@@ -7,16 +7,18 @@ config();
 
 //create express app
 const app = exp();
+
 //enable cors
 app.use(cors({
   origin:['http://localhost:5173'],
   credentials:true
 }))
+
 //add cookie parser middeleware
 app.use(cookieParser())
+
 //body parser middleware
 app.use(exp.json());
-
 
 //connect to db
 const connectDB = async () => {
