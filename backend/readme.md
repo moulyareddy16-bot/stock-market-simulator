@@ -2,6 +2,7 @@
 
 npm init -y
 npm install express mongoose cors dotenv
+npm i express dotenv mongoose cookie-parser cors
 npm install nodemon
 
 # step 2: Basic express server : 
