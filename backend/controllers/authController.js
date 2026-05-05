@@ -7,7 +7,7 @@ import { userModel } from "../models/UserModel.js"
 //Register User
 export const registerUser = async(req, res, next)=>{
     try{
-        let allowedRoles = ["trader","admin"]
+        let allowedRoles = ["trader","admin","stockmanager"]
         
         //get user from req obj
         const newUser = req.body

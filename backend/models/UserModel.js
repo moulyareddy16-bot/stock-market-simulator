@@ -22,7 +22,7 @@ const userSchema = new Schema({
     },
     role:{
         type:String,
-        enum:["trader","admin"],
+        enum:["trader","admin","stockmanager"],
         required:[true,"role is required"]
     },
     walletBalance:{
@@ -35,7 +35,7 @@ const userSchema = new Schema({
     }},
     {
         timestamps:true,
-        versionKey:true,
+        versionKey:false,
         strict:"throw"
     }
 )
