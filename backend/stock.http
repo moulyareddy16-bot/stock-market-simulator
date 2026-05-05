@@ -1,0 +1,36 @@
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "StockManager",
+  "email": "StockManager77@mail.com",
+  "password": "123456",
+  "role":"stockmanager",
+  "isUserActive":true
+}
+
+### User Login
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email":"StockManager77@mail.com",
+  "password":"123456"
+}
+
+### User logout
+GET http://localhost:5000/api/auth/logout
+
+
+
+
+
+### Change password
+PUT http://localhost:5000//api/auth/traders/login
+Content-Type: application/json
+
+{
+  "currentPassword":"",
+  "newPassword":""
+}

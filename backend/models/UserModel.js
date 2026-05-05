@@ -22,12 +22,14 @@ const userSchema = new Schema({
     },
     role:{
         type:String,
-        enum:["trader","admin","stockmanager"],
+        enum:["trader","admin"],
         required:[true,"role is required"]
     },
     walletBalance:{
         type:Number,
-        default:100000,
+        default: function () {
+            return this.role === "trader" ? 100000 : undefined;
+        }
     },
     isUserActive:{
         type:Boolean,
@@ -35,7 +37,6 @@ const userSchema = new Schema({
     }},
     {
         timestamps:true,
-        versionKey:false,
          versionKey: false,
         strict:"throw"
     }
