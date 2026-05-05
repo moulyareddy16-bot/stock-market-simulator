@@ -32,6 +32,6 @@ PUT http://localhost:5000//api/auth/traders/login
 Content-Type: application/json
 
 {
-  "currentPassword":"",
-  "newPassword":""
+  "currentPassword":"123456",
+  "newPassword":"12345"
 }
