@@ -29,7 +29,7 @@ POST http://localhost:5000/api/stocks
 Content-Type: application/json
 
 { 
-  "stockSymbol":"APPL",
+  "stockSymbol":"AAPL",
   "companyName":"Apple Company",
   "sector":"Technology",
   "availableQuantity":560
