@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { connect } from "mongoose";
 import app from "./app.js"
 config();
-
+zx
 //connect to db
 const connectDB = async () => {
 
