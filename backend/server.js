@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 import { config } from "dotenv";
+config();
 import { connect } from "mongoose";
 import app from "./app.js"
-config();
+
 
 //connect to db
 const connectDB = async () => {
