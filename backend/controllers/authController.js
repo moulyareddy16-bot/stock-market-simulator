@@ -1,3 +1,6 @@
+import jwt from "jsonwebtoken";
+
+const { sign } = jwt;
 import {hash, compare} from "bcryptjs"
 import { userModel } from "../models/UserModel.js"
 

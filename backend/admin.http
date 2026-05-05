@@ -1,0 +1,23 @@
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@mail.com",
+  "password": "1234",
+  "role":"admin",
+}
+
+### User Login
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email":"admin@mail.com",
+  "password":"1234"
+}
+
+### User logout
+GET http://localhost:5000/api/auth/logout
+
