@@ -1,0 +1,24 @@
+### Buy Transaction
+POST http://localhost:5000/api/transactions/buy
+Content-Type: application/json
+Cookie: token=YOUR_JWT_TOKEN
+
+{
+   "stockSymbol": "AAPL",
+   "quantity": 5
+}
+
+### Sell Transaction
+POST http://localhost:5000/api/transactions/sell
+Content-Type: application/json
+Cookie: token=YOUR_JWT_TOKEN
+
+{
+   "stockSymbol": "AAPL",
+   "quantity": 2
+}
+
+### Get all transactions
+GET http://localhost:5000/api/transactions
+Cookie: token=YOUR_JWT_TOKEN
+
