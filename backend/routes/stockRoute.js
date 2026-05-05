@@ -3,10 +3,11 @@ import exp from "express";
 import {
    addStock,
    getAllStocks,
-   deleteStock
+   deleteStock,
+   getStockDetails
 } from "../controllers/stockController.js";
 
-import verifyToken from "../middlewares/verifyToken.js";
+import {verifyToken} from "../middleware/verifyToken.js";
 
 const stockRouter = exp.Router();
 
@@ -14,19 +15,22 @@ const stockRouter = exp.Router();
 // Protected Routes
 stockRouter.post(
    "/",
-   verifyToken("stockManager"),
+   verifyToken("stockmanager"),
    addStock
 );
 
 stockRouter.delete(
    "/:symbol",
-   verifyToken("stockManager"),
+   verifyToken("stockmanager"),
    deleteStock
 );
 
 
-// Public Route
+// Public Route to get all stocks
 stockRouter.get("/", getAllStocks);
+
+//Public Route to get stock details
+stockRouter.get("/:stockSymbol", getStockDetails );
 
 
 export default stockRouter;

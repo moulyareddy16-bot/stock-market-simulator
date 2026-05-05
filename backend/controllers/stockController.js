@@ -25,7 +25,7 @@ export const getAllStocks = async(req,res)=>{
 
     }catch(error){
 
-        res.status(500).json({message: eror.message})
+        res.status(500).json({message: error.message})
 
     }
 }
@@ -69,4 +69,3 @@ export const getStockDetails = async (req,res,next)=>{
    }
 
 };
-

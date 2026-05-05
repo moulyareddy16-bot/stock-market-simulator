@@ -42,10 +42,13 @@ GET http://localhost:5000/api/stocks
 GET http://localhost/api/stocks:AAPL
 
 ### Change password
-PUT http://localhost:5000//api/auth/traders/login
+PUT http://localhost:5000/api/auth/traders/login
 Content-Type: application/json
 
 {
   "currentPassword":"",
   "newPassword":""
 }
+
+### Get stock details
+GET http://localhost:5000/api/stocks/AAPL 
