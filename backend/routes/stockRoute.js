@@ -6,7 +6,7 @@ import {
    deleteStock
 } from "../controllers/stockController.js";
 
-import verifyToken from "../middlewares/verifyToken.js";
+import {verifyToken} from "../middleware/verifyToken.js";
 
 const stockRouter = exp.Router();
 
