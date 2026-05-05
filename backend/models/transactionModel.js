@@ -5,7 +5,7 @@ const transactionSchema = new Schema({
     userId:{
         type: Schema.Types.ObjectId, //it takes userId from user schema
         ref:"user",
-        required:[true,"UserId is required"]
+        required:[true,"userId is required"]
     },
 
     stockSymbol:{
@@ -17,7 +17,7 @@ const transactionSchema = new Schema({
     transactionType:{
         type:String,
         required:[true,"trasactionType is required"],
-        enum:["buy","sell"]
+        enum:["BUY","SELL"]
 
     },
 
@@ -29,6 +29,11 @@ const transactionSchema = new Schema({
     pricePerShare:{
         type:Number,
         required:[true,"pricePerShare is required"]
+    },
+
+    totalAmount: {
+        type:Number,
+        required:[true,"totalAmount is required"]
     }
     
 },{
@@ -37,5 +42,5 @@ const transactionSchema = new Schema({
     strict:"throw"
 });
 
-//generate trasaction model
-export const trasactionModel = model("transaction",transactionSchema);
+//generate transaction model
+export const transactionModel = model("transaction",transactionSchema);

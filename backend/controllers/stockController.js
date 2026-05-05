@@ -1,4 +1,5 @@
 import { stockModel } from "../models/StockModel.js";
+import axios from "axios"
 
 //add stocks
 export const addStock = async(req, res)=>{
@@ -42,3 +43,19 @@ export const deleteStock = async(req,res)=>{
 
     }
 }
+
+//get stock details live API
+export const getStockDetails = async (req,res,next)=>{
+    try{
+
+        const symbol = req.params.stockSymbol
+
+        const response = await axios.get(
+            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=YOUR_API_KEY`
+
+        )
+
+
+    }
+}
+
