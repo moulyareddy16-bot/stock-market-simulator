@@ -54,7 +54,7 @@ export const getStockDetails = async (req,res,next)=>{
 
         const response = await axios.get(
 
-            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINHUB_API_KEY}`
+            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_API_KEY}`
 
         );
 

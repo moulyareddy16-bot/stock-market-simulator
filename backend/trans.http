@@ -1,7 +1,7 @@
 ### Buy Transaction
 POST http://localhost:5000/api/transactions/buy
 Content-Type: application/json
-Cookie: token=YOUR_JWT_TOKEN
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmExNjE0ODkyZGM1NmE2MDUzNDU3MiIsInVzZXJuYW1lIjoidHJhZGVyMTAxIiwiZW1haWwiOiJ0cmFkZXIxMDFAbWFpbC5jb20iLCJyb2xlIjoidHJhZGVyIiwid2FsbGV0QmFsYW5jZSI6MTAwMDAwLCJpYXQiOjE3Nzc5OTgwMzQsImV4cCI6MTc3ODAwMTYzNH0.4_ieOBF7rNl82KuJkGIfBQnqXeBuhelJPjJuPxp9YyY
 
 {
    "stockSymbol": "AAPL",
@@ -11,7 +11,7 @@ Cookie: token=YOUR_JWT_TOKEN
 ### Sell Transaction
 POST http://localhost:5000/api/transactions/sell
 Content-Type: application/json
-Cookie: token=YOUR_JWT_TOKEN
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmExNjE0ODkyZGM1NmE2MDUzNDU3MiIsInVzZXJuYW1lIjoidHJhZGVyMTAxIiwiZW1haWwiOiJ0cmFkZXIxMDFAbWFpbC5jb20iLCJyb2xlIjoidHJhZGVyIiwid2FsbGV0QmFsYW5jZSI6MTAwMDAwLCJpYXQiOjE3Nzc5OTgwMzQsImV4cCI6MTc3ODAwMTYzNH0.4_ieOBF7rNl82KuJkGIfBQnqXeBuhelJPjJuPxp9YyY
 
 {
    "stockSymbol": "AAPL",
@@ -20,5 +20,5 @@ Cookie: token=YOUR_JWT_TOKEN
 
 ### Get all transactions
 GET http://localhost:5000/api/transactions
-Cookie: token=YOUR_JWT_TOKEN
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZmExNjE0ODkyZGM1NmE2MDUzNDU3MiIsInVzZXJuYW1lIjoidHJhZGVyMTAxIiwiZW1haWwiOiJ0cmFkZXIxMDFAbWFpbC5jb20iLCJyb2xlIjoidHJhZGVyIiwid2FsbGV0QmFsYW5jZSI6MTAwMDAwLCJpYXQiOjE3Nzc5OTgwMzQsImV4cCI6MTc3ODAwMTYzNH0.4_ieOBF7rNl82KuJkGIfBQnqXeBuhelJPjJuPxp9YyY
 
