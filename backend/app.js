@@ -4,6 +4,7 @@ import cors from 'cors'
 
 import authRouter from "./routes/authRoute.js"
 import stockRouter from "./routes/stockRoute.js";
+import transactionRouter from "./routes/transactionRoute.js";
 
 //create express app
 const app = exp();
@@ -24,6 +25,8 @@ app.use(exp.json());
 app.use("/api/auth", authRouter)
 
 app.use("/api/stocks", stockRouter)
+
+app.use("/api/transactions", transactionRouter)
 
 //to handle invalid path
 app.use((req, res, next) => {
