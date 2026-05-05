@@ -25,8 +25,14 @@ const stockSchema = new Schema({
         required:[true,"available Quantity is required"]
     }},{
     timestamps:true,
+<<<<<<< HEAD
     versionKey:false
     }
 );
+=======
+     versionKey: false,
+    strict:"throw"
+});
+>>>>>>> 339d18e5855ced6c2881f64b8d6206ac91166514
 
 export const stockModel = model("stock",stockSchema)

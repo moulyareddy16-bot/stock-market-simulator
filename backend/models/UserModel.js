@@ -27,7 +27,9 @@ const userSchema = new Schema({
     },
     walletBalance:{
         type:Number,
-        default:100000,
+        default: function () {
+            return this.role === "trader" ? 100000 : undefined;
+        }
     },
     isUserActive:{
         type:Boolean,
@@ -35,7 +37,11 @@ const userSchema = new Schema({
     }},
     {
         timestamps:true,
+<<<<<<< HEAD
         versionKey:false,
+=======
+         versionKey: false,
+>>>>>>> 339d18e5855ced6c2881f64b8d6206ac91166514
         strict:"throw"
     }
 )
