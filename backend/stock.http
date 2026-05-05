@@ -3,9 +3,9 @@ POST http://localhost:5000/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "StockManager",
-  "email": "StockManager77@mail.com",
-  "password": "123456",
+  "username": "Stockmanager1",
+  "email": "Stockmanager1@mail.com",
+  "password": "stockmanager1",
   "role":"stockmanager",
   "isUserActive":true
 }
@@ -15,8 +15,8 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "email":"StockManager77@mail.com",
-  "password":"123456"
+  "email":"Stockmanager1@mail.com",
+  "password":"stockmanager1"
 }
 
 ### User logout
@@ -29,8 +29,8 @@ POST http://localhost:5000/api/stocks
 Content-Type: application/json
 
 { 
-  "stockSymbol":"AAPL",
-  "companyName":"Apple Company",
+  "stockSymbol":"TSLA",
+  "companyName":"Tesla Inc",
   "sector":"Technology",
   "availableQuantity":560
 }
@@ -43,10 +43,13 @@ GET http://localhost/api/stocks:AAPL
 
 
 ### Change password
-PUT http://localhost:5000//api/auth/traders/login
+PUT http://localhost:5000/api/auth/traders/login
 Content-Type: application/json
 
 {
   "currentPassword":"",
   "newPassword":""
 }
+
+### Get stock details
+GET http://localhost:5000/api/stocks/AAPL 
