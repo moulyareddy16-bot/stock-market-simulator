@@ -1,17 +1,32 @@
-import exp from "express"
+import exp from "express";
 
 import {
-    addStock,
-    getAllStocks,
-    deleteStock
-} from "../controllers/stockController.js"
+   addStock,
+   getAllStocks,
+   deleteStock
+} from "../controllers/stockController.js";
 
-const stockRouter = exp.Router()
+import verifyToken from "../middlewares/verifyToken.js";
 
-stockRouter.post("/",addStock)
+const stockRouter = exp.Router();
 
-stockRouter.get("/",getAllStocks)
 
-stockRouter.get("/:symbol", deleteStock)
+// Protected Routes
+stockRouter.post(
+   "/",
+   verifyToken("stockManager"),
+   addStock
+);
 
-export default stockRouter
+stockRouter.delete(
+   "/:symbol",
+   verifyToken("stockManager"),
+   deleteStock
+);
+
+
+// Public Route
+stockRouter.get("/", getAllStocks);
+
+
+export default stockRouter;
