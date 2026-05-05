@@ -1,5 +1,7 @@
 import { stockModel } from "../models/StockModel.js";
-import axios from "axios"
+import axios from "axios";
+import { config } from "dotenv";
+config();
 
 //add stocks
 export const addStock = async(req, res)=>{
@@ -48,14 +50,23 @@ export const deleteStock = async(req,res)=>{
 export const getStockDetails = async (req,res,next)=>{
     try{
 
-        const symbol = req.params.stockSymbol
+        const symbol = req.params.stockSymbol;
 
         const response = await axios.get(
-            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=YOUR_API_KEY`
 
-        )
+            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINHUB_API_KEY}`
 
+        );
 
-    }
-}
+        res.status(200).json({
+            payload: response.data
+        });
+
+    } catch(error) {
+
+      next(error);
+
+   }
+
+};
 
