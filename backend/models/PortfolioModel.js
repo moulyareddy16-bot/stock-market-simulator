@@ -5,7 +5,7 @@ import {Schema, model} from mongoose
 const portfolioSchema = new Schema({
     userId:{
         type:Schema.Types.ObjectId,
-        ref:user,
+        ref:"user",
         required:true
     },
     stockSymbol:{
