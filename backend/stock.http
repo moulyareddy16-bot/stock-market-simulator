@@ -39,7 +39,7 @@ Content-Type: application/json
 GET http://localhost:5000/api/stocks
 
 ### Delete Stock
-GET http://localhost/api/stocks:AAPL
+GET http://localhost/api/stocks:TSLA
 
 
 ### Change password
@@ -52,4 +52,4 @@ Content-Type: application/json
 }
 
 ### Get stock details
-GET http://localhost:5000/api/stocks/AAPL 
+GET http://localhost:5000/api/stocks/TSLA 
