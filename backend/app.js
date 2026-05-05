@@ -2,7 +2,8 @@ import exp from "express"
 import cookieParser from "cookie-parser";
 import cors from 'cors'
 
-import {authRouter} from "./routes/authRoute.js"
+import authRouter from "./routes/authRoute.js"
+import stockRouter from "./routes/stockRoute.js";
 
 //create express app
 const app = exp();
@@ -20,7 +21,9 @@ app.use(cookieParser())
 app.use(exp.json());
 
 // Routes
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authRouter)
+
+app.use("/api/stocks", stockRouter)
 
 //to handle invalid path
 app.use((req, res, next) => {

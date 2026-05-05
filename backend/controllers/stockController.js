@@ -1,0 +1,44 @@
+import { stockModel } from "../models/StockModel.js";
+
+//add stocks
+export const addStock = async(req, res)=>{
+    try{
+
+        const stock = await stockModel.create(req.body)
+        res.status(201).json({message:"Stock created", payload:stock})
+
+    }catch(error){
+
+        res.status(500).json({message: error.message})
+    }
+}
+
+//get all stocks
+export const getAllStocks = async(req,res)=>{
+    try{
+
+        const stocks = await stockModel.find()
+        res.status(200).json({message:stocks, payload:stocks})
+
+    }catch(error){
+
+        res.status(500).json({message: eror.message})
+
+    }
+}
+
+//delete stocks
+export const deleteStock = async(req,res)=>{
+    try{
+
+        await stockModel.findOneAndDelete({
+            symbol:req.params.symbol
+        })
+        res.status(200).json({message: "Stock Deleted"})
+
+    }catch(error){
+        
+        res.status(500).json({message: error.message})
+
+    }
+}

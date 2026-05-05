@@ -8,10 +8,10 @@ import {
 
 const authRouter = exp.Router()
 
-authRouter.post("/register", registerUser);
+authRouter.post("/register", registerUser)
 
-authRouter.post("/login", loginUser);
+authRouter.post("/login", loginUser)
 
-authRouter.get("/logout", logoutUser);
+authRouter.get("/logout", logoutUser)
 
-export  {authRouter};
+export default authRouter
