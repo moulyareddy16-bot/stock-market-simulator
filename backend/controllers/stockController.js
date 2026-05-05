@@ -69,4 +69,3 @@ export const getStockDetails = async (req,res,next)=>{
    }
 
 };
-
