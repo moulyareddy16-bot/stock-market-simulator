@@ -53,7 +53,7 @@ const stockSchema = new schema({
         required:[true,"change Percentage is required"]
     }},{
     timestamps:true,
-    versionKey:false,
+     versionKey: false,
     strict:"throw"
 });
 
