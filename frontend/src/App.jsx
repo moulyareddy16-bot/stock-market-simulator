@@ -8,6 +8,7 @@ import Portfolio from "./components/Portfolio";
 import Stocks from "./components/Stocks";
 import Transactions from "./components/Transactions";
 import Profile from "./components/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -15,38 +16,65 @@ function App() {
       path: "/",
       element: <Root />,
       children: [
-        // 🏠 Home
-        {
-          index: true,
-          element: <Home />,
-        },
+        // Home
+        { index: true, element: <Home /> },
 
-        // 🔐 Auth
-        {
-          path: "register",
-          element: <Register />,
-        },
-        {
-          path: "signin",
-          element: <Signin />,
-        },
+        // Auth
+        { path: "register", element: <Register /> },
+        { path: "signin", element: <Signin /> },
 
-        // 📊 Dashboard Pages (no protection for now)
+        // 🟢 Trader Routes
         {
           path: "dashboard",
-          element: <Portfolio />,
+          element: (
+            <ProtectedRoute allowedRoles={["trader"]}>
+              <Portfolio />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "stocks",
-          element: <Stocks />,
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "stockmanager"]}>
+              <Stocks />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "transactions",
-          element: <Transactions />,
+          element: (
+            <ProtectedRoute allowedRoles={["trader"]}>
+              <Transactions />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "profile",
-          element: <Profile />,
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "admin"]}>
+              <Profile />
+            </ProtectedRoute>
+          ),
+        },
+
+        // 🔴 Admin Route
+        {
+          path: "admin",
+          element: (
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Profile />
+            </ProtectedRoute>
+          ),
+        },
+
+        // 🔵 Manager Route
+        {
+          path: "manager",
+          element: (
+            <ProtectedRoute allowedRoles={["stockmanager"]}>
+              <Stocks />
+            </ProtectedRoute>
+          ),
         },
       ],
     },

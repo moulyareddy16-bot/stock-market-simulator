@@ -23,24 +23,35 @@ function Signin() {
         form
       );
 
-      console.log(res.data);
+      console.log("LOGIN RESPONSE:", res.data);
 
-      // 🔐 store token
+      // ✅ Extract role from your backend structure
+      const role = res.data.payload.role;
+
+      // ✅ Store token + role
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", role);
 
       alert("Login Successful");
 
-      navigate("/dashboard");
+      // ✅ Role-based navigation
+      if (role === "admin") {
+        navigate("/admin");
+      } else if (role === "stockmanager") {
+        navigate("/manager");
+      } else {
+        navigate("/dashboard");
+      }
 
     } catch (err) {
       console.error(err.response?.data || err.message);
-      alert("Login Failed");
+      alert(err.response?.data?.message || "Login Failed");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-
+      
       <form
         onSubmit={handleSubmit}
         className="bg-[#020617] p-8 rounded-lg border border-slate-800 w-96"
@@ -50,24 +61,29 @@ function Signin() {
           Sign In
         </h2>
 
+        {/* Email */}
         <input
           type="email"
           name="email"
           placeholder="Email"
+          value={form.email}
           onChange={handleChange}
           className="w-full mb-4 p-2 rounded bg-[#1e293b] text-white outline-none"
           required
         />
 
+        {/* Password */}
         <input
           type="password"
           name="password"
           placeholder="Password"
+          value={form.password}
           onChange={handleChange}
           className="w-full mb-6 p-2 rounded bg-[#1e293b] text-white outline-none"
           required
         />
 
+        {/* Submit */}
         <button
           type="submit"
           className="w-full py-2 bg-emerald-500 text-black rounded hover:bg-emerald-600 transition"
@@ -75,6 +91,7 @@ function Signin() {
           Login
         </button>
 
+        {/* Redirect */}
         <p className="text-sm text-slate-400 mt-4 text-center">
           Don't have an account?{" "}
           <Link to="/register" className="text-emerald-400">
