@@ -1,7 +1,9 @@
 import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
+import { getHistoricalStockData } from "../services/stockService.js";
 import { config } from "dotenv";
 config();
+
 
 //add stocks
 export const addStock = async(req, res)=>{
@@ -69,3 +71,112 @@ export const getStockDetails = async (req,res,next)=>{
    }
 
 };
+
+
+// GET HISTORICAL STOCK DATA
+
+export const getStockHistory =
+async (req, res, next) => {
+
+   try {
+
+      // 1. Get stock symbol
+      const { symbol } = req.params;
+
+      // Optional query param
+      const days =
+      Number(req.query.days) || 30;
+
+
+      // 2. Check stock exists
+      const stock =
+      await stockModel.findOne({
+
+         stockSymbol: symbol
+
+      });
+
+      if (!stock) {
+
+         return res.status(404).json({
+
+            message:
+            "Stock not found"
+
+         });
+
+      }
+
+
+      // 3. Fetch historical data
+      const data =
+      await getHistoricalStockData(
+         symbol,
+         days
+      );
+
+
+      // Finnhub failed
+      if (data.s !== "ok") {
+
+         return res.status(400).json({
+
+            message:
+            "Unable to fetch historical data"
+
+         });
+
+      }
+
+
+      // 4. Format response
+      const formattedData =
+      data.t.map((timestamp, index) => {
+
+         return {
+
+            date:
+            new Date(timestamp * 1000)
+            .toISOString()
+            .split("T")[0],
+
+            open: data.o[index],
+
+            high: data.h[index],
+
+            low: data.l[index],
+
+            close: data.c[index],
+
+            volume: data.v[index]
+
+         };
+
+      });
+
+
+      // 5. Send response
+      res.status(200).json({
+
+         message:
+         "Historical stock data",
+
+         stockSymbol:
+         symbol,
+
+         totalDays:
+         days,
+
+         payload:
+         formattedData
+
+      });
+
+   } catch(error) {
+
+      next(error);
+
+   }
+
+};
+

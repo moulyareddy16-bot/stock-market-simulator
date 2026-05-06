@@ -53,3 +53,8 @@ Content-Type: application/json
 
 ### Get stock details
 GET http://localhost:5000/api/stocks/TSLA 
+
+
+
+### Get Stock Historical data based on days
+GET http://localhost:5000/api/stocks/history/AAPL?days=30

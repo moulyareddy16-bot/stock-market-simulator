@@ -7,6 +7,7 @@ import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
 import portfolioRouter from "./routes/portfolioRoute.js";
 
+
 //create express app
 const app = exp();
 
