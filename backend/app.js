@@ -5,6 +5,7 @@ import cors from 'cors'
 import authRouter from "./routes/authRoute.js"
 import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
+import portfolioRouter from "./routes/portfolioRoute.js";
 
 //create express app
 const app = exp();
