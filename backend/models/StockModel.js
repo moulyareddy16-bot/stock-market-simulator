@@ -6,6 +6,29 @@ import {Schema , model} from "mongoose";
 // currentPrice, availableQuantity, latestTradingDate, previousClosePrice, 
 // changeInPrice, changePercentage
 
+// const stockSchema = new Schema({
+//     stockSymbol:{
+//         type:String,
+//         required:[true,"stock Symbol is required"],
+//         unique:true
+//     },
+//     companyName:{
+//         type:String,
+//         required:[true,"company Name is required"]
+//     },
+//     sector:{
+//         type:String,
+//         required:[true,"Sector is required"]
+//     },
+//     availableQuantity:{
+//         type:Number,
+//         required:[true,"available Quantity is required"]
+//     }},{
+//     timestamps:true,
+//     versionKey:false
+//     }
+// );
+
 const stockSchema = new Schema({
     stockSymbol:{
         type:String,
@@ -23,10 +46,16 @@ const stockSchema = new Schema({
     availableQuantity:{
         type:Number,
         required:[true,"available Quantity is required"]
-    }},{
+    },
+
+    isActive:{
+        type:Boolean,
+        default:true
+    }
+
+},{
     timestamps:true,
     versionKey:false
-    }
-);
+});
 
 export const stockModel = model("stock",stockSchema)
