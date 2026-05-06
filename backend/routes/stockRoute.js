@@ -7,11 +7,7 @@ import {
    getStockDetails
 } from "../controllers/stockController.js";
 
-<<<<<<< HEAD
-import verifyToken from "../middleware/verifyToken.js";
-=======
 import {verifyToken} from "../middleware/verifyToken.js";
->>>>>>> 55ef4d5c5efc3e123d7cdb1b68c88687c940363a
 
 const stockRouter = exp.Router();
 
