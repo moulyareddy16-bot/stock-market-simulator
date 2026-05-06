@@ -19,6 +19,10 @@ Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Zjk4Mzc4NzQ0Njc2Z
 }
 
 ### Get all transactions
+<<<<<<< HEAD
 GET http://localhost:5000/api/transactions
+=======
+GET http://localhost:5000/api/transactions/history
+>>>>>>> 882377b28697f58ceb2cee414e061871bd7d5666
 Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Zjk4Mzc4NzQ0Njc2ZTg1ODNiODU3MSIsInVzZXJuYW1lIjoiVHJhZGVyIiwiZW1haWwiOiJUcmFkZXI3N0BtYWlsLmNvbSIsInJvbGUiOiJ0cmFkZXIiLCJ3YWxsZXRCYWxhbmNlIjoxMDAwMDAsImlhdCI6MTc3Nzk5NjQzMywiZXhwIjoxNzc4MDAwMDMzfQ.m0YgHynuso_nmApH4fcqpsxaO-6xqP-vBk9aed9PL_s
 
