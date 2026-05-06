@@ -1,9 +1,9 @@
 import axios from "axios";
 
 
-// =========================================
+
 // FETCH HISTORICAL STOCK DATA
-// =========================================
+
 export const getHistoricalStockData =
 async (symbol, days = 30) => {
 
@@ -39,7 +39,6 @@ async (symbol, days = 30) => {
       }
 
    );
-
 
    return response.data;
 

@@ -1,0 +1,32 @@
+
+### CREATE ALERT (Price goes ABOVE target)
+POST http://localhost:5000/api/alerts
+Content-Type: application/json
+
+{
+  "stockSymbol": "AAPL",
+  "targetPrice": 200,
+  "condition": "ABOVE"
+}
+
+
+
+### CREATE ALERT (Price goes BELOW target)
+POST http://localhost:5000/api/alerts
+Content-Type: application/json
+
+{
+  "stockSymbol": "TSLA",
+  "targetPrice": 150,
+  "condition": "BELOW"
+}
+
+
+
+### GET ALL ALERTS (for logged-in user)
+GET http://localhost:5000/api/alerts
+
+
+
+### DELETE ALERT (replace :id with actual id)
+DELETE http://localhost:5000/api/alerts/REPLACE_ALERT_ID
