@@ -7,6 +7,8 @@ import {
    getStockDetails
 } from "../controllers/stockController.js";
 
+import { getStockHistory } from "../controllers/stockController.js";
+
 import {verifyToken} from "../middleware/verifyToken.js";
 
 const stockRouter = exp.Router();
@@ -32,5 +34,11 @@ stockRouter.get("/", getAllStocks);
 //Public Route to get stock details
 stockRouter.get("/:stockSymbol", getStockDetails );
 
+
+//  Historical analysis
+stockRouter.get(
+   "/history/:symbol",
+   getStockHistory
+);
 
 export default stockRouter;
