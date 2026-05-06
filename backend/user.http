@@ -3,9 +3,9 @@ POST http://localhost:5000/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "Trader",
-  "email": "Trader77@mail.com",
-  "password": "123456",
+  "username": "trader101",
+  "email": "trader101@mail.com",
+  "password": "trader101",
   "role":"trader",
   "walletBalance":100000,
   "isUserActive":true
@@ -16,8 +16,8 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "email":"Trader77@mail.com",
-  "password":"123456"
+  "email":"trader101@mail.com",
+  "password":"trader101"
 }
 
 ### User logout
