@@ -16,7 +16,7 @@ export const buyStock = async (req, res, next) => {
       const { stockSymbol, quantity } = req.body;
 
       // logged in user
-      const userId = req.user?.id;
+      const userId = req.trader?.id;
 
       // check stock exists
       const stock = await stockModel.findOne({stockSymbol});

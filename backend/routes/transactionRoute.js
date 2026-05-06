@@ -11,13 +11,13 @@ import {
 const transactionRouter = exp.Router()
 
 // Buy stock 
-transactionRouter.post("/buy",verifyToken("user"), buyStock);
+transactionRouter.post("/buy",verifyToken("trader"), buyStock);
 
 // Sell stock
-transactionRouter.post("/sell",verifyToken("user", sellStock));
+transactionRouter.post("/sell",verifyToken("trader", sellStock));
 
 // Get transaction history
-transactionRouter.get("/",verifyToken("user"), getTransactions);
+transactionRouter.get("/",verifyToken("trader"), getTransactions);
 
 
 export default transactionRouter;
