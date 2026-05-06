@@ -6,9 +6,17 @@ import authRouter from "./routes/authRoute.js"
 import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
 import portfolioRouter from "./routes/portfolioRoute.js";
+import alertRouter from "./routes/alertRoute.js";
+
+
+
+
 
 //create express app
 const app = exp();
+
+
+
 
 //enable cors
 app.use(cors({
@@ -16,11 +24,20 @@ app.use(cors({
   credentials:true
 }))
 
+
+
+
 //add cookie parser middeleware
 app.use(cookieParser())
 
+
+
+
 //body parser middleware
 app.use(exp.json());
+
+
+
 
 // Routes
 app.use("/api/auth", authRouter)
@@ -28,6 +45,13 @@ app.use("/api/auth", authRouter)
 app.use("/api/stocks", stockRouter)
 
 app.use("/api/transactions", transactionRouter)
+
+app.use("/api/portfolio", portfolioRouter)
+
+app.use("/api/alerts", alertRouter)
+
+
+
 
 //to handle invalid path
 app.use((req, res, next) => {

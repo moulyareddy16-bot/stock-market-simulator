@@ -17,7 +17,7 @@ transactionRouter.post("/buy",verifyToken("trader"), buyStock);
 transactionRouter.post("/sell",verifyToken("trader", sellStock));
 
 // Get transaction history
-transactionRouter.get("/",verifyToken("trader"), getTransactions);
+transactionRouter.get("/history",verifyToken("trader"), getTransactions);
 
 
 export default transactionRouter;
