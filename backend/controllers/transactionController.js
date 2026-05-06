@@ -6,11 +6,15 @@ from "../models/TransactionModel.js";
 import { stockModel }
 from "../models/StockModel.js";
 
+import { userModel}
+from "../models/UserModel.js";
+
 
 //BUY STOCKS
 export const buyStock = async (req, res, next) => {
 
    try {
+      console.log(process.env.FINNHUB_API_KEY);
 
       // get request body
       const { stockSymbol, quantity } = req.body;
