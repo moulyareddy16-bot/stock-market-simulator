@@ -9,6 +9,7 @@ import Stocks from "./components/Stocks";
 import Transactions from "./components/Transactions";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import StockDetails from "./components/StockDetails";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -39,6 +40,10 @@ function App() {
               <Stocks />
             </ProtectedRoute>
           ),
+        },
+        {
+          path: "/stocks/:stockSymbol",
+          element: <StockDetails />
         },
         {
           path: "transactions",
