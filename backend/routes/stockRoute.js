@@ -11,6 +11,8 @@ import { getStockHistory } from "../controllers/stockController.js";
 
 import {verifyToken} from "../middleware/verifyToken.js";
 
+import { toggleStockStatus } from "../controllers/stockController.js";
+
 const stockRouter = exp.Router();
 
 
@@ -43,6 +45,13 @@ stockRouter.get("/:stockSymbol", getStockDetails );
 stockRouter.get(
    "/history/:symbol",
    getStockHistory
+);
+
+
+stockRouter.patch(
+   "/toggle-status/:symbol",
+   verifyToken("stockmanager"),
+   toggleStockStatus
 );
 
 export default stockRouter;

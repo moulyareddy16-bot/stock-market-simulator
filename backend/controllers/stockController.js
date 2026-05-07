@@ -1,8 +1,8 @@
 import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
 import { getHistoricalStockData } from "../services/stockService.js";
-import { config } from "dotenv";
-config();
+// import { config } from "dotenv";
+// config();
 
 
 //add stocks
@@ -251,3 +251,53 @@ async (req, res, next) => {
 
 };
 
+// ACTIVATE / DEACTIVATE STOCK
+
+export const toggleStockStatus =
+async (req, res) => {
+
+   try {
+
+      const { symbol } = req.params;
+
+      // find stock
+      const stock =
+      await stockModel.findOne({
+         stockSymbol: symbol
+      });
+
+      if (!stock) {
+
+         return res.status(404).json({
+            message: "Stock not found"
+         });
+
+      }
+
+      // toggle status
+      stock.isActive = !stock.isActive;
+
+      await stock.save();
+
+      res.status(200).json({
+
+         message:
+         `Stock ${
+            stock.isActive
+            ? "Activated"
+            : "Deactivated"
+         } Successfully`,
+
+         payload: stock
+
+      });
+
+   } catch (error) {
+
+      res.status(500).json({
+         message: error.message
+      });
+
+   }
+
+};
