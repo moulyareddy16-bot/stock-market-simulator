@@ -28,9 +28,10 @@ function Home() {
           <span className="text-emerald-400">Without Risk</span>
         </h1>
 
-        <p className="mt-6 text-slate-400 max-w-xl">
-          Practice stock trading using virtual money and learn market strategies safely.
-        </p>
+       <p className="mt-6 text-slate-400 max-w-xl overflow-hidden whitespace-nowrap border-r-4 border-orange-500 animate-typewriter">
+  Practice stock trading using virtual money and learn market strategies safely.
+</p>
+
 
         <Link
           to="/register"
