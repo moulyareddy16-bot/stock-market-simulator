@@ -1,15 +1,22 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import api from "../service/api";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user"); // if stored
+  const handleLogout = async () => {
+    try {
+      await api.get("/auth/logout");
+    } catch (error) {
+      console.error("Logout Error:", error.response?.data || error.message);
+    } finally {
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
 
-    navigate("/signin");
+      navigate("/signin");
+    }
   };
 
   return (
@@ -25,7 +32,7 @@ function Navbar() {
       <div className="flex gap-3 items-center">
 
         {/* IF NOT LOGGED IN */}
-        {!token ? (
+        {!role ? (
           <>
             <NavLink
               to="/signin"
