@@ -13,9 +13,16 @@ const stockSchema = new Schema({
     sector:{
         type:String
     },
+   
     availableQuantity:{
         type:Number
-    }},{
+    },
+    
+     isActive: {
+     type: Boolean,
+     default: true
+    }
+},{
     timestamps:true,
     versionKey:false
 });

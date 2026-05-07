@@ -41,3 +41,4 @@ async (symbol, days = 30) => {
    return response.data;
 
 };
+
