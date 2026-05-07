@@ -1,7 +1,5 @@
 import axios from "axios";
 
-
-
 // FETCH HISTORICAL STOCK DATA
 
 export const getHistoricalStockData =
