@@ -11,11 +11,16 @@ import alertRouter from "./routes/alertRoute.js";
 
 
 
-
 //create express app
 const app = exp();
 
 
+//body parser middleware
+app.use(exp.json());
+
+
+//add cookie parser middeleware
+app.use(cookieParser())
 
 
 //enable cors
@@ -23,18 +28,6 @@ app.use(cors({
   origin:['http://localhost:5173'],
   credentials:true
 }))
-
-
-
-
-//add cookie parser middeleware
-app.use(cookieParser())
-
-
-
-
-//body parser middleware
-app.use(exp.json());
 
 
 

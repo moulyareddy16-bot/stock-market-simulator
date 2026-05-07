@@ -22,9 +22,13 @@ stockRouter.post(
 );
 
 stockRouter.delete(
-   "/:symbol",
-   verifyToken("stockmanager"),
+
+   "/:stockSymbol",
+
+   verifyToken("admin","stockmanager"),
+
    deleteStock
+
 );
 
 

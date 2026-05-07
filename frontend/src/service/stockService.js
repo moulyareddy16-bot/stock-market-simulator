@@ -33,11 +33,11 @@ export const addStock = async (stockData) => {
 // =========================================
 // DELETE STOCK
 // =========================================
-export const deleteStock = async (stockId) => {
+export const deleteStock = async (stockSymbol) => {
 
    const response =
       await api.delete(
-         `/stocks/${stockId}`
+         `/stocks/${stockSymbol}`
       );
 
    return response.data;
