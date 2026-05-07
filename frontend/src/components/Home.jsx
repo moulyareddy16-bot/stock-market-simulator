@@ -1,6 +1,21 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+
+    if (role === "trader") {
+      navigate("/dashboard", { replace: true });
+    } else if (role === "admin") {
+      navigate("/admin", { replace: true });
+    } else if (role === "stockmanager") {
+      navigate("/manager", { replace: true });
+    }
+  }, [navigate]);
+
   return (
     <div className="bg-[#020617] text-white">
 
@@ -55,7 +70,7 @@ function Home() {
       {/* 📊 MARKET TREND (Chart LEFT | Text RIGHT) */}
       <section className="py-16 px-6 md:px-16 grid md:grid-cols-2 gap-10 items-center">
 
-        <div className="bg-[#020617] border border-slate-800 rounded-lg p-6">
+        <div className="bg-[#030820] border border-slate-800 rounded-lg p-6">
           <div className="flex items-end gap-2 h-48">
             {[20,40,35,60,55,70,65,80,75,90].map((h,i)=>(
               <div
