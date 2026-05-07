@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import myImage from '../assets/logo.jpeg'
 
 function Navbar() {
   const navigate = useNavigate();
@@ -18,7 +19,9 @@ function Navbar() {
 
       {/* LOGO */}
       <NavLink to="/" className="text-2xl font-bold text-emerald-400">
-        StockSim
+        <a href={myImage} target="_blank" rel="noreferrer">
+     SimStock
+    </a>
       </NavLink>
 
       {/* RIGHT SIDE */}

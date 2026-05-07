@@ -494,4 +494,5 @@ return (
   </div>
 );
 }
+
 export default Stocks;
