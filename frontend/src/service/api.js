@@ -1,9 +1,8 @@
 import axios from "axios";
 
 
-// =========================================
 // AXIOS INSTANCE
-// =========================================
+
 const api = axios.create({
 
    // backend base URL

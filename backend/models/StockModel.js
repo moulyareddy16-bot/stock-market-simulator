@@ -40,10 +40,13 @@ const stockSchema = new Schema({
         required:[true,"company Name is required"]
     },
     sector:{
-        type:String,
-        required:[true,"Sector is required"]
+        type:String
     },
     availableQuantity:{
+<<<<<<< HEAD
+        type:Number
+    }},{
+=======
         type:Number,
         required:[true,"available Quantity is required"]
     },
@@ -54,6 +57,7 @@ const stockSchema = new Schema({
     }
 
 },{
+>>>>>>> 8816478812ce014a44900df6b08312cdecbfbd5f
     timestamps:true,
     versionKey:false
 });

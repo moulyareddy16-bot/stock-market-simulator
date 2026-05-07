@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import api from "../service/api";
 
 function Signin() {
   const navigate = useNavigate();
@@ -58,7 +58,15 @@ function Signin() {
       { withCredentials: true } // REQUIRED to receive the cookie
     );
 
+<<<<<<< HEAD
+    try {
+      const res = await api.post(
+        "/auth/login",
+        form
+      );
+=======
     console.log("LOGIN RESPONSE:", res.data);
+>>>>>>> 8816478812ce014a44900df6b08312cdecbfbd5f
 
     // FIX: Get role safely from payload
     const user = res.data.payload;
