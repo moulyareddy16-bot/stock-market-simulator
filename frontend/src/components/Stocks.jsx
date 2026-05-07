@@ -170,12 +170,7 @@ function Stocks() {
               </button>
 
               <button
-<<<<<<< HEAD
                 onClick={() => handleDelete(stock.stockSymbol)}
-=======
-                // onClick={() => handleDelete(stock._id)}
-                 onClick={() => handleDelete(stock.stockSymbol)} 
->>>>>>> 8816478812ce014a44900df6b08312cdecbfbd5f
                 className="flex-1 rounded-xl bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
               >
                 Delete
