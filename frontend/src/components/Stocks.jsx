@@ -16,9 +16,9 @@ function Stocks() {
     companyName: "",
   });
 
-
+  // =====================================
   // FETCH STOCKS
-  
+  // =====================================
   const fetchStocks = async () => {
     try {
       const data = await getAllStocks();
@@ -34,8 +34,9 @@ function Stocks() {
     fetchStocks();
   }, []);
 
+  // =====================================
   // HANDLE INPUT CHANGE
-
+  // =====================================
   const handleChange = (e) => {
     setStockData({
       ...stockData,
@@ -43,8 +44,9 @@ function Stocks() {
     });
   };
 
+  // =====================================
   // ADD STOCK
-
+  // =====================================
   const handleAddStock = async (e) => {
 
    e.preventDefault();
@@ -69,25 +71,17 @@ function Stocks() {
 
    } catch (error) {
 
-   console.log(error);
+      console.log(error);
 
-   alert(
-
-      error.response?.data?.message ||
-
-      "Something went wrong"
-
-   );
-
-  }
+   }
 
   };
-  
+  // =====================================
   // DELETE STOCK
-
-  const handleDelete = async (stockSymbol) => {
+  // =====================================
+  const handleDelete = async (stockId) => {
     try {
-      await deleteStock(stockSymbol);
+      await deleteStock(stockId);
 
       fetchStocks();
     } catch (error) {
@@ -170,12 +164,8 @@ function Stocks() {
               </button>
 
               <button
-<<<<<<< HEAD
-                onClick={() => handleDelete(stock.stockSymbol)}
-=======
                 // onClick={() => handleDelete(stock._id)}
                  onClick={() => handleDelete(stock.stockSymbol)} 
->>>>>>> 8816478812ce014a44900df6b08312cdecbfbd5f
                 className="flex-1 rounded-xl bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
               >
                 Delete
