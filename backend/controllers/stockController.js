@@ -7,16 +7,59 @@ import { getHistoricalStockData } from "../services/stockService.js";
 
 //add stocks
 export const addStock = async(req, res)=>{
-    try{
+     try {
 
-        const stock = await stockModel.create(req.body)
-        res.status(201).json({message:"Stock created", payload:stock})
+      // get stock data
+      const newStock = req.body;
 
-    }catch(error){
 
-        res.status(500).json({message: error.message})
-    }
-}
+      newStock.stockSymbol = newStock.stockSymbol.toUpperCase();
+
+      // check existing stock
+      const existingStock =
+         await stockModel.findOne({
+
+            stockSymbol:
+            newStock.stockSymbol
+
+         });
+
+
+      // if stock already exists
+      if (existingStock) {
+
+         return res.status(400).json({
+
+            message:
+            "Stock already exists"
+
+         });
+
+      }
+
+
+      // create stock
+      const stock =
+         await stockModel.create(newStock);
+
+
+      // send response
+      res.status(201).json({
+
+         message:
+         "Stock added successfully",
+
+         payload: stock
+
+      });
+
+   } catch(error) {
+
+      next(error);
+
+   }
+
+};
 
 //get all stocks
 export const getAllStocks = async(req,res)=>{
@@ -33,20 +76,48 @@ export const getAllStocks = async(req,res)=>{
 }
 
 //delete stocks
-export const deleteStock = async(req,res)=>{
-    try{
+export const deleteStock = async (req, res, next) => {
 
-        await stockModel.findOneAndDelete({
-            symbol:req.params.symbol
-        })
-        res.status(200).json({message: "Stock Deleted"})
+   try {
 
-    }catch(error){
-        
-        res.status(500).json({message: error.message})
+      const { stockSymbol } =
+         req.params;
 
-    }
-}
+
+      const deletedStock =
+         await stockModel.findOneAndDelete({
+
+            stockSymbol
+
+         });
+
+
+      if (!deletedStock) {
+
+         return res.status(404).json({
+
+            message:
+            "Stock not found"
+
+         });
+
+      }
+
+
+      res.status(200).json({
+
+         message:
+         "Stock deleted successfully"
+
+      });
+
+   } catch(error) {
+
+      next(error);
+
+   }
+
+};
 
 //get stock details live API
 export const getStockDetails = async (req,res,next)=>{
