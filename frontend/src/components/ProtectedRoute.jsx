@@ -1,10 +1,10 @@
+// ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role"); // Use role as the proof of login
 
-  if (!token) {
+  if (!role) {
     return <Navigate to="/signin" />;
   }
 
