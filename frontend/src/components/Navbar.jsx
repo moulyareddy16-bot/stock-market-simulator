@@ -18,11 +18,18 @@ function Navbar() {
     bg-[#020617]/80 backdrop-blur-md border-b border-slate-800">
 
       {/* LOGO */}
-      <NavLink to="/" className="text-2xl font-bold text-emerald-400">
-        <a href={myImage} target="_blank" rel="noreferrer">
-     SimStock
-    </a>
-      </NavLink>
+     <NavLink
+to="/"
+className="text-2xl font-bold text-emerald-400"
+>
+
+   <img
+      src={myImage}
+      alt="Logo"
+      className="h-10"
+   />
+
+</NavLink>
 
       {/* RIGHT SIDE */}
       <div className="flex gap-3 items-center">
