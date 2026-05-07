@@ -1,8 +1,8 @@
 import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
 import { getHistoricalStockData } from "../services/stockService.js";
-import { config } from "dotenv";
-config();
+// import { config } from "dotenv";
+// config();
 
 
 //add stocks

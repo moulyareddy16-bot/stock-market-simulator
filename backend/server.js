@@ -1,8 +1,14 @@
 import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
+
 import { config } from "dotenv";
 config();
+
+// import dotenv from "dotenv";
+// dotenv.config();
+// console.log("FINNHUB:", process.env.FINNHUB_API_KEY);
+
 
 import { connect } from "mongoose";
 import http from "http";
@@ -70,6 +76,9 @@ const connectDB = async () => {
     console.log("Error in DB connect:", err);
 
   }clearScreenDown
+   
+
+  // console.log(process.env.FINNHUB_API_KEY);
 
 };
 
