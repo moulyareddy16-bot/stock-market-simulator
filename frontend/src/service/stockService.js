@@ -1,9 +1,8 @@
 import api from "./api";
 
 
-// =========================================
 // GET ALL STOCKS
-// =========================================
+
 export const getAllStocks = async () => {
 
    const response =
@@ -14,9 +13,8 @@ export const getAllStocks = async () => {
 };
 
 
-// =========================================
 // ADD STOCK
-// =========================================
+
 export const addStock = async (stockData) => {
 
    const response =
@@ -30,9 +28,8 @@ export const addStock = async (stockData) => {
 };
 
 
-// =========================================
 // DELETE STOCK
-// =========================================
+
 export const deleteStock = async (stockSymbol) => {
 
    const response =
@@ -43,3 +40,4 @@ export const deleteStock = async (stockSymbol) => {
    return response.data;
 
 };
+

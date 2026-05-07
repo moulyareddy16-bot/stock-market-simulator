@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import {
+  useNavigate
+} from "react-router-dom";
 
 import {
   getAllStocks,
@@ -7,6 +10,9 @@ import {
 } from "../service/stockService";
 
 function Stocks() {
+
+  const navigate = useNavigate();
+
   // store all stocks
   const [stocks, setStocks] = useState([]);
 
@@ -95,6 +101,18 @@ function Stocks() {
     }
   };
 
+  // VIEW STOCK
+
+  const handleViewStock = (stockSymbol) => {
+
+   navigate(
+
+      `/stocks/${stockSymbol}`
+
+   );
+
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* PAGE TITLE */}
@@ -165,7 +183,9 @@ function Stocks() {
 
             {/* ACTION BUTTONS */}
             <div className="mt-6 flex gap-3">
-              <button className="flex-1 rounded-xl bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700">
+              <button 
+                onClick={()=> handleViewStock(stock.stockSymbol)}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700">
                 View
               </button>
 
