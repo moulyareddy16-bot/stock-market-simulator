@@ -37,15 +37,17 @@ stockRouter.delete(
 // Public Route to get all stocks
 stockRouter.get("/", getAllStocks);
 
-//Public Route to get stock details
-stockRouter.get("/:stockSymbol", getStockDetails );
-
-
 //  Historical analysis
 stockRouter.get(
    "/history/:symbol",
    getStockHistory
 );
+
+
+//Public Route to get stock details
+stockRouter.get("/:stockSymbol", getStockDetails );
+
+
 
 
 stockRouter.patch(

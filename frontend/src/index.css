@@ -1,1 +1,18 @@
+
+/* src/index.css */
 @import "tailwindcss";
+
+@theme {
+  /* Define your custom typewriter animation here */
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes blink {
+    50% { border-color: transparent; }
+  }
+
+  /* Add your custom utilities */
+  --animate-typewriter: typewriter 6s steps(70) forwards, blink 0.75s step-end infinite;
+}
