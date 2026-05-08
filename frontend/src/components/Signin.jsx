@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function Signin() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // 🔥 from context
 
   const [form, setForm] = useState({
     email: "",
@@ -23,35 +25,27 @@ function Signin() {
         form
       );
 
-      console.log("LOGIN RESPONSE:", res.data);
-
-      // ✅ Extract role from your backend structure
-      const role = res.data.payload.role;
-
-      // ✅ Store token + role
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", role);
+      // 🔥 IMPORTANT: use context login instead of localStorage directly
+      login(res.data.token);
 
       alert("Login Successful");
 
-      // ✅ Role-based navigation
-      if (role === "admin") {
-        navigate("/admin");
-      } else if (role === "stockmanager") {
-        navigate("/manager");
-      } else {
-        navigate("/dashboard");
-      }
+      // 👉 role-based navigation (you already used this earlier)
+      const role = res.data.user.role;
+
+      if (role === "trader") navigate("/portfolio");
+      else if (role === "admin") navigate("/profile");
+      else if (role === "stockmanager") navigate("/stock");
 
     } catch (err) {
-      console.error(err.response?.data || err.message);
+      console.log(err.response?.data || err.message);
       alert(err.response?.data?.message || "Login Failed");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-      
+
       <form
         onSubmit={handleSubmit}
         className="bg-[#020617] p-8 rounded-lg border border-slate-800 w-96"
@@ -66,7 +60,6 @@ function Signin() {
           type="email"
           name="email"
           placeholder="Email"
-          value={form.email}
           onChange={handleChange}
           className="w-full mb-4 p-2 rounded bg-[#1e293b] text-white outline-none"
           required
@@ -77,7 +70,6 @@ function Signin() {
           type="password"
           name="password"
           placeholder="Password"
-          value={form.password}
           onChange={handleChange}
           className="w-full mb-6 p-2 rounded bg-[#1e293b] text-white outline-none"
           required
@@ -91,9 +83,8 @@ function Signin() {
           Login
         </button>
 
-        {/* Redirect */}
         <p className="text-sm text-slate-400 mt-4 text-center">
-          Don't have an account?{" "}
+          Don’t have an account?{" "}
           <Link to="/register" className="text-emerald-400">
             Register
           </Link>
