@@ -28,11 +28,13 @@ function Stocks() {
   // LOADING STATES
   const [loadingStock, setLoadingStock] = useState("");
   const [addingStock, setAddingStock] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const [fetchingStocks, setFetchingStocks] = useState(false);
   // FILTER STATES
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+const [statusFilter, setStatusFilter] = useState("all");
+const [showFilters, setShowFilters] = useState(false);
+
+// MAIN LOADING
+const [loading, setLoading] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
@@ -94,13 +96,21 @@ function Stocks() {
   }, [stocks, search, statusFilter]);
 
   // HANDLE INPUT
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setStockData({
-      ...stockData,
-      [name]: name === "stockSymbol" ? value.toUpperCase() : value,
-    });
-  };
+
+  const { name, value } = e.target;
+
+  setStockData({
+    ...stockData,
+
+    [name]:
+      name === "stockSymbol"
+        ? value.toUpperCase()
+        : value,
+  });
+};
 
   // =====================================
   // ADD STOCK
@@ -212,7 +222,7 @@ function Stocks() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="min-h-screen bg-[#020617] text-white px-6 py-8 space-y-8">
 
       {/* HEADER */}
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">

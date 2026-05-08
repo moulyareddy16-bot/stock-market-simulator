@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { stockModel }
-from "../models/StockModel.js";
-=======
 import axios from "axios";
 
 import { stockModel }
@@ -9,79 +5,15 @@ from "../models/StockModel.js";
 
 import { stockCache }
 from "./cacheService.js";
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
 
 
-// ==========================================
-// STORE LIVE PRICES
-// ==========================================
-const livePrices = {};
-
-
-// ==========================================
-// GENERATE SMALL FLUCTUATION
-// ==========================================
-const fluctuatePrice =
-(price) => {
-
-   // 2% fluctuation
-   const percentageChange =
-
-      (Math.random() - 0.5) * 0.04;
-
-
-   const newPrice =
-
-      price +
-
-      (price * percentageChange);
-
-
-   return Number(
-      newPrice.toFixed(2)
-   );
-
-};
-
-
-// ==========================================
-// GET RANDOM INITIAL PRICE
-// ==========================================
-const generateInitialPrice =
-() => {
-
-   return Number(
-
-      (
-         200 +
-
-         Math.random() * 800
-      ).toFixed(2)
-
-   );
-
-};
-
-
-// ==========================================
 // GET LIVE STOCK UPDATES
-<<<<<<< HEAD
-// ==========================================
-=======
 
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
 export const getLiveStockUpdates =
 async () => {
 
    try {
 
-<<<<<<< HEAD
-      const stocks =
-         await stockModel.find();
-
-
-      const stockUpdates =
-=======
       // FETCH STOCKS
       const stocks =
       await stockModel.find({
@@ -94,45 +26,9 @@ async () => {
       // FETCH DATA
       const stockUpdates =
       await Promise.all(
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
 
-         stocks.map((stock) => {
+         stocks.map(async (stock) => {
 
-            // initialize dynamically
-            if (
-
-               !livePrices[
-                  stock.stockSymbol
-               ]
-
-            ) {
-
-               livePrices[
-                  stock.stockSymbol
-               ] =
-
-               generateInitialPrice();
-
-            }
-
-
-            // fluctuate existing price
-            livePrices[
-               stock.stockSymbol
-            ] =
-
-            fluctuatePrice(
-
-               livePrices[
-                  stock.stockSymbol
-               ]
-
-<<<<<<< HEAD
-            );
-
-
-            return {
-=======
             // CACHE KEY
             const cacheKey =
             `stock_${stock.stockSymbol}`;
@@ -163,24 +59,11 @@ async () => {
             );
 
             const stockData = {
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
 
                stockSymbol:
                stock.stockSymbol,
 
                currentPrice:
-<<<<<<< HEAD
-
-               livePrices[
-                  stock.stockSymbol
-               ]
-
-            };
-
-         });
-
-
-=======
                response.data.c,
 
                high:
@@ -218,17 +101,10 @@ async () => {
 
       );
 
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
       return stockUpdates;
 
-   } catch(error) {
+   } catch (error) {
 
-<<<<<<< HEAD
-      console.log(
-
-         "Realtime Service Error:",
-
-=======
       // RATE LIMIT
       if (
          error.response?.status === 429
@@ -247,7 +123,6 @@ async () => {
       console.log(
 
          "Realtime service error:",
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
          error.message
 
       );
