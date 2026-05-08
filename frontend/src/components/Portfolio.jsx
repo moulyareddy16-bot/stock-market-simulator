@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import React from 'react'
-
-function Portfolio() {
-  return (
-    <div>Portfolio</div>
-  )
-}
-
-export default Portfolio
-=======
 import { useEffect, useState } from "react";
 import api from "../service/api";
 
@@ -75,9 +64,8 @@ function Portfolio() {
             <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
               <p className="text-sm text-slate-400">Profit / Loss</p>
               <p
-                className={`mt-2 text-2xl font-semibold ${
-                  summary.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"
-                }`}
+                className={`mt-2 text-2xl font-semibold ${summary.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"
+                  }`}
               >
                 ${summary.totalProfit?.toFixed(2) || "0.00"}
               </p>
@@ -111,9 +99,8 @@ function Portfolio() {
                     <td className="p-4">${stock.avgPrice?.toFixed(2)}</td>
                     <td className="p-4">${stock.currentPrice?.toFixed(2)}</td>
                     <td
-                      className={`p-4 ${
-                        stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"
-                      }`}
+                      className={`p-4 ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"
+                        }`}
                     >
                       ${stock.profitLoss?.toFixed(2)} ({stock.profitPercent?.toFixed(2)}%)
                     </td>
@@ -129,4 +116,3 @@ function Portfolio() {
 }
 
 export default Portfolio;
->>>>>>> c1eaa7c4ac9c594c91cd1bea77498ac0bb1c16a8

@@ -1,16 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-<<<<<<< HEAD
-import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-=======
-
 import api from "../service/api";
-import Home from "./Home";
+import { useAuth } from "../context/AuthContext";
 
 const authImage =
   "https://img.etimg.com/thumb/width-1200,height-900,imgsize-87918,resizemode-75,msid-113755821/wealth/invest/stocks-to-buy-look-for-stocks-with-improved-earnings-quality-5-stocks-with-up-to-28-upside-potential.jpg";
->>>>>>> c1eaa7c4ac9c594c91cd1bea77498ac0bb1c16a8
 
 function Signin() {
   const navigate = useNavigate();
@@ -37,27 +31,13 @@ function Signin() {
       const user = res.data.payload;
       const role = user?.role;
 
-<<<<<<< HEAD
-      // 🔥 IMPORTANT: use context login instead of localStorage directly
-      login(res.data.token);
-
-      alert("Login Successful");
-
-      // 👉 role-based navigation (you already used this earlier)
-      const role = res.data.user.role;
-
-      if (role === "trader") navigate("/portfolio");
-      else if (role === "admin") navigate("/profile");
-      else if (role === "stockmanager") navigate("/stock");
-
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-=======
       if (!role) {
         alert("Login failed: Role not found");
         return;
       }
 
+      // 🔥 IMPORTANT: use context login instead of localStorage directly
+      login(res.data.token);
       localStorage.setItem("role", role);
       localStorage.setItem("username", user.username);
 
@@ -72,18 +52,12 @@ function Signin() {
       }
     } catch (err) {
       console.error("Login Error:", err.response?.data || err.message);
->>>>>>> c1eaa7c4ac9c594c91cd1bea77498ac0bb1c16a8
       alert(err.response?.data?.message || "Login Failed");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-
-      <form
-        onSubmit={handleSubmit}
-        className="bg-[#020617] p-8 rounded-lg border border-slate-800 w-96"
-      >
 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-8">
         <div className="relative grid w-full max-w-3xl overflow-hidden rounded-2xl bg-[#6b746f] shadow-2xl md:grid-cols-2">
@@ -96,44 +70,20 @@ function Signin() {
             X
           </button>
 
-<<<<<<< HEAD
-        {/* Email */}
-        <input
-          type="email"
-          name="email"
-          onChange={handleChange}
-          className="w-full mb-4 p-2 rounded bg-[#1e293b] text-white outline-none"
-          required
-        />
-
-        {/* Password */}
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          className="w-full mb-6 p-2 rounded bg-[#1e293b] text-white outline-none"
-          required
-        />
-=======
           <form
             onSubmit={handleSubmit}
             className="flex min-h-[500px] flex-col justify-center px-8 py-12 text-slate-950 md:px-14"
           >
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
               value={form.email}
               onChange={handleChange}
               required
-              className="mb-5 w-full  rounded-lg bg-[#f1efff] px-4 py-3 text-lg text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+              className="mb-5 w-full rounded-lg bg-[#f1efff] px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
             />
 
-<<<<<<< HEAD
-        <p className="text-sm text-slate-400 mt-4 text-center">
-          Don’t have an account?{" "}
-          <Link to="/register" className="text-emerald-400">
-            Register
-          </Link>
-        </p>
-=======
             <div className="relative mb-8">
               <input
                 type={showPassword ? "text" : "password"}
@@ -144,7 +94,6 @@ function Signin() {
                 required
                 className="w-full rounded-lg bg-[#f1efff] px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
               />
->>>>>>> c1eaa7c4ac9c594c91cd1bea77498ac0bb1c16a8
 
               <button
                 type="button"

@@ -27,13 +27,7 @@ function Stocks() {
     stockSymbol: "",
   });
 
-<<<<<<< HEAD
-  // =====================================
   // FETCH STOCKS
-  // =====================================
-=======
-  // FETCH STOCKS
->>>>>>> c6da05af4d4e02f5176793c21813df4c319c0c36
   const fetchStocks = async () => {
 
     try {
@@ -71,11 +65,6 @@ function Stocks() {
 
       fetchStocks();
 
-<<<<<<< HEAD
-  // =====================================
-  // HANDLE INPUT CHANGE
-  // =====================================
-=======
     }, 400);
 
     return () =>
@@ -84,7 +73,6 @@ function Stocks() {
   }, [page, search]);
 
   // HANDLE INPUT
->>>>>>> c6da05af4d4e02f5176793c21813df4c319c0c36
   const handleChange = (e) => {
 
     const value =
@@ -160,9 +148,6 @@ function Stocks() {
 
       console.log(error);
 
-<<<<<<< HEAD
-   }
-=======
       alert(
 
         error.response?.data?.message ||
@@ -176,15 +161,10 @@ function Stocks() {
       setAddingStock(false);
 
     }
->>>>>>> c6da05af4d4e02f5176793c21813df4c319c0c36
 
   };
   // =====================================
   // DELETE STOCK
-<<<<<<< HEAD
-  // =====================================
-  const handleDelete = async (stockId) => {
-=======
   const handleDelete = async (stockSymbol) => {
 
     const confirmDelete =
@@ -193,8 +173,6 @@ function Stocks() {
       );
 
     if (!confirmDelete) return;
-
->>>>>>> c6da05af4d4e02f5176793c21813df4c319c0c36
     try {
       await deleteStock(stockId);
 
@@ -583,20 +561,9 @@ function Stocks() {
 
             disabled={page === totalPages}
 
-<<<<<<< HEAD
-              {/* DELETE BUTTON */}
-              <button
-                // onClick={() => handleDelete(stock._id)}
-                 onClick={() => handleDelete(stock.stockSymbol)} 
-                className="flex-1 rounded-xl bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
-              >
-                Delete
-              </button>
-=======
             onClick={() =>
               setPage(page + 1)
             }
->>>>>>> c6da05af4d4e02f5176793c21813df4c319c0c36
 
             className="rounded-xl bg-green-600 px-4 py-2 text-white disabled:opacity-40"
           >
