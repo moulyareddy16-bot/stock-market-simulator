@@ -104,9 +104,21 @@ export const logoutUser = async(req,res,next)=>{
     }
 }
 
+// Get Profile
+export const getProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({ message: "User Profile", payload: user });
+    } catch (err) {
+        next(err);
+    }
+};
+
 //Change Password
 export const changePassword= async (req,res)=>{
     
 }
-
-//

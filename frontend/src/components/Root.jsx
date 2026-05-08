@@ -1,36 +1,46 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
-import { Outlet, useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 function Root() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const role = localStorage.getItem("role");
+
+  // Auth pages should not have sidebar/navbar sometimes, 
+  // but for now, we'll just toggle the sidebar based on role and path.
+  const isAuthPage = ["/signin", "/register"].includes(location.pathname);
+  const showSidebar = role && !isAuthPage && location.pathname !== "/";
 
   useEffect(() => {
     const navEntry = window.performance.getEntriesByType("navigation")[0];
-    const role = localStorage.getItem("role");
-
-    // On a fresh visit show Home. If a logged-in trader refreshes,
-    // take them back to the portfolio dashboard.
-    if (navEntry?.type === "reload" && role === "trader") {
-      navigate("/dashboard", { replace: true });
+    if (navEntry?.type === "reload" && role === "trader" && location.pathname === "/") {
+      navigate("/portfolio", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, role, location.pathname]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#0f172a] text-white">
-
-      {/* Navbar */}
+    <div className="min-h-screen bg-[#020617] text-slate-200">
       <Navbar />
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto mt-16 mb-16">
-        <Outlet />
+      
+      <div className="flex pt-16">
+        {showSidebar && <Sidebar />}
+        
+        <main className={`flex-1 transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
+          <div className="p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto">
+            <Outlet />
+          </div>
+          {!showSidebar && <Footer />}
+        </main>
       </div>
 
-      {/* Footer */}
-      <Footer />
-
+      {showSidebar && (
+        <div className="ml-20 lg:ml-64 border-t border-slate-800">
+          <Footer />
+        </div>
+      )}
     </div>
   );
 }

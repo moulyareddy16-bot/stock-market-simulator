@@ -8,7 +8,7 @@ function Home() {
     const role = localStorage.getItem("role");
 
     if (role === "trader") {
-      navigate("/dashboard", { replace: true });
+      navigate("/portfolio", { replace: true });
     } else if (role === "admin") {
       navigate("/admin", { replace: true });
     } else if (role === "stockmanager") {
