@@ -10,6 +10,7 @@ import Transactions from "./components/Transactions";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StockDetails from "./components/StockDetails";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -67,7 +68,7 @@ function App() {
           path: "admin",
           element: (
             <ProtectedRoute allowedRoles={["admin"]}>
-              <Profile />
+              <AdminDashboard />
             </ProtectedRoute>
           ),
         },
