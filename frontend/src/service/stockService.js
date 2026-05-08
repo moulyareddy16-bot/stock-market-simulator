@@ -41,3 +41,16 @@ export const deleteStock = async (stockSymbol) => {
 
 };
 
+// TOGGLE STOCK STATUS
+
+export const toggleStockStatus =
+async (stockSymbol) => {
+
+   const response =
+   await api.patch(
+      `/stocks/toggle-status/${stockSymbol}`
+   );
+
+   return response.data;
+
+};
