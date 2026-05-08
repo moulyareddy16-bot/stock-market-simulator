@@ -15,6 +15,8 @@ import {
 } from "../middleware/verifyToken.js";
 
 
+import { toggleStockStatus } from "../controllers/stockController.js";
+
 const stockRouter = exp.Router();
 
 
@@ -52,6 +54,10 @@ stockRouter.delete(
 // ==========================================
 // GET ALL STOCKS
 // ==========================================
+// Public Route to get all stocks
+stockRouter.get("/", getAllStocks);
+
+//  Historical analysis
 stockRouter.get(
 
    "/",
@@ -84,5 +90,17 @@ stockRouter.get(
 
 );
 
+
+//Public Route to get stock details
+stockRouter.get("/:stockSymbol", getStockDetails );
+
+
+
+
+stockRouter.patch(
+   "/toggle-status/:symbol",
+   verifyToken("stockmanager"),
+   toggleStockStatus
+);
 
 export default stockRouter;

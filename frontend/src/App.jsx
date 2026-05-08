@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 import Root from "./components/Root";
 import Home from "./components/Home";
@@ -10,6 +10,7 @@ import Transactions from "./components/Transactions";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StockDetails from "./components/StockDetails";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -27,6 +28,14 @@ function App() {
         // 🟢 Trader Routes
         {
           path: "dashboard",
+          element: (
+            <ProtectedRoute allowedRoles={["trader"]}>
+              <Navigate to="/portfolio" replace />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "portfolio",
           element: (
             <ProtectedRoute allowedRoles={["trader"]}>
               <Portfolio />
@@ -67,7 +76,7 @@ function App() {
           path: "admin",
           element: (
             <ProtectedRoute allowedRoles={["admin"]}>
-              <Profile />
+              <AdminDashboard />
             </ProtectedRoute>
           ),
         },

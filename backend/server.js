@@ -6,6 +6,11 @@ dns.setDefaultResultOrder("ipv4first");
 
 import mongoose from "mongoose";
 
+// import dotenv from "dotenv";
+// dotenv.config();
+// console.log("FINNHUB:", process.env.FINNHUB_API_KEY);
+
+
 import { connect } from "mongoose";
 import http from "http";
 import { Server } from "socket.io";

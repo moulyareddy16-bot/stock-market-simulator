@@ -1,15 +1,23 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import api from "../service/api";
+import myImage from '../assets/logo.jpeg'
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user"); // if stored
+  const handleLogout = async () => {
+    try {
+      await api.get("/auth/logout");
+    } catch (error) {
+      console.error("Logout Error:", error.response?.data || error.message);
+    } finally {
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
 
-    navigate("/signin");
+      navigate("/signin");
+    }
   };
 
   return (
@@ -17,15 +25,24 @@ function Navbar() {
     bg-[#020617]/80 backdrop-blur-md border-b border-slate-800">
 
       {/* LOGO */}
-      <NavLink to="/" className="text-2xl font-bold text-emerald-400">
-        StockSim
+      <NavLink
+        to="/"
+        className="text-2xl font-bold text-emerald-400"
+      >
+
+        <img
+          src={myImage}
+          alt="Logo"
+          className="h-10"
+        />
+
       </NavLink>
 
       {/* RIGHT SIDE */}
       <div className="flex gap-3 items-center">
 
         {/* IF NOT LOGGED IN */}
-        {!token ? (
+        {!role ? (
           <>
             <NavLink
               to="/signin"
