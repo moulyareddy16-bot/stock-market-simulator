@@ -35,9 +35,6 @@ function Stocks() {
     stockSymbol: "",
   });
 
-
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
   // FETCH STOCKS
   const fetchStocks = async () => {
     try {
@@ -109,7 +106,9 @@ function Stocks() {
     });
   };
 
+  // =====================================
   // ADD STOCK
+  // =====================================
   const handleAddStock = async (e) => {
     e.preventDefault();
 
@@ -155,7 +154,7 @@ function Stocks() {
       setAddingStock(false);
     }
   };
-
+  // =====================================
   // DELETE STOCK
   const handleDelete = async (stockSymbol) => {
     const confirmDelete = window.confirm(
@@ -164,7 +163,7 @@ function Stocks() {
 
     if (!confirmDelete) return;
     try {
-      await deleteStock(stockId);
+      await deleteStock(stockSymbol);
 
       fetchStocks();
     } catch (error) {
@@ -216,381 +215,426 @@ function Stocks() {
     return num;
   };
 
-  const formatMarketCap = (num) => {
-
-    if (!num) return "N/A";
-
-    if (num >= 1_000_000_000_000) {
-      return (
-        num / 1_000_000_000_000
-      ).toFixed(2) + "T";
-    }
-
-    if (num >= 1_000_000_000) {
-      return (
-        num / 1_000_000_000
-      ).toFixed(2) + "B";
-    }
-
-    return num;
-
-  };
-
-  const filteredStocks = stocks.filter((stock) => {
-
-    if (statusFilter === "active") {
-      return stock.isActive;
-    }
-
-    if (statusFilter === "inactive") {
-      return !stock.isActive;
-    }
-
-    return true;
-
-  });
-
   return (
+    <div className="min-h-screen bg-[#020617] text-white px-6 py-8 space-y-8">
 
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#081c15] via-[#0f2d24] to-[#1b4332] p-6">
+      {/* HEADER */}
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
 
-      {/* WATERMARK */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-
-        <h1 className="select-none text-[180px] font-black tracking-widest text-white/5">
-
-          STOCKS
-
-        </h1>
-
-      </div>
-
-      {/* GLOW */}
-      <div className="absolute left-[-120px] top-[-120px] h-[300px] w-[300px] rounded-full bg-green-500/10 blur-3xl"></div>
-
-      <div className="absolute bottom-[-120px] right-[-120px] h-[300px] w-[300px] rounded-full bg-emerald-400/10 blur-3xl"></div>
-
-      {/* CONTENT */}
-      <div className="relative z-10">
-
-        {/* TITLE */}
-        <div className="mb-10 text-center">
-
-          <h1 className="bg-gradient-to-r from-green-300 to-emerald-500 bg-clip-text text-5xl font-extrabold text-transparent">
-
-            Stock Management
-
+        {/* LEFT */}
+        <div>
+          <h1 className="text-4xl font-black tracking-tight">
+            Market Explorer
           </h1>
 
-          <p className="mt-3 text-green-100/70">
-
-            Add, manage and monitor live market stocks
-
+          <p className="mt-2 text-slate-400">
+            Discover and manage global assets
           </p>
-
         </div>
 
-        {/* ADD STOCK */}
-        <div className="mx-auto mb-10 max-w-4xl rounded-3xl border border-green-500/20 bg-white/10 p-6 shadow-2xl backdrop-blur-lg">
+        {/* RIGHT */}
+        <div className="flex flex-col md:flex-row items-center gap-3">
+
+          {/* SEARCH */}
+          <div className="relative w-full md:w-80">
+            <input
+              type="text"
+              placeholder="Search stocks..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 outline-none transition focus:border-emerald-500"
+            />
+          </div>
+
+          {/* FILTER BUTTON */}
+          <button
+            onClick={() =>
+              setShowFilters(!showFilters)
+            }
+            className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 hover:border-emerald-500 transition"
+          >
+            ⚙️ Filters
+          </button>
+        </div>
+      </header>
+
+      {/* FILTER PANEL */}
+      {showFilters && (
+        <div className="glass-card rounded-2xl border border-slate-800 bg-slate-900/70 p-5 backdrop-blur">
+          <h2 className="mb-4 text-lg font-bold">
+            Filter Stocks
+          </h2>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setStatusFilter("all")}
+              className={`rounded-xl px-5 py-2 font-semibold transition
+              ${
+                statusFilter === "all"
+                  ? "bg-emerald-500 text-black"
+                  : "bg-slate-800 text-white"
+              }`}
+            >
+              All
+            </button>
+
+            <button
+              onClick={() =>
+                setStatusFilter("active")
+              }
+              className={`rounded-xl px-5 py-2 font-semibold transition
+              ${
+                statusFilter === "active"
+                  ? "bg-emerald-500 text-black"
+                  : "bg-slate-800 text-white"
+              }`}
+            >
+              Active
+            </button>
+
+            <button
+              onClick={() =>
+                setStatusFilter("inactive")
+              }
+              className={`rounded-xl px-5 py-2 font-semibold transition
+              ${
+                statusFilter === "inactive"
+                  ? "bg-red-500 text-white"
+                  : "bg-slate-800 text-white"
+              }`}
+            >
+              Inactive
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* STATS */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <p className="text-sm text-slate-400">
+            Total Stocks
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold">
+            {stocks.length}
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <p className="text-sm text-slate-400">
+            Active
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-emerald-400">
+            {
+              stocks.filter((s) => s.isActive)
+                .length
+            }
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <p className="text-sm text-slate-400">
+            Inactive
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-red-400">
+            {
+              stocks.filter((s) => !s.isActive)
+                .length
+            }
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <p className="text-sm text-slate-400">
+            Exchanges
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-blue-400">
+            {
+              [
+                ...new Set(
+                  stocks.map(
+                    (stock) => stock.exchange
+                  )
+                ),
+              ].length
+            }
+          </h2>
+        </div>
+      </section>
+
+      {/* MANAGER TOOLS */}
+      {role === "stockmanager" && (
+        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+
+          <h2 className="mb-5 text-xl font-bold">
+            Stock Management
+          </h2>
 
           <form
             onSubmit={handleAddStock}
-            className="flex flex-col gap-4 md:flex-row"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
 
             <input
               type="text"
               name="stockSymbol"
-              placeholder="Enter Symbol (AAPL, TSLA, NVDA)"
+              placeholder="AAPL"
               value={stockData.stockSymbol}
               onChange={handleChange}
-              autoComplete="off"
-              required
-              className="flex-1 rounded-xl border border-green-400/20 bg-black/20 px-4 py-3 text-white placeholder:text-gray-400 outline-none transition focus:border-green-400 focus:ring-2 focus:ring-green-500"
+              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-500"
+            />
+
+            <input
+              type="text"
+              name="companyName"
+              placeholder="Company Name"
+              value={stockData.companyName}
+              onChange={handleChange}
+              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-500"
             />
 
             <button
               type="submit"
               disabled={addingStock}
-              className={`rounded-xl px-6 py-3 font-semibold text-white shadow-lg transition duration-300
-
-              ${
-                addingStock
-                  ? "cursor-not-allowed bg-gray-500"
-                  : "bg-gradient-to-r from-green-500 to-emerald-700 hover:scale-105 hover:from-green-400 hover:to-emerald-600"
-              }
-              `}
+              className="rounded-xl bg-emerald-500 px-5 py-3 font-bold text-black transition hover:bg-emerald-400"
             >
-
-              {
-                addingStock
-                  ? "Adding..."
-                  : "Add Stock"
-              }
-
+              {addingStock
+                ? "Adding..."
+                : "+ Add Stock"}
             </button>
-
           </form>
+        </section>
+      )}
 
-          <p className="mt-3 text-sm text-green-100/50">
+      {/* STOCK GRID */}
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-            Only valid Finnhub market symbols are accepted.
-
-          </p>
-
-        </div>
-
-        {/* SEARCH */}
-        <div className="mx-auto mb-8 max-w-4xl">
-
-          <input
-            type="text"
-            placeholder="Search stocks..."
-            value={search}
-            onChange={(e) => {
-
-              setSearch(e.target.value);
-
-              setPage(1);
-
-            }}
-            className="w-full rounded-2xl border border-green-500/20 bg-white/10 px-5 py-4 text-white placeholder:text-gray-400 outline-none backdrop-blur-lg focus:border-green-400"
-          />
-
-        </div>
-
-        {/* LOADING */}
-        {
-          fetchingStocks && (
-
-            <div className="mb-6 text-center text-green-200">
-
-              Loading stocks...
-
-            </div>
-
-          )
-        }
-
-        {/* EMPTY */}
-        {
-          !fetchingStocks &&
-          stocks.length === 0 && (
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center text-gray-300">
-
-              No stocks found
-
-            </div>
-
-          )
-        }
-
-        {/* GRID */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-          {stocks.map((stock) => (
-
+        {loading ? (
+          [...Array(6)].map((_, i) => (
+            <CardSkeleton key={i} />
+          ))
+        ) : filteredStocks.length > 0 ? (
+          filteredStocks.map((stock) => (
             <div
               key={stock._id}
-              className="group relative overflow-hidden rounded-3xl border border-green-500/20 bg-white/10 p-6 shadow-2xl backdrop-blur-lg transition duration-300 hover:-translate-y-2 hover:border-green-400 hover:shadow-green-500/20"
+              className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-5 transition hover:-translate-y-1 hover:border-emerald-500/40"
             >
 
-              {/* STATUS */}
-              <div className="absolute right-4 top-4 z-20">
+              {/* TOP */}
+              <div className="flex items-start justify-between">
 
+                <div className="flex gap-4">
+
+                  {/* LOGO */}
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white">
+                    {stock.logo ? (
+                      <img
+                        src={stock.logo}
+                        alt={stock.companyName}
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-2xl font-black text-black">
+                        {stock.stockSymbol[0]}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* INFO */}
+                  <div>
+                    <h2 className="text-3xl font-black">
+                      {stock.stockSymbol}
+                    </h2>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                      {stock.companyName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* STATUS */}
                 <button
-
                   disabled={
                     loadingStock ===
                     stock.stockSymbol
                   }
-
                   onClick={() =>
                     handleToggleStatus(
                       stock.stockSymbol
                     )
                   }
-
-                  className={`rounded-full px-3 py-1 text-xs font-bold text-white
-
+                  className={`rounded-full px-3 py-1 text-xs font-bold
                   ${
                     stock.isActive
-                      ? "bg-green-500"
-                      : "bg-red-500"
-                  }
-                  `}
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-red-500/20 text-red-400"
+                  }`}
                 >
-
-                  {
-                    loadingStock ===
-                      stock.stockSymbol
-
-                      ? "Updating..."
-
-                      : stock.isActive
-
-                        ? "🟢 ACTIVE"
-
-                        : "🔴 INACTIVE"
-                  }
-
+                  {stock.isActive
+                    ? "ACTIVE"
+                    : "INACTIVE"}
                 </button>
-
               </div>
 
-              {/* HEADER */}
-              <div className="flex items-center gap-4">
+              {/* CHART */}
+              <div className="mt-5">
+                <svg
+                  viewBox="0 0 100 30"
+                  className="h-14 w-full"
+                >
+                  <polyline
+                    fill="none"
+                    stroke="rgb(34 197 94)"
+                    strokeWidth="2"
+                    points="0,25 20,20 40,22 60,10 80,14 100,5"
+                  />
+                </svg>
+              </div>
 
-                {/* LOGO */}
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white p-2">
+              {/* DETAILS */}
+              <div className="mt-5 grid grid-cols-2 gap-4">
 
-                  {
-                    stock.logo ? (
-
-                      <img
-                        src={stock.logo}
-                        alt={stock.companyName}
-                        className="h-full w-full object-contain"
-                        onError={(e) => {
-
-                          e.target.style.display = "none";
-
-                        }}
-                      />
-
-                    ) : (
-
-                      <span className="text-lg font-bold text-black">
-
-                        {stock.stockSymbol[0]}
-
-                      </span>
-
-                    )
-                  }
-
-                </div>
-
-                {/* INFO */}
                 <div>
-
-                  <h2 className="text-3xl font-extrabold tracking-wide text-white">
-
-                    {stock.stockSymbol}
-
-                  </h2>
-
-                  <p className="text-green-100/70">
-
-                    {stock.companyName}
-
+                  <p className="text-xs uppercase tracking-widest text-slate-500">
+                    Sector
                   </p>
 
+                  <p className="mt-1 text-sm font-semibold">
+                    {stock.sector || "N/A"}
+                  </p>
                 </div>
 
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">
+                    Country
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold">
+                    {stock.country || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">
+                    Market Cap
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-emerald-400">
+                    {formatMarketCap(
+                      stock.marketCapitalization
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">
+                    IPO
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold">
+                    {stock.ipo || "N/A"}
+                  </p>
+                </div>
               </div>
 
-              {/* TAGS */}
-              <div className="mt-4 flex flex-wrap gap-2">
+              {/* FOOTER */}
+              <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
 
-                <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-300">
+                <p className="text-xs text-slate-500">
+                  Added{" "}
+                  {new Date(
+                    stock.createdAt
+                  ).toLocaleDateString()}
+                </p>
 
-                  📈 Live Market
+                <div className="flex gap-2">
 
-                </span>
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/stocks/${stock.stockSymbol}`
+                      )
+                    }
+                    className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-emerald-400"
+                  >
+                    View
+                  </button>
 
-                {
-                  stock.exchange && (
-
-                    <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-
-                      {stock.exchange}
-
-                    </span>
-
-                  )
-                }
-
+                  {role === "stockmanager" && (
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          stock.stockSymbol
+                        )
+                      }
+                      className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
-
-              {/* ACTIONS */}
-              <div className="mt-6 flex gap-3">
-
-                <button
-                  className="flex-1 rounded-xl bg-gradient-to-r from-green-500 to-emerald-700 px-4 py-2 font-medium text-white transition duration-300 hover:scale-105"
-                >
-
-                  View
-
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleDelete(
-                      stock.stockSymbol
-                    )
-                  }
-                  className="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-4 py-2 font-medium text-white transition duration-300 hover:scale-105"
-                >
-
-                  Delete
-
-                </button>
-
-              </div>
-
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full rounded-3xl border border-slate-800 bg-slate-900 py-20 text-center">
+            <div className="text-5xl">
+              🔍
             </div>
 
-          ))}
+            <h2 className="mt-4 text-2xl font-bold">
+              No Stocks Found
+            </h2>
 
-        </div>
+            <p className="mt-2 text-slate-400">
+              Try changing search or filters
+            </p>
 
-        {/* PAGINATION */}
-        <div className="mt-10 flex items-center justify-center gap-4">
+            <button
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("all");
+              }}
+              className="mt-4 text-emerald-400 hover:underline"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+      </section>
 
-          <button
+      {/* PAGINATION */}
+      <div className="flex items-center justify-center gap-4 pt-6">
 
-            disabled={page === 1}
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+          className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-2 transition hover:border-emerald-500 disabled:opacity-40"
+        >
+          Previous
+        </button>
 
-            onClick={() =>
-              setPage(page - 1)
-            }
+        <span className="text-sm text-slate-400">
+          Page {page} of {totalPages}
+        </span>
 
-            className="rounded-xl bg-green-600 px-4 py-2 text-white disabled:opacity-40"
-          >
-
-            Previous
-
-          </button>
-
-          <span className="text-white">
-
-            Page {page} of {totalPages}
-
-          </span>
-
-          <button
-
-            disabled={page === totalPages}
-
-            onClick={() =>
-              setPage(page + 1)
-            }
-
-            className="rounded-xl bg-green-600 px-4 py-2 text-white disabled:opacity-40"
-          >
-
-            Next
-
-          </button>
-
-        </div>
-
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+          className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-2 transition hover:border-emerald-500 disabled:opacity-40"
+        >
+          Next
+        </button>
       </div>
-
     </div>
-
   );
 }
 
