@@ -1,42 +1,133 @@
-import axios from "axios";
-import { stockModel } from "../models/StockModel.js";
+import { stockModel }
+from "../models/StockModel.js";
 
 
+// ==========================================
+// STORE LIVE PRICES
+// ==========================================
+const livePrices = {};
+
+
+// ==========================================
+// GENERATE SMALL FLUCTUATION
+// ==========================================
+const fluctuatePrice =
+(price) => {
+
+   // 2% fluctuation
+   const percentageChange =
+
+      (Math.random() - 0.5) * 0.04;
+
+
+   const newPrice =
+
+      price +
+
+      (price * percentageChange);
+
+
+   return Number(
+      newPrice.toFixed(2)
+   );
+
+};
+
+
+// ==========================================
+// GET RANDOM INITIAL PRICE
+// ==========================================
+const generateInitialPrice =
+() => {
+
+   return Number(
+
+      (
+         200 +
+
+         Math.random() * 800
+      ).toFixed(2)
+
+   );
+
+};
+
+
+// ==========================================
 // GET LIVE STOCK UPDATES
-
-export const getLiveStockUpdates = async () => {
+// ==========================================
+export const getLiveStockUpdates =
+async () => {
 
    try {
 
-      // Fetch stocks from DB (limit for safety)
-      const stocks = await stockModel.find().limit(10);
+      const stocks =
+         await stockModel.find();
 
 
-      // Fetch all stock prices in parallel (FASTER 🔥)
-      const stockUpdates = await Promise.all(
+      const stockUpdates =
 
-         stocks.map(async (stock) => {
+         stocks.map((stock) => {
 
-            const response = await axios.get(
-               `https://finnhub.io/api/v1/quote?symbol=${stock.stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+            // initialize dynamically
+            if (
+
+               !livePrices[
+                  stock.stockSymbol
+               ]
+
+            ) {
+
+               livePrices[
+                  stock.stockSymbol
+               ] =
+
+               generateInitialPrice();
+
+            }
+
+
+            // fluctuate existing price
+            livePrices[
+               stock.stockSymbol
+            ] =
+
+            fluctuatePrice(
+
+               livePrices[
+                  stock.stockSymbol
+               ]
+
             );
 
+
             return {
-               stockSymbol: stock.stockSymbol,
-               currentPrice: response.data.c
+
+               stockSymbol:
+               stock.stockSymbol,
+
+               currentPrice:
+
+               livePrices[
+                  stock.stockSymbol
+               ]
+
             };
 
-         })
-
-      );
+         });
 
 
-      // Return prepared data
       return stockUpdates;
 
-   } catch (error) {
+   } catch(error) {
 
-      console.log("Service error:", error.message);
+      console.log(
+
+         "Realtime Service Error:",
+
+         error.message
+
+      );
 
       return [];
 

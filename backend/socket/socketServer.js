@@ -1,6 +1,8 @@
 import { getLiveStockUpdates }
 from "../services/realtimeService.js";
 
+import mongoose from "mongoose";
+
 
 // REALTIME SOCKET SERVER
 
@@ -26,6 +28,16 @@ export const startRealtimeUpdates = (io) => {
    setInterval(async () => {
 
       try {
+
+          if (mongoose.connection.readyState !== 1) {
+
+   console.log(
+      "MongoDB disconnected..."
+   );
+
+   return;
+
+}
 
          // Call service
          const stockUpdates =

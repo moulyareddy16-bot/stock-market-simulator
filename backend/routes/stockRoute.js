@@ -1,48 +1,88 @@
 import exp from "express";
 
 import {
+
    addStock,
    getAllStocks,
    deleteStock,
-   getStockDetails
+   getSingleStock,
+   getStockHistory
+
 } from "../controllers/stockController.js";
 
-import { getStockHistory } from "../controllers/stockController.js";
+import {
+   verifyToken
+} from "../middleware/verifyToken.js";
 
-import {verifyToken} from "../middleware/verifyToken.js";
 
 const stockRouter = exp.Router();
 
 
-// Protected Routes
+// ==========================================
+// ADD STOCK
+// ==========================================
 stockRouter.post(
+
    "/",
+
    verifyToken("stockmanager"),
+
    addStock
+
 );
 
+
+// ==========================================
+// DELETE STOCK
+// ==========================================
 stockRouter.delete(
 
    "/:stockSymbol",
 
-   verifyToken("admin","stockmanager"),
+   verifyToken(
+      "admin",
+      "stockmanager"
+   ),
 
    deleteStock
 
 );
 
 
-// Public Route to get all stocks
-stockRouter.get("/", getAllStocks);
-
-//Public Route to get stock details
-stockRouter.get("/:stockSymbol", getStockDetails );
-
-
-//  Historical analysis
+// ==========================================
+// GET ALL STOCKS
+// ==========================================
 stockRouter.get(
-   "/history/:symbol",
-   getStockHistory
+
+   "/",
+
+   getAllStocks
+
 );
+
+
+// ==========================================
+// GET SINGLE STOCK
+// ==========================================
+stockRouter.get(
+
+   "/:stockSymbol",
+
+   getSingleStock
+
+);
+
+
+// ==========================================
+// GET STOCK HISTORY
+// ==========================================
+stockRouter.get(
+
+   "/history/:symbol",
+
+   getStockHistory
+
+);
+
 
 export default stockRouter;

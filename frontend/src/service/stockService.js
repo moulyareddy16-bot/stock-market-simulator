@@ -41,3 +41,19 @@ export const deleteStock = async (stockSymbol) => {
 
 };
 
+
+// GET SINGLE STOCK
+
+export const getSingleStock =
+async (stockSymbol) => {
+
+   const response =
+      await api.get(
+
+         `/stocks/${stockSymbol}`
+
+      );
+
+   return response.data;
+
+};

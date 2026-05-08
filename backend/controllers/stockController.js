@@ -251,3 +251,62 @@ async (req, res, next) => {
 
 };
 
+
+// GET SINGLE STOCK
+
+export const getSingleStock =
+async (req, res, next) => {
+
+   try {
+
+      // get stock symbol from params
+      const { stockSymbol } =
+         req.params;
+
+
+      // find stock from DB
+      const stock =
+         await stockModel.findOne({
+
+            stockSymbol:
+            stockSymbol.toUpperCase()
+
+         });
+
+
+      // stock not found
+      if (!stock) {
+
+         return res.status(404).json({
+
+            message:
+            "Stock not found"
+
+         });
+
+      }
+
+
+      // send stock details
+      res.status(200).json({
+
+         payload: {
+
+            stockSymbol:
+            stock.stockSymbol,
+
+            companyName:
+            stock.companyName
+
+         }
+
+      });
+
+   } catch(error) {
+
+      next(error);
+
+   }
+
+};
+
