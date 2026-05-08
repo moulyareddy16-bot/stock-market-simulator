@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+
+import api from "../service/api";
+import Home from "./Home";
+
+const authImage =
+  "https://www.shutterstock.com/image-vector/bullish-market-trend-charging-bull-600nw-2526656507.jpg";
 
 function Register() {
   const navigate = useNavigate();
@@ -9,8 +14,9 @@ function Register() {
     username: "",
     email: "",
     password: "",
-    role: "trader", // ✅ fixed role
+    role: "trader",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,10 +26,7 @@ function Register() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        form
-      );
+      const res = await api.post("/auth/register", form);
 
       console.log(res.data);
       alert("Registered Successfully");
@@ -36,66 +39,132 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+    <div className="relative min-h-screen">
+      <Home />
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-[#020617] p-8 rounded-lg border border-slate-800 w-96"
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-8">
+        <div className="relative grid w-full max-w-3xl overflow-hidden rounded-2xl bg-[#6b746f] shadow-2xl md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="absolute right-4 top-4 z-20 rounded-full px-3 py-1 text-lg font-bold leading-none text-slate-500 transition hover:bg-slate-100 md:text-white md:hover:bg-white/20"
+            aria-label="Close register"
+          >
+            X
+          </button>
 
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Create Account
-        </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="flex min-h-[500px] flex-col justify-center px-8 py-12 text-slate-950 md:px-14"
+          >
+            <h2 className="text-center text-3xl font-extrabold tracking-wide text-slate-950">
+              REGISTER
+            </h2>
 
-        {/* Username */}
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-          className="w-full mb-4 p-2 rounded bg-[#1e293b] text-white outline-none"
-          required
-        />
+            <p className="mb-8 mt-2 text-center text-[15px] bg-[#6b746f]">
+              Create your StockSim account
+            </p>
 
-        {/* Email */}
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          className="w-full mb-4 p-2 rounded bg-[#1e293b] text-white outline-none"
-          required
-        />
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={form.username}
+              onChange={handleChange}
+              className="mb-5 w-full rounded-lg bg-[#f1efff] px-4 py-3 text-lg text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+              required
+            />
 
-        {/* Password */}
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          className="w-full mb-6 p-2 rounded bg-[#1e293b] text-white outline-none"
-          required
-        />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              className="mb-5 w-full rounded-lg bg-[#f1efff] px-4 py-3 text-lg text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+              required
+            />
 
-        {/* Hidden Role */}
-        <input type="hidden" name="role" value="trader" />
+            <div className="relative mb-8">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full rounded-lg bg-[#f1efff] px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+                required
+              />
 
-        {/* Submit */}
-        <button
-          type="submit"
-          className="w-full py-2 bg-emerald-500 text-black rounded hover:bg-emerald-600 transition"
-        >
-          Register
-        </button>
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 transition hover:bg-violet-100 hover:text-violet-700"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6" />
+                    <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c5 0 9 5 9 8a8.8 8.8 0 0 1-2 3.6" />
+                    <path d="M6.6 6.6C4.4 8 3 10.3 3 12c0 3 4 8 9 8 1.2 0 2.4-.3 3.5-.8" />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
 
-        <p className="text-sm text-slate-400 mt-4 text-center">
-          Already have an account?{" "}
-          <Link to="/signin" className="text-emerald-400">
-            Login
-          </Link>
-        </p>
+            <input type="hidden" name="role" value="trader" />
 
-      </form>
+            <button
+              type="submit"
+              className="mx-auto block rounded-lg bg-violet-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:bg-violet-700"
+            >
+              Register Now
+            </button>
+
+            <p className="mt-10 text-center text-sm text-white">
+              Already have an account?{" "}
+              <Link
+                to="/signin"
+                className="font-semibold text-red-500 hover:text-violet-700"
+              >
+                Login
+              </Link>
+            </p>
+          </form>
+
+          <div className="relative hidden min-h-[500px] overflow-hidden bg-violet-600 md:block">
+            <div className="absolute -right-16 -top-14 h-44 w-44 rounded-full border-[18px] border-white/10"></div>
+            <div className="absolute bottom-[-80px] left-8 h-56 w-56 rounded-full border-[22px] border-white/10"></div>
+            <img
+              src={authImage}
+              alt="StockSim user"
+              className="relative z-10 h-full w-full object-cover"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

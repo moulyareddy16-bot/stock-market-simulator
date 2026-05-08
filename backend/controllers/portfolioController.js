@@ -1,5 +1,5 @@
 import axios from "axios";
-import { transactionModel } from "../models/TransactionModel.js";
+import { transactionModel } from "../models/transactionModel.js";
 
 // GET USER PORTFOLIO
 export const getPortfolio = async (req, res, next) => {
@@ -29,14 +29,14 @@ export const getPortfolio = async (req, res, next) => {
       if (tx.transactionType === "BUY") {
         portfolio[symbol].ownedQuantity += tx.quantity;
         portfolio[symbol].totalInvestment +=
-          tx.quantity * tx.price;
+          tx.quantity * tx.pricePerShare;
       }
 
       // Handle SELL
       else if (tx.transactionType === "SELL") {
         portfolio[symbol].ownedQuantity -= tx.quantity;
         portfolio[symbol].totalInvestment -=
-          tx.quantity * tx.price; // simple approach
+          tx.quantity * tx.pricePerShare; // simple approach
       }
     });
 

@@ -1,10 +1,31 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
+
 import { config } from "dotenv";
 config();
+
+// import dotenv from "dotenv";
+// dotenv.config();
+// console.log("FINNHUB:", process.env.FINNHUB_API_KEY);
+
+
 import { connect } from "mongoose";
-import app from "./app.js"
+import http from "http";
+import { Server } from "socket.io";
+
+import app from "./app.js";
+
+import { startRealtimeUpdates }
+from "./socket/socketServer.js";
+
+import { checkAlerts }
+from "./services/alertService.js";
+import { clearScreenDown } from "readline";
 
 
-//connect to db
+// CONNECT TO DATABASE
+
 const connectDB = async () => {
 
   try {
@@ -13,19 +34,54 @@ const connectDB = async () => {
 
     console.log("DB server connected");
 
-    //assign port
+
+    // CREATE HTTP SERVER
+
+    const server = http.createServer(app);
+
+
+    // INITIALIZE SOCKET.IO
+  
+    const io = new Server(server, {
+        cors: {
+             origin: "*",
+             methods: ["GET", "POST"],
+            credentials: true
+        }
+    });
+
+
+    // START REALTIME SOCKET SYSTEM
+    
+    startRealtimeUpdates(io);
+
+
+    // ALERT CHECKER (Phase-3)
+
+    setInterval(() => {
+      checkAlerts(io);
+    }, 60000); // every 1 min
+
+
+    // START SERVER
+
     const port = process.env.PORT || 5000;
 
-    app.listen(port, () =>
-        console.log(`server listening on ${port}..`)
+    server.listen(port, () =>
+      console.log(`Server running on ${port}`)
     );
 
   } catch (err) {
 
-    console.log("err in db connect", err);
+    console.log("Error in DB connect:", err);
 
-  }
-  
+  }clearScreenDown
+   
+
+  // console.log(process.env.FINNHUB_API_KEY);
+
 };
 
+
+// Call DB connection
 connectDB();

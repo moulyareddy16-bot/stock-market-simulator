@@ -8,12 +8,14 @@ function Root() {
 
   useEffect(() => {
     const navEntry = window.performance.getEntriesByType("navigation")[0];
+    const role = localStorage.getItem("role");
 
-    // check if page was refreshed
-    if (navEntry && navEntry.type === "reload") {
-      navigate("/");
+    // On a fresh visit show Home. If a logged-in trader refreshes,
+    // take them back to the portfolio dashboard.
+    if (navEntry?.type === "reload" && role === "trader") {
+      navigate("/dashboard", { replace: true });
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="flex flex-col h-screen bg-[#0f172a] text-white">

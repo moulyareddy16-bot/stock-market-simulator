@@ -26,3 +26,15 @@ npm install nodemon
 	
 # step 5: routes + Controllers
     Example: Buy Stock API
+
+    - A. RATE LIMITING
+
+Prevent API abuse.
+
+Install:
+
+npm install express-rate-limit
+
+# PROFESSIONAL STOCK CACHE SYSTEM
+  - npm install node-cache
+  
