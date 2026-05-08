@@ -61,3 +61,18 @@ export const toggleStockStatus =
     return response.data;
 
 };
+
+// GET STOCK DETAILS LIVE
+export const getStockDetails =
+  async (stockSymbol) => {
+
+    const response =
+      await api.get(
+
+        `/stocks/${stockSymbol}`
+
+      );
+
+    return response.data;
+
+};

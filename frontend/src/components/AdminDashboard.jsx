@@ -6,11 +6,21 @@ import {
   getUserTransactionsForAdmin,
   getUserPortfolioForAdmin
 } from "../service/userService";
+import { getAllStocks, getStockDetails } from "../service/stockService";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Sidebar / Navigation State
+  const [activeMenu, setActiveMenu] = useState("users"); // 'users' | 'stocks'
+
+  // Stocks State
+  const [stocks, setStocks] = useState([]);
+  const [stockPage, setStockPage] = useState(1);
+  const [totalStockPages, setTotalStockPages] = useState(1);
+  const [stocksLoading, setStocksLoading] = useState(false);
 
   // Modal State
   const [selectedUser, setSelectedUser] = useState(null);
@@ -20,6 +30,7 @@ function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
       const response = await getAllUsersForAdmin();
       setUsers(response.payload);
     } catch (err) {
@@ -29,9 +40,41 @@ function AdminDashboard() {
     }
   };
 
+  const fetchStocksData = async () => {
+    try {
+      setStocksLoading(true);
+      const response = await getAllStocks(stockPage, ""); // empty search
+      const stockList = response.payload || [];
+      setTotalStockPages(response.totalPages || 1);
+
+      // Fetch live details for each stock
+      const detailedStocks = await Promise.all(
+        stockList.map(async (stock) => {
+          try {
+            const details = await getStockDetails(stock.stockSymbol);
+            return { ...stock, ...details.payload }; // Merge DB data and live data
+          } catch (err) {
+            console.error(`Failed to fetch details for ${stock.stockSymbol}`);
+            return stock; // Return DB data if live fetch fails
+          }
+        })
+      );
+
+      setStocks(detailedStocks);
+    } catch (err) {
+      console.error("Failed to fetch stocks:", err);
+    } finally {
+      setStocksLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (activeMenu === "users") {
+      fetchUsers();
+    } else if (activeMenu === "stocks") {
+      fetchStocksData();
+    }
+  }, [activeMenu, stockPage]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
@@ -117,115 +160,263 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] p-6 text-white sm:p-10 relative">
+    <div className="flex min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] text-white">
 
-      {/* Header */}
-      <div className="mb-10 flex items-end justify-between">
-        <div>
-          <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-            Dashboard
-          </h1>
-          <p className="mt-2 text-slate-400">
-            System overview and user management
-          </p>
-        </div>
-        <div className="hidden sm:block">
-          <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-6 py-3 shadow-lg backdrop-blur-md">
-            <p className="text-sm text-slate-400">Total Traders</p>
-            <p className="text-2xl font-bold text-emerald-400">{users.length}</p>
-          </div>
-        </div>
+      {/* Sidebar */}
+      <div className="w-64 bg-[#0f172a]/50 backdrop-blur-md p-6 flex flex-col sticky top-16 h-[calc(100vh-64px)] border-r border-slate-700/50 z-20">
+        <h2 className="text-2xl font-bold mb-10 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin Panel</h2>
+        <nav className="flex flex-col gap-2">
+          <button
+            onClick={() => setActiveMenu('users')}
+            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'users' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+          >
+            <span>👥</span> Users
+          </button>
+          <button
+            onClick={() => setActiveMenu('stocks')}
+            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'stocks' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+          >
+            <span>📈</span> Stocks
+          </button>
+        </nav>
       </div>
 
-      {/* Users Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {users.map((user) => (
-          <div
-            key={user._id}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10"
-          >
-            {/* Status Badge */}
-            <div className="absolute right-4 top-4">
-              {user.isUserActive ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                  Active
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                  Inactive
-                </span>
-              )}
+      {/* Main Content */}
+      <div className="flex-1 p-6 sm:p-10 relative">
+
+        {activeMenu === 'users' && (
+          <>
+            {/* Header */}
+            <div className="mb-10 flex items-end justify-between">
+              <div>
+                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                  Users Dashboard
+                </h1>
+                <p className="mt-2 text-slate-400">
+                  System overview and user management
+                </p>
+              </div>
+              <div className="hidden sm:block">
+                <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-6 py-3 shadow-lg backdrop-blur-md">
+                  <p className="text-sm text-slate-400">Total Traders</p>
+                  <p className="text-2xl font-bold text-emerald-400">{users.length}</p>
+                </div>
+              </div>
             </div>
 
-            {/* User Info Header */}
-            <div className="mb-6 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
+            {/* Users Grid */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {users.map((user) => (
+                <div
+                  key={user._id}
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10"
+                >
+                  {/* Status Badge */}
+                  <div className="absolute right-4 top-4">
+                    {user.isUserActive ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+
+                  {/* User Info Header */}
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner">
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
+                        {user.username}
+                      </h3>
+                      <p className="text-xs text-slate-400 line-clamp-1">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+
+                  {/* User Stats */}
+                  <div className="flex-1 space-y-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-400">Wallet Balance</span>
+                      <span className="font-semibold text-emerald-300">
+                        {formatCurrency(user.walletBalance)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-400">Total Transactions</span>
+                      <span className="rounded-md bg-slate-700/50 px-2 py-0.5 text-sm font-medium text-slate-300">
+                        {user.totalTransactions}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-400">Joined Date</span>
+                      <span className="text-sm font-medium text-slate-300">
+                        {formatDate(user.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 mt-auto">
+                    <button
+                      onClick={() => openUserDetails(user)}
+                      className="w-full rounded-lg bg-emerald-500/20 py-2 text-sm font-semibold text-emerald-400 transition hover:bg-emerald-500/30 border border-emerald-500/50"
+                    >
+                      View Details
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleToggleStatus(user._id)}
+                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
+                      >
+                        {user.isUserActive ? "Block" : "Unblock"}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user._id)}
+                        className="flex-1 rounded-lg bg-red-500/20 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500/30 border border-red-500/50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {activeMenu === 'stocks' && (
+          <>
+            {/* Header */}
+            <div className="mb-10 flex items-end justify-between">
               <div>
-                <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
-                  {user.username}
-                </h3>
-                <p className="text-xs text-slate-400 line-clamp-1">
-                  {user.email}
+                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                  Stocks Dashboard
+                </h1>
+                <p className="mt-2 text-slate-400">
+                  Market overview and stock management
                 </p>
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+            {/* Stocks Grid */}
+            {stocksLoading ? (
+              <div className="flex items-center justify-center p-20">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {stocks.map((stock) => (
+                  <div
+                    key={stock._id}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10"
+                  >
+                    {/* Status Badge */}
+                    <div className="absolute right-4 top-4">
+                      {stock.isActive ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+                          Inactive
+                        </span>
+                      )}
+                    </div>
 
-            {/* User Stats */}
-            <div className="flex-1 space-y-4 mb-6">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-400">Wallet Balance</span>
-                <span className="font-semibold text-emerald-300">
-                  {formatCurrency(user.walletBalance)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-400">Total Transactions</span>
-                <span className="rounded-md bg-slate-700/50 px-2 py-0.5 text-sm font-medium text-slate-300">
-                  {user.totalTransactions}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-400">Joined Date</span>
-                <span className="text-sm font-medium text-slate-300">
-                  {formatDate(user.createdAt)}
-                </span>
-              </div>
-            </div>
+                    {/* Stock Info Header */}
+                    <div className="mb-6 flex items-center gap-4">
+                      {stock.logo ? (
+                        <img src={stock.logo} alt={stock.stockSymbol} className="h-12 w-12 rounded-full object-contain bg-white p-1" />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner">
+                          {stock.stockSymbol.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
+                          {stock.stockSymbol}
+                        </h3>
+                        <p className="text-xs text-slate-400 line-clamp-1">
+                          {stock.companyName}
+                        </p>
+                      </div>
+                    </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-2 mt-auto">
+                    {/* Divider */}
+                    <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+
+                    {/* Stock Stats */}
+                    <div className="flex-1 space-y-3 mb-6 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Current Price</span>
+                        <span className="font-semibold text-white">
+                          {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Change</span>
+                        <span className={`font-semibold ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {stock.d ? `${stock.d >= 0 ? '+' : ''}${stock.d.toFixed(2)} (${stock.dp.toFixed(2)}%)` : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Prev Close</span>
+                        <span className="text-slate-300">{stock.pc ? `$${stock.pc.toFixed(2)}` : 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Day High/Low</span>
+                        <span className="text-slate-300">{stock.h ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Available Qty</span>
+                        <span className="text-slate-300 font-medium">{stock.availableQuantity}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions (Optional or just info) */}
+                    <div className="mt-auto text-xs text-slate-500 text-center">
+                      Last updated: {stock.t ? new Date(stock.t * 1000).toLocaleTimeString() : 'N/A'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            <div className="mt-8 flex justify-center gap-4">
               <button
-                onClick={() => openUserDetails(user)}
-                className="w-full rounded-lg bg-emerald-500/20 py-2 text-sm font-semibold text-emerald-400 transition hover:bg-emerald-500/30 border border-emerald-500/50"
+                onClick={() => setStockPage(Math.max(1, stockPage - 1))}
+                disabled={stockPage === 1}
+                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-white disabled:opacity-40 transition hover:bg-slate-700"
               >
-                View Details
+                Previous
               </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleToggleStatus(user._id)}
-                  className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
-                >
-                  {user.isUserActive ? "Block" : "Unblock"}
-                </button>
-                <button
-                  onClick={() => handleDelete(user._id)}
-                  className="flex-1 rounded-lg bg-red-500/20 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500/30 border border-red-500/50"
-                >
-                  Delete
-                </button>
-              </div>
+              <span className="flex items-center text-slate-400">
+                Page {stockPage} of {totalStockPages}
+              </span>
+              <button
+                onClick={() => setStockPage(Math.min(totalStockPages, stockPage + 1))}
+                disabled={stockPage === totalStockPages}
+                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-white disabled:opacity-40 transition hover:bg-slate-700"
+              >
+                Next
+              </button>
             </div>
-
-          </div>
-        ))}
-      </div>
+          </>
+        )}
 
       {/* --- USER DETAILS MODAL --- */}
       {selectedUser && (
@@ -375,6 +566,7 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
