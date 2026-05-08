@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
+import authImage from "../assets/register.jpeg";
 import api from "../service/api";
 import Home from "./Home";
-
-const authImage =
-  "https://www.shutterstock.com/image-vector/bullish-market-trend-charging-bull-600nw-2526656507.jpg";
 
 function Register() {
   const navigate = useNavigate();
@@ -42,12 +39,12 @@ function Register() {
     <div className="relative min-h-screen">
       <Home />
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-8">
-        <div className="relative grid w-full max-w-3xl overflow-hidden rounded-2xl bg-[#6b746f] shadow-2xl md:grid-cols-2">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071427]/70 px-4 py-8 backdrop-blur-[2px]">
+        <div className="relative grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#10100f]/85 shadow-2xl shadow-black/50 md:grid-cols-2">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="absolute right-4 top-4 z-20 rounded-full px-3 py-1 text-lg font-bold leading-none text-slate-500 transition hover:bg-slate-100 md:text-white md:hover:bg-white/20"
+            className="absolute right-4 top-4 z-20 rounded-full px-3 py-1 text-lg font-bold leading-none text-white/70 transition hover:bg-white/10 hover:text-white"
             aria-label="Close register"
           >
             X
@@ -55,13 +52,13 @@ function Register() {
 
           <form
             onSubmit={handleSubmit}
-            className="flex min-h-[500px] flex-col justify-center px-8 py-12 text-slate-950 md:px-14"
+            className="flex min-h-[500px] flex-col justify-center px-8 py-12 text-white sm:px-12"
           >
-            <h2 className="text-center text-3xl font-extrabold tracking-wide text-slate-950">
-              REGISTER
+            <h2 className="text-center text-4xl font-extrabold tracking-normal text-white">
+              Register
             </h2>
 
-            <p className="mb-8 mt-2 text-center text-[15px] bg-[#6b746f]">
+            <p className="mb-8 mt-3 text-center text-sm text-slate-300">
               Create your StockSim account
             </p>
 
@@ -71,7 +68,7 @@ function Register() {
               placeholder="Username"
               value={form.username}
               onChange={handleChange}
-              className="mb-5 w-full rounded-lg bg-[#f1efff] px-4 py-3 text-lg text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+              className="mb-5 w-full rounded-lg border border-white/10 bg-[#1e293b] px-4 py-4 text-base font-semibold text-white outline-none transition placeholder:text-white/85 focus:border-[#61f4a1] focus:ring-2 focus:ring-[#61f4a1]/45"
               required
             />
 
@@ -81,7 +78,7 @@ function Register() {
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
-              className="mb-5 w-full rounded-lg bg-[#f1efff] px-4 py-3 text-lg text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+              className="mb-5 w-full rounded-lg border border-white/10 bg-[#1e293b] px-4 py-4 text-base font-semibold text-white outline-none transition placeholder:text-white/85 focus:border-[#61f4a1] focus:ring-2 focus:ring-[#61f4a1]/45"
               required
             />
 
@@ -92,14 +89,14 @@ function Register() {
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full rounded-lg bg-[#f1efff] px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-white/10 bg-[#1e293b] px-4 py-4 pr-12 text-base font-semibold text-white outline-none transition placeholder:text-white/85 focus:border-[#61f4a1] focus:ring-2 focus:ring-[#61f4a1]/45"
                 required
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 transition hover:bg-violet-100 hover:text-violet-700"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -138,25 +135,24 @@ function Register() {
 
             <button
               type="submit"
-              className="mx-auto block rounded-lg bg-violet-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:bg-violet-700"
+              className="w-full rounded-lg bg-emerald-500 py-3 font-semibold text-black transition hover:bg-emerald-600"
             >
-              Register Now
+              Register
             </button>
 
-            <p className="mt-10 text-center text-sm text-white">
+            <p className="mt-8 text-center text-base font-medium text-white">
               Already have an account?{" "}
               <Link
                 to="/signin"
-                className="font-semibold text-red-500 hover:text-violet-700"
+                className="font-extrabold text-[#61f4a1] transition hover:text-[#7cffb5]"
               >
                 Login
               </Link>
             </p>
           </form>
 
-          <div className="relative hidden min-h-[500px] overflow-hidden bg-violet-600 md:block">
-            <div className="absolute -right-16 -top-14 h-44 w-44 rounded-full border-[18px] border-white/10"></div>
-            <div className="absolute bottom-[-80px] left-8 h-56 w-56 rounded-full border-[22px] border-white/10"></div>
+          <div className="relative hidden min-h-[500px] overflow-hidden bg-[#071427] md:block">
+            <div className="absolute inset-0 bg-[#06101f]/25"></div>
             <img
               src={authImage}
               alt="StockSim user"
