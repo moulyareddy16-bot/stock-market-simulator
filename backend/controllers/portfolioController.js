@@ -1,5 +1,5 @@
 import axios from "axios";
-import { transactionModel } from "../models/transactionModel.js";
+import { transactionModel } from "../models/TransactionModel.js";
 
 // GET USER PORTFOLIO
 export const getPortfolio = async (req, res, next) => {

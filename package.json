@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "express-rate-limit": "^8.5.1",
+    "lucide-react": "^1.14.0",
+    "node-cache": "^5.1.2",
     "socket.io": "^4.8.3"
   }
 }
