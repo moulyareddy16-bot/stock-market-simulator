@@ -14,7 +14,7 @@ const transactionRouter = exp.Router()
 transactionRouter.post("/buy",verifyToken("trader"), buyStock);
 
 // Sell stock
-transactionRouter.post("/sell",verifyToken("trader", sellStock));
+transactionRouter.post("/sell", verifyToken("trader"), sellStock);
 
 // Get transaction history
 transactionRouter.get("/history",verifyToken("trader"), getTransactions);

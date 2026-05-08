@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 import Root from "./components/Root";
 import Home from "./components/Home";
@@ -28,6 +28,14 @@ function App() {
         // 🟢 Trader Routes
         {
           path: "dashboard",
+          element: (
+            <ProtectedRoute allowedRoles={["trader"]}>
+              <Navigate to="/portfolio" replace />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "portfolio",
           element: (
             <ProtectedRoute allowedRoles={["trader"]}>
               <Portfolio />
