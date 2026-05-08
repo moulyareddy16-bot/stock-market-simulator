@@ -7,6 +7,7 @@ import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
 import portfolioRouter from "./routes/portfolioRoute.js";
 import alertRouter from "./routes/alertRoute.js";
+import userRouter from "./routes/userRoute.js";
 
 
 
@@ -25,8 +26,8 @@ app.use(cookieParser())
 
 //enable cors
 app.use(cors({
-  origin:['http://localhost:5173'],
-  credentials:true
+  origin: ['http://localhost:5173'],
+  credentials: true
 }))
 
 
@@ -43,6 +44,8 @@ app.use("/api/portfolio", portfolioRouter)
 
 app.use("/api/alerts", alertRouter)
 
+app.use("/api/users", userRouter)
+
 
 
 
@@ -54,7 +57,7 @@ app.use((req, res, next) => {
 
 //Error handling middleware
 app.use((err, req, res, next) => {
-  console.log("error is ",err)
+  console.log("error is ", err)
   console.log("Full error:", JSON.stringify(err, null, 2));
   //ValidationError
   if (err.name === "ValidationError") {

@@ -1,7 +1,4 @@
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
-
-
+import dotenv from "dotenv";
 import { config } from "dotenv";
 config();
 

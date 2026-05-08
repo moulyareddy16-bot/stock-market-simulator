@@ -26,18 +26,13 @@ function Stocks() {
   const [totalPages, setTotalPages] = useState(1);
 
   // LOADING STATES
-  const [loading, setLoading] = useState(true);
   const [loadingStock, setLoadingStock] = useState("");
   const [addingStock, setAddingStock] = useState(false);
-
-  // FILTERS
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [fetchingStocks, setFetchingStocks] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
     stockSymbol: "",
-    companyName: "",
   });
 
   // FETCH STOCKS
@@ -98,7 +93,11 @@ function Stocks() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    const value =
+      e.target.value.toUpperCase();
+
     setStockData({
+
       ...stockData,
       [name]:
         name === "stockSymbol"
@@ -107,7 +106,9 @@ function Stocks() {
     });
   };
 
+  // =====================================
   // ADD STOCK
+  // =====================================
   const handleAddStock = async (e) => {
     e.preventDefault();
 
@@ -135,8 +136,9 @@ function Stocks() {
       fetchStocks();
 
       setStockData({
-        stockSymbol: "",
-        companyName: "",
+
+        stockSymbol: ""
+
       });
 
       alert("Stock added successfully");
@@ -144,6 +146,7 @@ function Stocks() {
       console.log(error);
 
       alert(
+
         error.response?.data?.message ||
           "Unable to add stock"
       );
@@ -151,7 +154,7 @@ function Stocks() {
       setAddingStock(false);
     }
   };
-
+  // =====================================
   // DELETE STOCK
   const handleDelete = async (stockSymbol) => {
     const confirmDelete = window.confirm(
@@ -159,7 +162,6 @@ function Stocks() {
     );
 
     if (!confirmDelete) return;
-
     try {
       await deleteStock(stockSymbol);
 
