@@ -1,7 +1,6 @@
 import axios from "axios";
 
-import { transactionModel }
-from "../models/TransactionModel.js";
+import { transactionModel } from "../models/transactionModel.js";
 
 import { stockModel }
 from "../models/StockModel.js";
