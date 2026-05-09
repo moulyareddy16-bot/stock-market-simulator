@@ -90,16 +90,19 @@ const [loading, setLoading] = useState(false);
     );
 
     // STATUS FILTER
-    if (statusFilter === "active") {
+    if (role === "trader") {
       filtered = filtered.filter((stock) => stock.isActive);
-    }
-
-    if (statusFilter === "inactive") {
-      filtered = filtered.filter((stock) => !stock.isActive);
+    } else {
+      if (statusFilter === "active") {
+        filtered = filtered.filter((stock) => stock.isActive);
+      }
+      if (statusFilter === "inactive") {
+        filtered = filtered.filter((stock) => !stock.isActive);
+      }
     }
 
     setFilteredStocks(filtered);
-  }, [stocks, search, statusFilter]);
+  }, [stocks, search, statusFilter, role]);
 
   // HANDLE INPUT
   // const handleChange = (e) => {
@@ -258,19 +261,21 @@ const [loading, setLoading] = useState(false);
           </div>
 
           {/* FILTER BUTTON */}
-          <button
-            onClick={() =>
-              setShowFilters(!showFilters)
-            }
-            className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 hover:border-emerald-500 transition"
-          >
-            ⚙️ Filters
-          </button>
+          {role !== "trader" && (
+            <button
+              onClick={() =>
+                setShowFilters(!showFilters)
+              }
+              className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 hover:border-emerald-500 transition"
+            >
+              ⚙️ Filters
+            </button>
+          )}
         </div>
       </header>
 
       {/* FILTER PANEL */}
-      {showFilters && (
+      {role !== "trader" && showFilters && (
         <div className="glass-card rounded-2xl border border-slate-800 bg-slate-900/70 p-5 backdrop-blur">
           <h2 className="mb-4 text-lg font-bold">
             Filter Stocks
@@ -330,29 +335,39 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold">
-            {totalStocks}
+            {role === "trader" ? filteredStocks.length : stocks.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">
-            Active
-          </p>
+        {role !== "trader" && (
+          <>
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <p className="text-sm text-slate-400">
+                Active
+              </p>
 
-          <h2 className="mt-2 text-3xl font-bold text-emerald-400">
-            {totalActive}
-          </h2>
-        </div>
+              <h2 className="mt-2 text-3xl font-bold text-emerald-400">
+                {
+                  stocks.filter((s) => s.isActive)
+                    .length
+                }
+              </h2>
+            </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">
-            Inactive
-          </p>
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <p className="text-sm text-slate-400">
+                Inactive
+              </p>
 
-          <h2 className="mt-2 text-3xl font-bold text-red-400">
-            {totalInactive}
-          </h2>
-        </div>
+              <h2 className="mt-2 text-3xl font-bold text-red-400">
+                {
+                  stocks.filter((s) => !s.isActive)
+                    .length
+                }
+              </h2>
+            </div>
+          </>
+        )}
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">
@@ -456,28 +471,30 @@ const [loading, setLoading] = useState(false);
                   </div>
                 </div>
 
-                {/* STATUS */}
-                <button
-                  disabled={
-                    loadingStock ===
-                    stock.stockSymbol
-                  }
-                  onClick={() =>
-                    handleToggleStatus(
+                {/* STATUS (FOR MANAGERS) */}
+                {role !== "trader" && (
+                  <button
+                    disabled={
+                      loadingStock ===
                       stock.stockSymbol
-                    )
-                  }
-                  className={`rounded-full px-3 py-1 text-xs font-bold
-                  ${
-                    stock.isActive
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {stock.isActive
-                    ? "ACTIVE"
-                    : "INACTIVE"}
-                </button>
+                    }
+                    onClick={() =>
+                      handleToggleStatus(
+                        stock.stockSymbol
+                      )
+                    }
+                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all
+                    ${
+                      stock.isActive
+                        ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                        : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                    }`}
+                  >
+                    {stock.isActive
+                      ? "ACTIVE"
+                      : "INACTIVE"}
+                  </button>
+                )}
               </div>
 
               {/* CHART */}
