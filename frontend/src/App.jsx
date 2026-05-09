@@ -11,7 +11,11 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StockDetails from "./components/StockDetails";
 import AdminDashboard from "./components/AdminDashboard";
+<<<<<<< HEAD
 import AiSuggestions from "./components/AiSuggestions";
+=======
+import Leaderboard from "./components/Leaderboard";
+>>>>>>> 45f6c0323b1fe3947ccc0196e2f33fd956e13cba
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -90,6 +94,14 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "leaderboard",
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "admin"]}>
+              <Leaderboard />
             </ProtectedRoute>
           ),
         },
