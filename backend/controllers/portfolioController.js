@@ -1,10 +1,6 @@
 import axios from "axios";
-<<<<<<< HEAD
 import { transactionModel } from "../models/TransactionModel.js";
 import { userModel } from "../models/UserModel.js";
-=======
-import { transactionModel } from "../models/transactionModel.js";
->>>>>>> dce6c3842dcf71e47a1b8ac8d0960deec982b894
 
 // GET USER PORTFOLIO
 export const getPortfolio = async (req, res, next) => {
