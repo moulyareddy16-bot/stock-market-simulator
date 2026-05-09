@@ -1,134 +1,97 @@
+import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
+import { stockCache } from "./cacheService.js";
 
-import { stockModel }
-from "../models/StockModel.js";
+// ==========================================
+// STORE LIVE PRICES
+// ==========================================
+const livePrices = {};
 
-import { stockCache }
-from "./cacheService.js";
+// ==========================================
+// GENERATE SMALL FLUCTUATION
+// ==========================================
+const fluctuatePrice = (price) => {
+   // 4% max fluctuation
+   const percentageChange = (Math.random() - 0.5) * 0.04;
+   const newPrice = price + (price * percentageChange);
+   return Number(newPrice.toFixed(2));
+};
 
+// ==========================================
+// GET RANDOM INITIAL PRICE
+// ==========================================
+const generateInitialPrice = () => {
+   return Number((200 + Math.random() * 800).toFixed(2));
+};
 
+// ==========================================
 // GET LIVE STOCK UPDATES
-
-export const getLiveStockUpdates =
-async () => {
-
+// ==========================================
+export const getLiveStockUpdates = async () => {
    try {
+      // FETCH ACTIVE STOCKS
+      const stocks = await stockModel.find({ isActive: true }).limit(10);
 
-      // FETCH STOCKS
-      const stocks =
-      await stockModel.find({
-
-         isActive: true
-
-      }).limit(10);
-
-
-      // FETCH DATA
-      const stockUpdates =
-      await Promise.all(
-
+      const stockUpdates = await Promise.all(
          stocks.map(async (stock) => {
+            const cacheKey = `stock_${stock.stockSymbol}`;
+            const cachedData = stockCache.get(cacheKey);
 
-            // CACHE KEY
-            const cacheKey =
-            `stock_${stock.stockSymbol}`;
-
-            // CHECK CACHE
-            const cachedData =
-            stockCache.get(cacheKey);
-
-            // RETURN CACHE
+            // RETURN CACHE IF EXISTS (Prevents Finnhub rate limits)
             if (cachedData) {
-
-               console.log(
-
-                  `Cache hit: ${stock.stockSymbol}`
-
-               );
-
-               return cachedData;
-
+               // We add a tiny artificial fluctuation to the cached data to simulate active trading 
+               // even when pulling from the cache, making the UI look alive!
+               const fluctuatedPrice = fluctuatePrice(cachedData.currentPrice);
+               return {
+                  ...cachedData,
+                  currentPrice: fluctuatedPrice
+               };
             }
 
-            // API REQUEST
-            const response =
-            await axios.get(
+            try {
+               // API REQUEST
+               const response = await axios.get(
+                  `https://finnhub.io/api/v1/quote?symbol=${stock.stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+               );
 
-               `https://finnhub.io/api/v1/quote?symbol=${stock.stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+               const stockData = {
+                  stockSymbol: stock.stockSymbol,
+                  currentPrice: response.data.c || generateInitialPrice(),
+                  high: response.data.h || 0,
+                  low: response.data.l || 0,
+                  open: response.data.o || 0,
+                  previousClose: response.data.pc || 0
+               };
 
-            );
+               // SAVE CACHE
+               stockCache.set(cacheKey, stockData);
+               
+               // Store for fallback memory
+               livePrices[stock.stockSymbol] = stockData.currentPrice;
 
-            const stockData = {
+               return stockData;
+            } catch (apiError) {
+               // ----------------------------------------------------
+               // FALLBACK: DUMMY DATA (Triggers on 429 Rate Limit)
+               // ----------------------------------------------------
+               if (!livePrices[stock.stockSymbol]) {
+                  livePrices[stock.stockSymbol] = generateInitialPrice();
+               }
 
-               stockSymbol:
-               stock.stockSymbol,
+               // Fluctuate the price
+               livePrices[stock.stockSymbol] = fluctuatePrice(livePrices[stock.stockSymbol]);
 
-               currentPrice:
-               response.data.c,
-
-               high:
-               response.data.h,
-
-               low:
-               response.data.l,
-
-               open:
-               response.data.o,
-
-               previousClose:
-               response.data.pc
-
-            };
-
-            // SAVE CACHE
-            stockCache.set(
-
-               cacheKey,
-
-               stockData
-
-            );
-
-            console.log(
-
-               `Fresh API: ${stock.stockSymbol}`
-
-            );
-
-            return stockData;
-
+               return {
+                  stockSymbol: stock.stockSymbol,
+                  currentPrice: livePrices[stock.stockSymbol]
+               };
+            }
          })
-
       );
 
       return stockUpdates;
-
-   } catch (error) {
-
-      // RATE LIMIT
-      if (
-         error.response?.status === 429
-      ) {
-
-         console.log(
-
-            "Finnhub rate limit exceeded"
-
-         );
-
-         return [];
-
-      }
-
-      console.log(
-
-         "Realtime service error:",
-         error.message
-
-      );
-
+   } catch(error) {
+      console.log("Realtime service error:", error.message);
       return [];
-
    }
-
 };

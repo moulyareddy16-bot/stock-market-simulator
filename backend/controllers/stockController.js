@@ -492,9 +492,51 @@ export const toggleStockStatus =
          });
 
       } catch (error) {
-
          next(error);
+      }
+};
 
+
+// GET SINGLE STOCK
+
+export const getSingleStock = async (req, res, next) => {
+   try {
+      const { stockSymbol } = req.params;
+
+      const stock = await stockModel.findOne({
+         stockSymbol: stockSymbol.toUpperCase()
+      });
+
+      if (!stock) {
+         return res.status(404).json({
+            message: "Stock not found"
+         });
       }
 
-   };
+      let currentPrice = 0;
+      let change = "+0.00%";
+      try {
+         const response = await axios.get(
+            `https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+         );
+         currentPrice = response.data.c || 0;
+         const dp = response.data.dp || 0;
+         change = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
+      } catch (e) {
+         console.error("Finnhub error:", e.message);
+      }
+
+      res.status(200).json({
+         payload: {
+            stockSymbol: stock.stockSymbol,
+            companyName: stock.companyName,
+            description: `${stock.companyName} is a global company.`,
+            currentPrice,
+            change
+         }
+      });
+   } catch(error) {
+      next(error);
+   }
+};
+
