@@ -5,6 +5,7 @@ import api from "../service/api";
 import Home from "./Home";
 function Signin() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // 🔥 from context
 
   const [form, setForm] = useState({
     email: "",
@@ -32,6 +33,8 @@ function Signin() {
         return;
       }
 
+      // 🔥 IMPORTANT: use context login instead of localStorage directly
+      login(res.data.token);
       localStorage.setItem("role", role);
       localStorage.setItem("username", user.username);
 
@@ -51,8 +54,7 @@ function Signin() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <Home />
+    <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071427]/70 px-4 py-8 backdrop-blur-[2px]">
         <div className="relative grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#10100f]/85 shadow-2xl shadow-black/50 md:grid-cols-2">

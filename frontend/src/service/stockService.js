@@ -1,56 +1,78 @@
 import api from "./api";
 
-
 // GET ALL STOCKS
+export const getAllStocks =
+  async (page = 1, search = "") => {
 
-export const getAllStocks = async () => {
+    const response =
+      await api.get(
 
-   const response =
-      await api.get("/stocks");
+        `/stocks?page=${page}&search=${search}`
 
-   return response.data;
+      );
+
+    return response.data;
 
 };
-
 
 // ADD STOCK
+export const addStock =
+  async (stockData) => {
 
-export const addStock = async (stockData) => {
-
-   const response =
+    const response =
       await api.post(
-         "/stocks",
-         stockData
+
+        "/stocks",
+
+        stockData
+
       );
 
-   return response.data;
+    return response.data;
 
 };
 
-
 // DELETE STOCK
+export const deleteStock =
+  async (stockSymbol) => {
 
-export const deleteStock = async (stockSymbol) => {
-
-   const response =
+    const response =
       await api.delete(
-         `/stocks/${stockSymbol}`
+
+        `/stocks/${stockSymbol}`
+
       );
 
-   return response.data;
+    return response.data;
 
 };
 
 // TOGGLE STOCK STATUS
-
 export const toggleStockStatus =
-async (stockSymbol) => {
+  async (stockSymbol) => {
 
-   const response =
-   await api.patch(
-      `/stocks/toggle-status/${stockSymbol}`
-   );
+    const response =
+      await api.patch(
 
-   return response.data;
+        `/stocks/toggle-status/${stockSymbol}`
+
+      );
+
+    return response.data;
+
+};
+
+// GET STOCK DETAILS LIVE
+export const getStockDetails =
+  async (stockSymbol) => {
+
+    const response =
+      await api.get(
+
+        `/stocks/${stockSymbol}`
+
+      );
+
+    return response.data;
 
 };
