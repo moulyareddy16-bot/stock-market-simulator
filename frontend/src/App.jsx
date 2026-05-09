@@ -11,6 +11,7 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StockDetails from "./components/StockDetails";
 import AdminDashboard from "./components/AdminDashboard";
+import Leaderboard from "./components/Leaderboard";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -81,6 +82,14 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "leaderboard",
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "admin"]}>
+              <Leaderboard />
             </ProtectedRoute>
           ),
         },
