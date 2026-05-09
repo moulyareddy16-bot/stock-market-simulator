@@ -98,7 +98,19 @@ export const getUserTransactions = async (req, res, next) => {
 export const getUserPortfolio = async (req, res, next) => {
   try {
     const { userId } = req.params;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const transactions = await transactionModel.find({ userId });
+
+    // Set default wallet balance if missing or if it's a new user with 0 transactions and 0 balance
+    if (user.walletBalance === undefined || user.walletBalance === null || (user.walletBalance === 0 && transactions.length === 0)) {
+      user.walletBalance = 100000;
+      await user.save();
+    }
 
     const portfolio = {};
 
@@ -132,7 +144,7 @@ export const getUserPortfolio = async (req, res, next) => {
         } catch (apiError) {
           stock.currentPrice = stock.totalInvestment / stock.ownedQuantity;
         }
-        
+
         stock.currentValue = stock.currentPrice * stock.ownedQuantity;
         stock.avgPrice = stock.totalInvestment / stock.ownedQuantity;
         stock.profitLoss = stock.currentValue - stock.totalInvestment;
@@ -153,6 +165,7 @@ export const getUserPortfolio = async (req, res, next) => {
         totalInvestment,
         totalCurrentValue,
         totalProfit: totalCurrentValue - totalInvestment,
+        walletBalance: user.walletBalance,
       },
       payload: filteredPortfolio,
       message: "Portfolio fetched",

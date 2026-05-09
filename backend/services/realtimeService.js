@@ -60,7 +60,8 @@ export const getLiveStockUpdates = async () => {
                   high: response.data.h || 0,
                   low: response.data.l || 0,
                   open: response.data.o || 0,
-                  previousClose: response.data.pc || 0
+                  previousClose: response.data.pc || 0,
+                  t: response.data.t || Math.floor(Date.now() / 1000)
                };
 
                // SAVE CACHE
@@ -83,7 +84,8 @@ export const getLiveStockUpdates = async () => {
 
                return {
                   stockSymbol: stock.stockSymbol,
-                  currentPrice: livePrices[stock.stockSymbol]
+                  currentPrice: livePrices[stock.stockSymbol],
+                  t: Math.floor(Date.now() / 1000)
                };
             }
          })

@@ -44,8 +44,8 @@ stockRouter.get(
    getStockHistory
 );
 
-// Get single stock (MUST BE LAST GET ROUTE TO PREVENT CLASHES)
-stockRouter.get("/:stockSymbol", getSingleStock);
+// Get single stock details
+stockRouter.get("/:stockSymbol", getStockDetails);
 
 
 stockRouter.patch(

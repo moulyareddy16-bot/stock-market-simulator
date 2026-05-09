@@ -10,6 +10,7 @@ import portfolioRouter from "./routes/portfolioRoute.js";
 import alertRouter from "./routes/alertRoute.js";
 import historicalRouter from "./routes/historicalRoute.js";
 import userRouter from "./routes/userRoute.js";
+import { getStockDetails } from "./controllers/stockController.js";
 
 
 
@@ -41,6 +42,7 @@ app.use('/uploads', exp.static('uploads'))
 app.use("/api/auth", authRouter)
 
 app.use("/api/stocks", stockRouter)
+app.get("/api/stocks/test", (req, res) => res.json({ msg: "test" }));
 
 app.use("/api/transactions", transactionRouter)
 
