@@ -38,7 +38,6 @@ const [loading, setLoading] = useState(false);
   // FORM DATA
   const [stockData, setStockData] = useState({
     stockSymbol: "",
-    companyName: "",
   });
 
   // FETCH STOCKS
@@ -136,7 +135,6 @@ const [loading, setLoading] = useState(false);
 
       await addStock({
         stockSymbol: cleanedSymbol,
-        companyName: stockData.companyName,
       });
 
       fetchStocks();
@@ -319,8 +317,9 @@ const [loading, setLoading] = useState(false);
       )}
 
       {/* STATS */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
+      {/* <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"> */}
+       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+        
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">
             Total Stocks
@@ -386,27 +385,20 @@ const [loading, setLoading] = useState(false);
 
           <form
             onSubmit={handleAddStock}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            // className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4"
           >
 
             <input
               type="text"
               name="stockSymbol"
-              placeholder="AAPL"
+              placeholder="Stock Symbols ex:AAPL"
               value={stockData.stockSymbol}
               onChange={handleChange}
               className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-500"
             />
 
-            <input
-              type="text"
-              name="companyName"
-              placeholder="Company Name"
-              value={stockData.companyName}
-              onChange={handleChange}
-              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-500"
-            />
-
+           
             <button
               type="submit"
               disabled={addingStock}
@@ -431,7 +423,7 @@ const [loading, setLoading] = useState(false);
           filteredStocks.map((stock) => (
             <div
               key={stock._id}
-              className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-5 transition hover:-translate-y-1 hover:border-emerald-500/40"
+              className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 transition hover:-translate-y-1 hover:border-emerald-500/40"
             >
 
               {/* TOP */}
@@ -440,7 +432,7 @@ const [loading, setLoading] = useState(false);
                 <div className="flex gap-4">
 
                   {/* LOGO */}
-                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white">
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white">
                     {stock.logo ? (
                       <img
                         src={stock.logo}
@@ -456,7 +448,7 @@ const [loading, setLoading] = useState(false);
 
                   {/* INFO */}
                   <div>
-                    <h2 className="text-3xl font-black">
+                    <h2 className="text-2xl font-black">
                       {stock.stockSymbol}
                     </h2>
 
@@ -494,7 +486,7 @@ const [loading, setLoading] = useState(false);
               <div className="mt-5">
                 <svg
                   viewBox="0 0 100 30"
-                  className="h-14 w-full"
+                  className="h-10 w-full"
                 >
                   <polyline
                     fill="none"
