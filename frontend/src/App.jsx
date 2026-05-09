@@ -52,7 +52,11 @@ function App() {
         },
         {
           path: "/stocks/:stockSymbol",
-          element: <StockDetails />
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "stockmanager"]}>
+              <StockDetails />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "transactions",

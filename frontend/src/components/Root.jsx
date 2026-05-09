@@ -12,7 +12,7 @@ function Root() {
   // Auth pages should not have sidebar/navbar sometimes, 
   // but for now, we'll just toggle the sidebar based on role and path.
   const isAuthPage = ["/signin", "/register"].includes(location.pathname);
-  const showSidebar = role && !isAuthPage && location.pathname !== "/";
+  const showSidebar = role === "trader" && !isAuthPage && location.pathname !== "/";
 
   useEffect(() => {
     const navEntry = window.performance.getEntriesByType("navigation")[0];

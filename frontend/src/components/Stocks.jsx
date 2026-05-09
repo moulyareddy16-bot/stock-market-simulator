@@ -24,21 +24,21 @@ function Stocks() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   // LOADING STATES
   const [loadingStock, setLoadingStock] = useState("");
   const [addingStock, setAddingStock] = useState(false);
   const [fetchingStocks, setFetchingStocks] = useState(false);
   // FILTER STATES
-const [statusFilter, setStatusFilter] = useState("all");
-const [showFilters, setShowFilters] = useState(false);
-
 // MAIN LOADING
 const [loading, setLoading] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
     stockSymbol: "",
+    companyName: "",
   });
 
   // FETCH STOCKS
@@ -100,10 +100,10 @@ const [loading, setLoading] = useState(false);
   //   const { name, value } = e.target;
   const handleChange = (e) => {
 
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  setStockData({
-    ...stockData,
+    setStockData({
+      ...stockData,
 
     [name]:
       name === "stockSymbol"
