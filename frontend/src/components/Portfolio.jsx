@@ -68,8 +68,9 @@ function Portfolio() {
       </header>
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
+          { label: "Wallet Balance", value: summary?.walletBalance, icon: "💵" },
           { label: "Total Investment", value: summary?.totalInvestment, icon: "💰" },
           { label: "Current Value", value: summary?.totalCurrentValue, icon: "🏦" },
           { label: "Total Profit", value: summary?.totalProfit, icon: "📈", highlight: true }
