@@ -95,3 +95,4 @@ const connectDB = async () => {
 
 // Call DB connection
 connectDB();
+// Trigger nodemon restart 1

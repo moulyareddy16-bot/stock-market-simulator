@@ -24,6 +24,9 @@ function Stocks() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalStocks, setTotalStocks] = useState(0);
+  const [totalActive, setTotalActive] = useState(0);
+  const [totalInactive, setTotalInactive] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -46,11 +49,15 @@ const [loading, setLoading] = useState(false);
       setLoading(true);
 
       const data = await getAllStocks(page, search);
+      console.log("Stocks data received:", data);
 
       const allStocks = data.payload || [];
 
       setStocks(allStocks);
       setTotalPages(data.totalPages || 1);
+      setTotalStocks(data.totalStocks || 0);
+      setTotalActive(data.totalActive || 0);
+      setTotalInactive(data.totalInactive || 0);
     } catch (error) {
       console.log(error);
     } finally {
@@ -326,7 +333,7 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold">
-            {stocks.length}
+            {totalStocks}
           </h2>
         </div>
 
@@ -336,10 +343,7 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold text-emerald-400">
-            {
-              stocks.filter((s) => s.isActive)
-                .length
-            }
+            {totalActive}
           </h2>
         </div>
 
@@ -349,10 +353,7 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold text-red-400">
-            {
-              stocks.filter((s) => !s.isActive)
-                .length
-            }
+            {totalInactive}
           </h2>
         </div>
 

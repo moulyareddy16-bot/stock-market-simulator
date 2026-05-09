@@ -43,6 +43,9 @@ stockRouter.get(
    getStockHistory
 );
 
+// Get single stock details
+stockRouter.get("/:stockSymbol", getStockDetails);
+
 
 stockRouter.patch(
    "/toggle-status/:symbol",

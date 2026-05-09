@@ -3,8 +3,8 @@ import axios from "axios";
 import { getHistoricalStockData } from "../services/stockService.js";
 // import { config } from "dotenv";
 // config();
-import { validateStockSymbol }
-   from "../services/finnhubService.js";
+import { validateStockSymbol } from "../services/finnhubService.js";
+import { stockCache } from "../services/cacheService.js";
 
 // ADD STOCK
 export const addStock =
@@ -188,7 +188,7 @@ async (req, res, next) => {
          Number(req.query.page) || 1;
 
       const limit =
-         Number(req.query.limit) || 6;
+         Number(req.query.limit) || 9;
 
       const search =
          req.query.search || "";
@@ -247,8 +247,22 @@ async (req, res, next) => {
             searchFilter
          );
 
+      const totalActive =
+         await stockModel.countDocuments({
+            ...searchFilter,
+            isActive: true
+         });
+
+      const totalInactive =
+         await stockModel.countDocuments({
+            ...searchFilter,
+            isActive: false
+         });
+
       const totalPages =
          Math.ceil(totalStocks / limit);
+
+      console.log("Backend sending stocks data:", { totalStocks, totalActive, totalInactive });
 
       res.status(200).json({
 
@@ -259,6 +273,10 @@ async (req, res, next) => {
          totalPages,
 
          totalStocks,
+
+         totalActive,
+
+         totalInactive,
 
          payload: stocks
 
@@ -320,25 +338,57 @@ export const deleteStock = async (req, res, next) => {
 //get stock details live API
 export const getStockDetails = async (req, res, next) => {
    try {
-
       const symbol = req.params.stockSymbol;
+      const cacheKey = `stock_${symbol}`;
+      const cachedData = stockCache.get(cacheKey);
 
-      const response = await axios.get(
+      if (cachedData) {
+         // Map cache data back to Finnhub format for frontend
+         return res.status(200).json({
+            payload: {
+               c: cachedData.currentPrice,
+               h: cachedData.high || cachedData.currentPrice,
+               l: cachedData.low || cachedData.currentPrice,
+               o: cachedData.open || cachedData.currentPrice,
+               pc: cachedData.previousClose || cachedData.currentPrice,
+               d: cachedData.previousClose ? cachedData.currentPrice - cachedData.previousClose : 0,
+               dp: cachedData.previousClose ? ((cachedData.currentPrice - cachedData.previousClose) / cachedData.previousClose) * 100 : 0,
+               t: cachedData.t || Math.floor(Date.now() / 1000)
+            }
+         });
+      }
 
-         `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_API_KEY}`
+      try {
+         const response = await axios.get(
+            `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_API_KEY}`
+         );
 
-      );
-
-      res.status(200).json({
-         payload: response.data
-      });
-
+         res.status(200).json({
+            payload: response.data
+         });
+      } catch (apiError) {
+         console.error(`Finnhub API error for ${symbol}:`, apiError.message);
+         
+         // Fallback: Generate dummy data if API fails and no cache
+         const generateInitialPrice = () => Number((200 + Math.random() * 800).toFixed(2));
+         const dummyPrice = generateInitialPrice();
+         
+         const dummyData = {
+            c: dummyPrice,
+            h: dummyPrice,
+            l: dummyPrice,
+            o: dummyPrice,
+            pc: dummyPrice,
+            d: 0,
+            dp: 0,
+            t: Math.floor(Date.now() / 1000)
+         };
+         
+         res.status(200).json({ payload: dummyData });
+      }
    } catch (error) {
-
       next(error);
-
    }
-
 };
 
 
