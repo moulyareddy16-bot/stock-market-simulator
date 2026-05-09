@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authImage from "../assets/sign.jpeg";
 import api from "../service/api";
-import Home from "./Home";
+import { useAuth } from "../context/AuthContext";
 function Signin() {
   const navigate = useNavigate();
   const { login } = useAuth(); // 🔥 from context

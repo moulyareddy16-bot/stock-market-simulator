@@ -104,10 +104,10 @@ function Portfolio() {
             <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
               <p className="text-sm text-slate-400">Profit / Loss</p>
               <p
-                className={`mt-2 text-2xl font-semibold ${summary.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"
+                className={`mt-2 text-2xl font-semibold ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"
                   }`}
               >
-                ${summary.totalProfit?.toFixed(2) || "0.00"}
+                ${summary?.totalProfit?.toFixed(2) || "0.00"}
               </p>
             </div>
           </div>
@@ -169,16 +169,6 @@ function Portfolio() {
                       <div className={`text-[10px] font-bold ${stock.profitLoss >= 0 ? "text-emerald-500/50" : "text-red-500/50"}`}>
                         {stock.profitPercent?.toFixed(2)}%
                       </div>
-                  <tr key={stock.stockSymbol} className="border-t border-slate-800">
-                    <td className="p-4 font-semibold">{stock.stockSymbol}</td>
-                    <td className="p-4">{stock.ownedQuantity}</td>
-                    <td className="p-4">${stock.avgPrice?.toFixed(2)}</td>
-                    <td className="p-4">${stock.currentPrice?.toFixed(2)}</td>
-                    <td
-                      className={`p-4 ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                    >
-                      ${stock.profitLoss?.toFixed(2)} ({stock.profitPercent?.toFixed(2)}%)
                     </td>
                   </tr>
                 ))
