@@ -24,6 +24,8 @@ function Stocks() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   // LOADING STATES
   const [loadingStock, setLoadingStock] = useState("");
@@ -92,9 +94,6 @@ function Stocks() {
   // HANDLE INPUT
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    const value =
-      e.target.value.toUpperCase();
 
     setStockData({
 
