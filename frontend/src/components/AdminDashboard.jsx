@@ -190,10 +190,10 @@ function AdminDashboard() {
             <div className="mb-10 flex items-end justify-between">
               <div>
                 <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-                  Users Dashboard
+                  Traders Information
                 </h1>
                 <p className="mt-2 text-slate-400">
-                  System overview and user management
+                  System overview and traders management
                 </p>
               </div>
               <div className="hidden sm:block">
@@ -418,154 +418,154 @@ function AdminDashboard() {
           </>
         )}
 
-      {/* --- USER DETAILS MODAL --- */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-4xl bg-[#0f172a] rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* --- USER DETAILS MODAL --- */}
+        {selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-4xl bg-[#0f172a] rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-            {/* Modal Header */}
-            <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {selectedUser.username}'s Details
-                </h2>
-                <p className="text-sm text-slate-400">{selectedUser.email}</p>
-              </div>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-white transition"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            {modalLoading ? (
-              <div className="flex-1 flex items-center justify-center p-20">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-auto flex flex-col">
-
-                {/* Tabs */}
-                <div className="flex border-b border-slate-700 px-6 pt-4 bg-slate-800/20">
-                  <button
-                    onClick={() => setModalTab("transactions")}
-                    className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${modalTab === "transactions" ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
-                  >
-                    Transactions ({modalData.transactions.length})
-                  </button>
-                  <button
-                    onClick={() => setModalTab("portfolio")}
-                    className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${modalTab === "portfolio" ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
-                  >
-                    Portfolio ({modalData.portfolio.length})
-                  </button>
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {selectedUser.username}'s Details
+                  </h2>
+                  <p className="text-sm text-slate-400">{selectedUser.email}</p>
                 </div>
+                <button
+                  onClick={closeModal}
+                  className="text-slate-400 hover:text-white transition"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-                {/* Tab Content */}
-                <div className="p-6">
+              {/* Modal Body */}
+              {modalLoading ? (
+                <div className="flex-1 flex items-center justify-center p-20">
+                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+                </div>
+              ) : (
+                <div className="flex-1 overflow-auto flex flex-col">
 
-                  {/* TRANSACTIONS TAB */}
-                  {modalTab === "transactions" && (
-                    <div className="overflow-x-auto rounded-xl border border-slate-700">
-                      <table className="w-full text-left text-sm text-slate-300">
-                        <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 border-b border-slate-700">
-                          <tr>
-                            <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Symbol</th>
-                            <th className="px-6 py-4">Type</th>
-                            <th className="px-6 py-4">Quantity</th>
-                            <th className="px-6 py-4">Price/Share</th>
-                            <th className="px-6 py-4">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {modalData.transactions.length === 0 ? (
-                            <tr><td colSpan="6" className="text-center py-6 text-slate-500">No transactions found.</td></tr>
-                          ) : (
-                            modalData.transactions.map((tx) => (
-                              <tr key={tx._id} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
-                                <td className="px-6 py-4 whitespace-nowrap">{formatDate(tx.createdAt)}</td>
-                                <td className="px-6 py-4 font-bold text-white">{tx.stockSymbol}</td>
-                                <td className="px-6 py-4">
-                                  <span className={`px-2 py-1 rounded text-xs font-bold ${tx.transactionType === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                                    {tx.transactionType}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4">{tx.quantity}</td>
-                                <td className="px-6 py-4">{formatCurrency(tx.pricePerShare)}</td>
-                                <td className="px-6 py-4 font-medium">{formatCurrency(tx.totalAmount)}</td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  {/* Tabs */}
+                  <div className="flex border-b border-slate-700 px-6 pt-4 bg-slate-800/20">
+                    <button
+                      onClick={() => setModalTab("transactions")}
+                      className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${modalTab === "transactions" ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                    >
+                      Transactions ({modalData.transactions.length})
+                    </button>
+                    <button
+                      onClick={() => setModalTab("portfolio")}
+                      className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${modalTab === "portfolio" ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                    >
+                      Portfolio ({modalData.portfolio.length})
+                    </button>
+                  </div>
 
-                  {/* PORTFOLIO TAB */}
-                  {modalTab === "portfolio" && (
-                    <div>
-                      {/* Portfolio Summary */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-                          <p className="text-xs text-slate-400 mb-1">Total Investment</p>
-                          <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalInvestment)}</p>
-                        </div>
-                        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-                          <p className="text-xs text-slate-400 mb-1">Current Value</p>
-                          <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalCurrentValue)}</p>
-                        </div>
-                        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-                          <p className="text-xs text-slate-400 mb-1">Total P/L</p>
-                          <p className={`text-lg font-bold ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {modalData.summary.totalProfit >= 0 ? '+' : ''}{formatCurrency(modalData.summary.totalProfit)}
-                          </p>
-                        </div>
-                      </div>
+                  {/* Tab Content */}
+                  <div className="p-6">
 
+                    {/* TRANSACTIONS TAB */}
+                    {modalTab === "transactions" && (
                       <div className="overflow-x-auto rounded-xl border border-slate-700">
                         <table className="w-full text-left text-sm text-slate-300">
                           <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 border-b border-slate-700">
                             <tr>
+                              <th className="px-6 py-4">Date</th>
                               <th className="px-6 py-4">Symbol</th>
-                              <th className="px-6 py-4">Owned Qty</th>
-                              <th className="px-6 py-4">Avg Buy</th>
-                              <th className="px-6 py-4">Current Price</th>
-                              <th className="px-6 py-4">P/L</th>
+                              <th className="px-6 py-4">Type</th>
+                              <th className="px-6 py-4">Quantity</th>
+                              <th className="px-6 py-4">Price/Share</th>
+                              <th className="px-6 py-4">Total</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {modalData.portfolio.length === 0 ? (
-                              <tr><td colSpan="5" className="text-center py-6 text-slate-500">No active holdings.</td></tr>
+                            {modalData.transactions.length === 0 ? (
+                              <tr><td colSpan="6" className="text-center py-6 text-slate-500">No transactions found.</td></tr>
                             ) : (
-                              modalData.portfolio.map((stock) => (
-                                <tr key={stock.stockSymbol} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
-                                  <td className="px-6 py-4 font-bold text-white">{stock.stockSymbol}</td>
-                                  <td className="px-6 py-4">{stock.ownedQuantity}</td>
-                                  <td className="px-6 py-4">{formatCurrency(stock.avgPrice)}</td>
-                                  <td className="px-6 py-4">{formatCurrency(stock.currentPrice)}</td>
-                                  <td className={`px-6 py-4 font-medium ${stock.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {stock.profitLoss >= 0 ? '+' : ''}{formatCurrency(stock.profitLoss)} ({stock.profitPercent.toFixed(2)}%)
+                              modalData.transactions.map((tx) => (
+                                <tr key={tx._id} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
+                                  <td className="px-6 py-4 whitespace-nowrap">{formatDate(tx.createdAt)}</td>
+                                  <td className="px-6 py-4 font-bold text-white">{tx.stockSymbol}</td>
+                                  <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${tx.transactionType === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {tx.transactionType}
+                                    </span>
                                   </td>
+                                  <td className="px-6 py-4">{tx.quantity}</td>
+                                  <td className="px-6 py-4">{formatCurrency(tx.pricePerShare)}</td>
+                                  <td className="px-6 py-4 font-medium">{formatCurrency(tx.totalAmount)}</td>
                                 </tr>
                               ))
                             )}
                           </tbody>
                         </table>
                       </div>
-                    </div>
-                  )}
+                    )}
 
+                    {/* PORTFOLIO TAB */}
+                    {modalTab === "portfolio" && (
+                      <div>
+                        {/* Portfolio Summary */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                            <p className="text-xs text-slate-400 mb-1">Total Investment</p>
+                            <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalInvestment)}</p>
+                          </div>
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                            <p className="text-xs text-slate-400 mb-1">Current Value</p>
+                            <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalCurrentValue)}</p>
+                          </div>
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                            <p className="text-xs text-slate-400 mb-1">Total P/L</p>
+                            <p className={`text-lg font-bold ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {modalData.summary.totalProfit >= 0 ? '+' : ''}{formatCurrency(modalData.summary.totalProfit)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto rounded-xl border border-slate-700">
+                          <table className="w-full text-left text-sm text-slate-300">
+                            <thead className="bg-slate-800/50 text-xs uppercase text-slate-400 border-b border-slate-700">
+                              <tr>
+                                <th className="px-6 py-4">Symbol</th>
+                                <th className="px-6 py-4">Owned Qty</th>
+                                <th className="px-6 py-4">Avg Buy</th>
+                                <th className="px-6 py-4">Current Price</th>
+                                <th className="px-6 py-4">P/L</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {modalData.portfolio.length === 0 ? (
+                                <tr><td colSpan="5" className="text-center py-6 text-slate-500">No active holdings.</td></tr>
+                              ) : (
+                                modalData.portfolio.map((stock) => (
+                                  <tr key={stock.stockSymbol} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
+                                    <td className="px-6 py-4 font-bold text-white">{stock.stockSymbol}</td>
+                                    <td className="px-6 py-4">{stock.ownedQuantity}</td>
+                                    <td className="px-6 py-4">{formatCurrency(stock.avgPrice)}</td>
+                                    <td className="px-6 py-4">{formatCurrency(stock.currentPrice)}</td>
+                                    <td className={`px-6 py-4 font-medium ${stock.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                      {stock.profitLoss >= 0 ? '+' : ''}{formatCurrency(stock.profitLoss)} ({stock.profitPercent.toFixed(2)}%)
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );
