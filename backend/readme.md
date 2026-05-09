@@ -37,4 +37,6 @@ npm install express-rate-limit
 
 # PROFESSIONAL STOCK CACHE SYSTEM
   - npm install node-cache
+# multer is used for file uploads.
+  - npm install multer
   
