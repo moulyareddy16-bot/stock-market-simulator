@@ -4,7 +4,8 @@ import {
    addStock,
    getAllStocks,
    deleteStock,
-   getStockDetails
+   getStockDetails,
+   getSingleStock
 } from "../controllers/stockController.js";
 
 import { getStockHistory } from "../controllers/stockController.js";
@@ -42,6 +43,9 @@ stockRouter.get(
    "/history/:symbol",
    getStockHistory
 );
+
+// Get single stock (MUST BE LAST GET ROUTE TO PREVENT CLASHES)
+stockRouter.get("/:stockSymbol", getSingleStock);
 
 
 stockRouter.patch(

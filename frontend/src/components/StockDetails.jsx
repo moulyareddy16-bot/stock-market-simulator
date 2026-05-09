@@ -34,6 +34,14 @@ function StockDetails() {
   const historicalSectionRef = useRef(null);
 
   // 1. FETCH STOCK DETAILS
+  const formatMarketCap = (num) => {
+    if (!num || num === 0) return "N/A";
+    // Finnhub provides market cap in Millions
+    if (num >= 1000000) return (num / 1000000).toFixed(2) + "T";
+    if (num >= 1000) return (num / 1000).toFixed(2) + "B";
+    return num.toFixed(2) + "M";
+  };
+
   const fetchStock = async () => {
     try {
       const data = await getSingleStock(stockSymbol);
@@ -46,9 +54,9 @@ function StockDetails() {
            open: (fetchedStock.currentPrice * 0.99).toFixed(2),
            high: (fetchedStock.currentPrice * 1.05).toFixed(2),
            low: (fetchedStock.currentPrice * 0.95).toFixed(2),
-           mktCap: "N/A",
-           peRatio: "N/A",
-           divYield: "N/A"
+           mktCap: formatMarketCap(fetchedStock.marketCapitalization),
+           peRatio: fetchedStock.peRatio || "N/A",
+           divYield: fetchedStock.divYield || "N/A"
         }
       });
       setLivePrice(Number(fetchedStock.currentPrice).toFixed(2));
@@ -206,98 +214,147 @@ function StockDetails() {
         </div>
       )}
 
-      <div className="animate-fade-in space-y-10 pb-20">
-        <Link to="/" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-400 transition group">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-          Back to Market
-        </Link>
+      <div className="animate-fade-in pt-6 space-y-12 pb-20 max-w-[1600px] mx-auto px-4 lg:px-8">
+        
+        {/* TOP NAVBAR: BACK LINK & LOGOUT SPACE */}
+        <div className="flex items-center justify-between">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-black text-slate-500 hover:text-emerald-400 transition group">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+            Back to Market
+          </Link>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* LEFT: CHART & INFO */}
-          <div className="lg:col-span-2 space-y-10">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase">{stock.stockSymbol}</h1>
+          {/* SIDEBAR: SYMBOL, BUTTON, PROFILE */}
+          <div className="flex flex-col gap-6 w-full lg:col-span-1">
+             {/* SYMBOL BOX */}
+             <div className="glass-card flex flex-col justify-center items-center p-8 bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl relative overflow-hidden text-center">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full"></div>
+                
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">{stock.stockSymbol}</h1>
                   {stock.change && (
-                    <div className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-black">
+                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-black">
                       {stock.change}
-                    </div>
+                    </span>
                   )}
                 </div>
-                <p className="text-lg font-medium text-slate-400">{stock.companyName}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Live Market Price</p>
-                <div className="flex items-center gap-2 justify-end">
-                  <h2 className="text-4xl font-black text-emerald-400">${livePrice}</h2>
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></div>
+                <p className="text-sm font-bold text-slate-400 mb-6">{stock.companyName}</p>
+                
+                <div className="w-full h-px bg-slate-700/50 mb-6"></div>
+                
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 opacity-60">Live Price</p>
+                <div className="flex items-center gap-2 justify-center">
+                  <h2 className="text-4xl font-black text-emerald-400 tracking-tight">${livePrice}</h2>
+                  <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.4)]"></div>
                 </div>
+             </div>
+
+             {/* COMPANY PROFILE */}
+             <div className="glass-card p-8 bg-slate-800/20 rounded-[2.5rem] border border-slate-700/30 space-y-6">
+               <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50 pb-3">Company Profile</h3>
+               <div className="space-y-5">
+                 {[
+                   { label: "Sector", value: stock.sector },
+                   { label: "Exchange", value: stock.exchange },
+                   { label: "Country", value: stock.country },
+                   { label: "IPO Date", value: stock.ipo }
+                 ].map((item, idx) => (
+                   <div key={idx}>
+                     <p className="text-[10px] font-bold text-slate-600 uppercase mb-1">{item.label}</p>
+                     <p className="text-xs font-black text-slate-300 uppercase truncate">{item.value || "N/A"}</p>
+                   </div>
+                 ))}
+               </div>
+             </div>
+
+             {/* VIEW HISTORY BUTTON */}
+             <button
+               onClick={() => {
+                  setShowHistorical(!showHistorical);
+                  if (!showHistorical) {
+                     setTimeout(() => {
+                        historicalSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                     }, 200);
+                  }
+               }}
+               className={`w-full rounded-[2rem] py-6 font-black text-xs uppercase tracking-widest transition-all shadow-xl active:scale-95 ${showHistorical ? "bg-slate-700 text-white border border-slate-600" : "bg-emerald-500 text-black shadow-emerald-500/10 hover:bg-emerald-400"}`}
+             >
+               {showHistorical ? "Hide Historical Analysis" : "View Historical Analysis"}
+             </button>
+          </div>
+
+          {/* MAIN CONTENT AREA */}
+          <div className={`space-y-10 ${role === "trader" ? "lg:col-span-2" : "lg:col-span-3"}`}>
+            
+            {/* LIVE MOMENTUM */}
+            <div className="glass-card p-8 bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center justify-between mb-8">
+                 <h3 className="text-base font-black text-white uppercase tracking-wider">Live Momentum</h3>
+                 <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-tighter border border-emerald-500/20">Real-time Stream</span>
               </div>
-            </header>
-
-            {/* LIVE GRAPH */}
-            <div className="glass-card p-6 bg-slate-800 rounded-[2rem] h-[400px]">
-              <StockChart chartData={liveChartData} range="LIVE" />
+              <div className="h-[320px]">
+                 <StockChart chartData={liveChartData} range="LIVE" />
+              </div>
             </div>
 
-            <div className="flex flex-wrap justify-between gap-4">
-              <button
-                onClick={() => {
-                   setShowHistorical(true);
-                   setTimeout(() => {
-                      historicalSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-                   }, 200);
-                }}
-                className="w-full rounded-xl bg-slate-800 py-4 font-semibold text-white transition hover:bg-slate-700"
-              >
-                View Historical Analysis
-              </button>
-            </div>
-
-            {/* HISTORICAL GRAPH */}
+            {/* HISTORICAL (CONDITIONAL) */}
             {showHistorical && (
-               <div ref={historicalSectionRef} className="glass-card bg-slate-800 p-6 rounded-[2rem] space-y-6">
-                  <h2 className="text-3xl font-black">Historical Analysis</h2>
-                  <div className="flex flex-wrap gap-3">
-                     {["1D", "5D", "1M", "3M", "1Y", "MAX"].map((item) => (
-                        <button
-                           key={item}
-                           onClick={() => handleRangeChange(item)}
-                           className={`rounded-xl px-5 py-2 font-semibold transition-all ${selectedRange === item ? "bg-emerald-400 text-black" : "bg-slate-700 text-white hover:bg-slate-600"}`}
-                        >
-                           {item}
-                        </button>
-                     ))}
+               <div ref={historicalSectionRef} className="space-y-8 animate-slide-up">
+                  <div className="glass-card bg-slate-900/40 p-8 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                      <h2 className="text-xl font-black text-white uppercase tracking-widest">Historical Performance</h2>
+                      <div className="flex bg-slate-950/40 p-1 rounded-xl border border-slate-800">
+                         {["1D", "5D", "1M", "3M", "1Y", "MAX"].map((item) => (
+                            <button
+                               key={item}
+                               onClick={() => handleRangeChange(item)}
+                               className={`rounded-lg px-4 py-1.5 text-[10px] font-black transition-all ${selectedRange === item ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-white"}`}
+                            >
+                               {item}
+                            </button>
+                         ))}
+                      </div>
+                    </div>
+                    <div className="h-[380px] w-full">
+                       {historyLoading ? (
+                          <div className="flex h-full items-center justify-center">
+                             <div className="flex flex-col items-center gap-4">
+                                <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest animate-pulse">Syncing data...</p>
+                             </div>
+                          </div>
+                       ) : (
+                          <StockChart chartData={historicalData} range={selectedRange} />
+                       )}
+                    </div>
                   </div>
-                  <div className="h-[400px] w-full">
-                     {historyLoading ? (
-                        <div className="flex h-full items-center justify-center text-xl text-slate-400">Loading historical data...</div>
-                     ) : (
-                        <StockChart chartData={historicalData} range={selectedRange} />
-                     )}
+
+                  {/* STATS GRID */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                     {stock.stats && Object.entries(stock.stats).map(([key, val]) => (
+                       <div key={key} className="glass-card bg-slate-800/40 p-5 rounded-2xl border border-slate-700/30 text-center hover:border-emerald-500/30 transition-all group">
+                         <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter mb-1 group-hover:text-emerald-400">{key}</p>
+                         <p className="text-sm font-black text-white">{val}</p>
+                       </div>
+                     ))}
                   </div>
                </div>
             )}
             
-            {/* STATS GRID */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {stock.stats && Object.entries(stock.stats).map(([key, val]) => (
-                <div key={key} className="glass-card bg-slate-800 p-4 rounded-2xl text-center">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{key}</p>
-                  <p className="text-lg font-black text-white">{val}</p>
-                </div>
-              ))}
-            </div>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-black text-white">About {stock.companyName}</h2>
-              <p className="text-slate-400 leading-relaxed font-medium">
+            {/* ABOUT SECTION */}
+            <section className="glass-card p-10 bg-slate-800/10 rounded-[2.5rem] border border-slate-700/20 space-y-4">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="h-0.5 w-8 bg-emerald-500 rounded-full"></div>
+                <h2 className="text-lg font-black text-white uppercase tracking-widest">About {stock.companyName}</h2>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">
                 {stock.description || "No description available for this stock."}
               </p>
             </section>
           </div>
+
 
           {/* RIGHT: TRADING TERMINAL */}
           {role === "trader" && (

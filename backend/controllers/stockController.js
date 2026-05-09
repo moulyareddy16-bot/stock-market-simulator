@@ -409,6 +409,7 @@ export const getStockHistory =
                         .toISOString()
                         .split("T")[0],
 
+                  price: data.c[index], // ADDED FOR CHART COMPATIBILITY
                   open: data.o[index],
 
                   high: data.h[index],
@@ -515,25 +516,58 @@ export const getSingleStock = async (req, res, next) => {
 
       let currentPrice = 0;
       let change = "+0.00%";
+      let peRatio = "N/A";
+      let divYield = "N/A";
+      let profile = {};
+
       try {
-         const response = await axios.get(
+         // 1. Get Quote for Price & Change
+         const quoteRes = await axios.get(
             `https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
          );
-         currentPrice = response.data.c || 0;
-         const dp = response.data.dp || 0;
+         currentPrice = quoteRes.data.c || 0;
+         const dp = quoteRes.data.dp || 0;
          change = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
+
+         // 2. Get Basic Financials for PE & Dividend
+         const metricRes = await axios.get(
+            `https://finnhub.io/api/v1/stock/metric?symbol=${stockSymbol}&metric=all&token=${process.env.FINNHUB_API_KEY}`
+         );
+         
+         if (metricRes.data && metricRes.data.metric) {
+            peRatio = metricRes.data.metric.peExclExtraTTM ? metricRes.data.metric.peExclExtraTTM.toFixed(2) : "N/A";
+            divYield = metricRes.data.metric.dividendYieldIndicatedAnnual ? metricRes.data.metric.dividendYieldIndicatedAnnual.toFixed(2) + "%" : "N/A";
+         }
+
+         // 3. Get Company Profile
+         const profileRes = await axios.get(
+            `https://finnhub.io/api/v1/stock/profile2?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+         );
+         if (profileRes.data) {
+            profile = {
+               sector: profileRes.data.finnhubIndustry,
+               exchange: profileRes.data.exchange,
+               country: profileRes.data.country,
+               ipo: profileRes.data.ipo,
+               logo: profileRes.data.logo
+            };
+         }
       } catch (e) {
          console.error("Finnhub error:", e.message);
       }
 
-      res.status(200).json({
-         payload: {
-            stockSymbol: stock.stockSymbol,
-            companyName: stock.companyName,
-            description: `${stock.companyName} is a global company.`,
-            currentPrice,
-            change
-         }
+      const stockData = {
+         ...stock.toObject(),
+         currentPrice,
+         change,
+         peRatio,
+         divYield,
+         ...profile
+      };
+
+      return res.status(200).json({
+         success: true,
+         payload: stockData
       });
    } catch(error) {
       next(error);
