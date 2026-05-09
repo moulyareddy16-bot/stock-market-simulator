@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 //user model
 //username , email , password , role, wallet-balance , isuseractive 
@@ -44,4 +44,6 @@ const userSchema = new Schema({
 
 
 //generate user model
-export const userModel=model("user",userSchema)
+export const userModel =
+  mongoose.models.user ||
+  model("user", userSchema);
