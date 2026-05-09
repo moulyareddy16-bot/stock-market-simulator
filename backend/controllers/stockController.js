@@ -1,6 +1,7 @@
 import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
 import { getHistoricalStockData } from "../services/stockService.js";
+import { logAdminActivity } from "./adminActivityController.js";
 // import { config } from "dotenv";
 // config();
 import { validateStockSymbol } from "../services/finnhubService.js";
@@ -158,6 +159,15 @@ export const addStock =
                   companyData.logo || ""
 
             });
+
+         // Log Activity
+         await logAdminActivity(
+            req.user.id,
+            "ADD_STOCK",
+            "STOCK",
+            stockSymbol,
+            `Stock manager added new stock to market: ${stockSymbol} (${companyData.name})`
+         );
 
          // RESPONSE
          res.status(201).json({
@@ -327,6 +337,15 @@ export const deleteStock = async (req, res, next) => {
 
       }
 
+
+      // Log Activity
+      await logAdminActivity(
+         req.user.id,
+         "DELETE_STOCK",
+         "STOCK",
+         stockSymbol,
+         `Stock manager permanently removed stock from market: ${stockSymbol}`
+      );
 
       res.status(200).json({
 
@@ -538,6 +557,15 @@ export const toggleStockStatus =
             !stock.isActive;
 
          await stock.save();
+
+         // Log Activity
+         await logAdminActivity(
+            req.user.id,
+            "STOCK_STATUS",
+            "STOCK",
+            symbol,
+            `Stock manager ${stock.isActive ? 'activated' : 'deactivated'} stock: ${symbol}`
+         );
 
          res.status(200).json({
 

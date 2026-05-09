@@ -7,6 +7,7 @@ import {
   getUserPortfolioForAdmin
 } from "../service/userService";
 import { getAllStocks, getStockDetails } from "../service/stockService";
+import { getAdminActivities } from "../service/adminActivityService";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -21,6 +22,12 @@ function AdminDashboard() {
   const [stockPage, setStockPage] = useState(1);
   const [totalStockPages, setTotalStockPages] = useState(1);
   const [stocksLoading, setStocksLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [stockSearch, setStockSearch] = useState("");
+
+  // Activity History State
+  const [activities, setActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
 
   // Modal State
   const [selectedUser, setSelectedUser] = useState(null);
@@ -43,7 +50,7 @@ function AdminDashboard() {
   const fetchStocksData = async () => {
     try {
       setStocksLoading(true);
-      const response = await getAllStocks(stockPage, ""); // empty search
+      const response = await getAllStocks(stockPage, stockSearch);
       const stockList = response.payload || [];
       setTotalStockPages(response.totalPages || 1);
 
@@ -68,13 +75,34 @@ function AdminDashboard() {
     }
   };
 
+  const fetchActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      const response = await getAdminActivities();
+      setActivities(response.payload || []);
+    } catch (err) {
+      console.error("Failed to fetch activities:", err);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeMenu === "users") {
       fetchUsers();
-    } else if (activeMenu === "stocks") {
-      fetchStocksData();
     }
-  }, [activeMenu, stockPage]);
+  }, [activeMenu]);
+
+  useEffect(() => {
+    if (activeMenu === "stocks") {
+      const timeout = setTimeout(() => {
+        fetchStocksData();
+      }, 500);
+      return () => clearTimeout(timeout);
+    } else if (activeMenu === "history") {
+      fetchActivities();
+    }
+  }, [activeMenu, stockPage, stockSearch]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
@@ -178,6 +206,12 @@ function AdminDashboard() {
           >
             <span>📈</span> Stocks
           </button>
+          <button
+            onClick={() => setActiveMenu('history')}
+            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'history' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+          >
+            <span>📜</span> Activity History
+          </button>
         </nav>
       </div>
 
@@ -187,7 +221,7 @@ function AdminDashboard() {
         {activeMenu === 'users' && (
           <>
             {/* Header */}
-            <div className="mb-10 flex items-end justify-between">
+            <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
                   Traders Information
@@ -196,20 +230,40 @@ function AdminDashboard() {
                   System overview and traders management
                 </p>
               </div>
-              <div className="hidden sm:block">
-                <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-6 py-3 shadow-lg backdrop-blur-md">
-                  <p className="text-sm text-slate-400">Total Traders</p>
-                  <p className="text-2xl font-bold text-emerald-400">{users.length}</p>
+              
+              <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
+                <div className="relative flex-1 max-w-md">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search traders..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                  />
+                </div>
+                
+                <div className="hidden sm:block">
+                  <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 shadow-lg backdrop-blur-md whitespace-nowrap">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Traders</p>
+                    <p className="text-xl font-bold text-emerald-400">{users.length}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Users Grid */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {users.map((user) => (
+              {users
+                .filter(u => 
+                  u.username.toLowerCase().includes(userSearch.toLowerCase()) || 
+                  u.email.toLowerCase().includes(userSearch.toLowerCase())
+                )
+                .sort((a, b) => (b.isUserActive === a.isUserActive ? 0 : b.isUserActive ? 1 : -1))
+                .map((user) => (
                 <div
                   key={user._id}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10"
+                  className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!user.isUserActive ? 'border-red-500/20' : ''}`}
                 >
                   {/* Status Badge */}
                   <div className="absolute right-4 top-4">
@@ -226,9 +280,9 @@ function AdminDashboard() {
                     )}
                   </div>
 
-                  {/* User Info Header */}
-                  <div className="mb-6 flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner">
+                  {/* User Info Header (Dimmed when inactive) */}
+                  <div className={`mb-6 flex items-center gap-4 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner`}>
                       {user.username.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -244,8 +298,8 @@ function AdminDashboard() {
                   {/* Divider */}
                   <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
 
-                  {/* User Stats */}
-                  <div className="flex-1 space-y-4 mb-6">
+                  {/* User Stats (Dimmed when inactive) */}
+                  <div className={`flex-1 space-y-4 mb-6 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-slate-400">Wallet Balance</span>
                       <span className="font-semibold text-emerald-300">
@@ -270,20 +324,20 @@ function AdminDashboard() {
                   <div className="flex flex-col gap-2 mt-auto">
                     <button
                       onClick={() => openUserDetails(user)}
-                      className="w-full rounded-lg bg-emerald-500/20 py-2 text-sm font-semibold text-emerald-400 transition hover:bg-emerald-500/30 border border-emerald-500/50"
+                      className={`w-full rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-slate-700/20 text-slate-500 border-slate-700/50' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
                     >
                       View Details
                     </button>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleToggleStatus(user._id)}
-                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
+                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition shadow-lg ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500 text-white border border-emerald-400 hover:bg-emerald-600 shadow-emerald-500/20'}`}
                       >
                         {user.isUserActive ? "Block" : "Unblock"}
                       </button>
                       <button
                         onClick={() => handleDelete(user._id)}
-                        className="flex-1 rounded-lg bg-red-500/20 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500/30 border border-red-500/50"
+                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-red-500/10 text-red-900 border-red-500/20' : 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30'}`}
                       >
                         Delete
                       </button>
@@ -298,7 +352,7 @@ function AdminDashboard() {
         {activeMenu === 'stocks' && (
           <>
             {/* Header */}
-            <div className="mb-10 flex items-end justify-between">
+            <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
                   Stocks Dashboard
@@ -306,6 +360,29 @@ function AdminDashboard() {
                 <p className="mt-2 text-slate-400">
                   Market overview and stock management
                 </p>
+              </div>
+
+              <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
+                <div className="relative flex-1 max-w-md">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search stocks..."
+                    value={stockSearch}
+                    onChange={(e) => {
+                      setStockSearch(e.target.value);
+                      setStockPage(1);
+                    }}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                  />
+                </div>
+                
+                <div className="hidden sm:block">
+                  <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 shadow-lg backdrop-blur-md whitespace-nowrap">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Active</p>
+                    <p className="text-xl font-bold text-emerald-400">{stocks.filter(s => s.isActive).length}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -316,10 +393,12 @@ function AdminDashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {stocks.map((stock) => (
+                {[...stocks]
+                  .sort((a, b) => (b.isActive === a.isActive ? 0 : b.isActive ? 1 : -1))
+                  .map((stock) => (
                   <div
                     key={stock._id}
-                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10"
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!stock.isActive ? 'border-red-500/20' : ''}`}
                   >
                     {/* Status Badge */}
                     <div className="absolute right-4 top-4">
@@ -339,9 +418,9 @@ function AdminDashboard() {
                     {/* Stock Info Header */}
                     <div className="mb-6 flex items-center gap-4">
                       {stock.logo ? (
-                        <img src={stock.logo} alt={stock.stockSymbol} className="h-12 w-12 rounded-full object-contain bg-white p-1" />
+                        <img src={stock.logo} alt={stock.stockSymbol} className={`h-12 w-12 rounded-full object-contain bg-white p-1 ${!stock.isActive ? 'grayscale opacity-50' : ''}`} />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner">
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner ${!stock.isActive ? 'from-red-500 to-rose-600' : ''}`}>
                           {stock.stockSymbol.charAt(0)}
                         </div>
                       )}
@@ -358,8 +437,8 @@ function AdminDashboard() {
                     {/* Divider */}
                     <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
 
-                    {/* Stock Stats */}
-                    <div className="flex-1 space-y-3 mb-6 text-sm">
+                    {/* Stock Stats (Dimmed when inactive) */}
+                    <div className={`flex-1 space-y-3 mb-6 text-sm transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Current Price</span>
                         <span className="font-semibold text-white">
@@ -380,10 +459,7 @@ function AdminDashboard() {
                         <span className="text-slate-400">Day High/Low</span>
                         <span className="text-slate-300">{stock.h ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Available Qty</span>
-                        <span className="text-slate-300 font-medium">{stock.availableQuantity}</span>
-                      </div>
+                      {/* Removed Available Qty */}
                     </div>
 
                     {/* Actions (Optional or just info) */}
@@ -415,6 +491,71 @@ function AdminDashboard() {
                 Next
               </button>
             </div>
+          </>
+        )}
+
+        {activeMenu === 'history' && (
+          <>
+            {/* Header */}
+            <div className="mb-10">
+              <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                Activity History
+              </h1>
+              <p className="mt-2 text-slate-400">
+                Audit log of all administrative actions
+              </p>
+            </div>
+
+            {/* Activities Table */}
+            {activitiesLoading ? (
+               <div className="flex items-center justify-center p-20">
+                 <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+               </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/40 shadow-xl backdrop-blur-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="bg-slate-900/50 text-xs uppercase text-slate-400 border-b border-slate-700">
+                      <tr>
+                        <th className="px-6 py-4 w-1/4 text-center">Date & Time</th>
+                        <th className="px-6 py-4 w-1/4 text-center">Action</th>
+                        <th className="px-6 py-4 w-1/2">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                      {activities.length === 0 ? (
+                        <tr><td colSpan="3" className="text-center py-10 text-slate-500">No activities logged yet.</td></tr>
+                      ) : (
+                        activities.map((act) => (
+                          <tr key={act._id} className="hover:bg-slate-800/30 transition">
+                            <td className="px-6 py-4 whitespace-nowrap w-1/4 text-center">
+                              <div className="font-medium text-slate-200">
+                                {new Date(act.createdAt).toLocaleDateString()}
+                              </div>
+                              <div className="text-[10px] text-slate-500 uppercase">
+                                {new Date(act.createdAt).toLocaleTimeString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 w-1/4 text-center">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${
+                                act.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
+                                act.action.includes('ADD') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+                                'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              }`}>
+                                {act.action.replace(/_/g, ' ').replace('TOGGLE ', '')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 w-1/2">
+                              <p className="text-slate-300 italic">"{act.details}"</p>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </>
         )}
 

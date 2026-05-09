@@ -433,16 +433,18 @@ const [loading, setLoading] = useState(false);
             <CardSkeleton key={i} />
           ))
         ) : filteredStocks.length > 0 ? (
-          filteredStocks.map((stock) => (
+          [...filteredStocks]
+            .sort((a, b) => (b.isActive === a.isActive ? 0 : b.isActive ? 1 : -1))
+            .map((stock) => (
             <div
               key={stock._id}
-              className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 transition hover:-translate-y-1 hover:border-emerald-500/40"
+              className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 transition hover:-translate-y-1 hover:border-emerald-500/40`}
             >
 
               {/* TOP */}
               <div className="flex items-start justify-between">
 
-                <div className="flex gap-4">
+                <div className={`flex gap-4 transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
 
                   {/* LOGO */}
                   <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white">
@@ -483,29 +485,29 @@ const [loading, setLoading] = useState(false);
                         stock.stockSymbol
                       )
                     }
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all
-                    ${
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-all ${
                       stock.isActive
-                        ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                        : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                        : "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
                     }`}
                   >
+                    <span className={`h-1.5 w-1.5 rounded-full ${stock.isActive ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
                     {stock.isActive
-                      ? "ACTIVE"
-                      : "INACTIVE"}
+                      ? "Active"
+                      : "Inactive"}
                   </button>
                 )}
               </div>
 
               {/* CHART */}
-              <div className="mt-5">
+              <div className={`mt-5 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
                 <svg
                   viewBox="0 0 100 30"
                   className="h-10 w-full"
                 >
                   <polyline
                     fill="none"
-                    stroke="rgb(34 197 94)"
+                    stroke={stock.isActive ? "rgb(34 197 94)" : "rgb(239 68 68)"}
                     strokeWidth="2"
                     points="0,25 20,20 40,22 60,10 80,14 100,5"
                   />
@@ -513,7 +515,7 @@ const [loading, setLoading] = useState(false);
               </div>
 
               {/* DETAILS */}
-              <div className="mt-5 grid grid-cols-2 gap-4">
+              <div className={`mt-5 grid grid-cols-2 gap-4 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
 
                 <div>
                   <p className="text-xs uppercase tracking-widest text-slate-500">
@@ -558,8 +560,8 @@ const [loading, setLoading] = useState(false);
                 </div>
               </div>
 
-              {/* FOOTER */}
-              <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
+              {/* FOOTER (Dimmed when inactive) */}
+              <div className={`mt-6 flex items-center justify-between border-t border-slate-800 pt-4 transition-opacity ${!stock.isActive ? 'opacity-40' : 'opacity-100'}`}>
 
                 <p className="text-xs text-slate-500">
                   Added{" "}
