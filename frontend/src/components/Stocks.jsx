@@ -209,21 +209,18 @@ const [loading, setLoading] = useState(false);
 
   // FORMAT MARKET CAP
   const formatMarketCap = (num) => {
-    if (!num) return "N/A";
-
-    if (num >= 1_000_000_000_000) {
-      return (
-        (num / 1_000_000_000_000).toFixed(2) + "T"
-      );
+    if (!num || num === 0) return "N/A";
+    
+    // Finnhub provides market cap in Millions.
+    // 1,000,000 Millions = 1 Trillion
+    // 1,000 Millions = 1 Billion
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(2) + "T";
     }
-
-    if (num >= 1_000_000_000) {
-      return (
-        (num / 1_000_000_000).toFixed(2) + "B"
-      );
+    if (num >= 1000) {
+      return (num / 1000).toFixed(2) + "B";
     }
-
-    return num;
+    return num.toFixed(2) + "M";
   };
 
   return (

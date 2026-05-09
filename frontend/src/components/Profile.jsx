@@ -50,12 +50,16 @@ function Profile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-slate-800/50">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">User ID</p>
-                <p className="font-bold text-white text-sm">{user?._id}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account Number</p>
+                <p className="font-bold text-white text-sm">
+                  #{user?.role?.charAt(0).toUpperCase()}-{user?._id?.substring(0, 8).toUpperCase()}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Joined On</p>
-                <p className="font-bold text-white text-sm">March 2024</p>
+                <p className="font-bold text-white text-sm">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "March 2024"}
+                </p>
               </div>
             </div>
           </section>
@@ -93,7 +97,7 @@ function Profile() {
                   ${user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </h4>
               </div>
-
+              
               <div className="pt-6 border-t border-slate-800/50 space-y-4">
                 <Link
                   to="/stocks"
@@ -102,7 +106,7 @@ function Profile() {
                   START TRADING
                 </Link>
               </div>
-
+              
               <p className="text-[10px] text-center text-slate-500 font-bold uppercase tracking-widest">
                 All funds are virtual and for simulation only
               </p>
