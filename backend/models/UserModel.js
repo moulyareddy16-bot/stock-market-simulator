@@ -34,6 +34,10 @@ const userSchema = new Schema({
     isUserActive:{
         type:Boolean,
         default:true,
+    },
+    profileImage:{
+        type:String,
+        default:""
     }},
     {
         timestamps:true,

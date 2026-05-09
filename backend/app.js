@@ -1,6 +1,7 @@
 import exp from "express"
 import cookieParser from "cookie-parser";
 import cors from 'cors'
+import path from 'path';
 
 import authRouter from "./routes/authRoute.js"
 import stockRouter from "./routes/stockRoute.js";
@@ -30,6 +31,8 @@ app.use(cors({
   origin: ['http://localhost:5173'],
   credentials: true
 }))
+
+app.use('/uploads', exp.static('uploads'))
 
 
 

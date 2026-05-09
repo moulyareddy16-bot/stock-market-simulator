@@ -118,7 +118,92 @@ export const getProfile = async (req, res, next) => {
     }
 };
 
+// Update Profile
+export const updateProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { username, email, password, currentPassword, profileImage } = req.body;
+        
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // If updating password, verify current password first
+        if (password) {
+            if (!currentPassword) {
+                return res.status(400).json({ message: "Current password is required to set a new one" });
+            }
+            const isMatch = await compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Current password doesn't match" });
+            }
+            user.password = await hash(password, 12);
+        }
+
+        if (username) user.username = username;
+        if (email) user.email = email;
+        if (profileImage !== undefined) user.profileImage = profileImage;
+
+        await user.save();
+        
+        const updatedUser = user.toObject();
+        delete updatedUser.password;
+
+        res.status(200).json({ 
+            message: "Profile updated successfully", 
+            payload: updatedUser 
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 //Change Password
 export const changePassword= async (req,res)=>{
     
 }
+
+// Upload Profile Image
+export const uploadProfileImage = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const userId = req.user.id;
+        const fileUrl = `${req.protocol}://${req.get('host')}/uploads/profiles/${req.file.filename}`;
+
+        const user = await userModel.findByIdAndUpdate(
+            userId,
+            { profileImage: fileUrl },
+            { new: true }
+        ).select("-password");
+
+        res.status(200).json({
+            message: "Profile image uploaded successfully",
+            payload: user
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// Remove Profile Image
+export const removeProfileImage = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findByIdAndUpdate(
+            userId,
+            { profileImage: "" },
+            { new: true }
+        ).select("-password");
+
+        res.status(200).json({
+            message: "Profile image removed successfully",
+            payload: user
+        });
+    } catch (err) {
+        next(err);
+    }
+};

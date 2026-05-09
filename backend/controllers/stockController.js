@@ -231,16 +231,30 @@ async (req, res, next) => {
 
       const stocks =
          await stockModel.find(searchFilter)
-
             .skip(skip)
-
             .limit(limit)
+            .sort({ createdAt: -1 });
 
-            .sort({
-
-               createdAt: -1
-
-            });
+      // HEAL MISSING DATA (Lazy sync for "Unknown" fields)
+      const healedStocks = await Promise.all(stocks.map(async (stock) => {
+         if (stock.country === "Unknown" || stock.sector === "Unknown" || !stock.logo) {
+            try {
+               const profile = await validateStockSymbol(stock.stockSymbol);
+               if (profile && profile.name) {
+                  stock.sector = profile.finnhubIndustry || stock.sector;
+                  stock.country = profile.country || stock.country;
+                  stock.exchange = profile.exchange || stock.exchange;
+                  stock.logo = profile.logo || stock.logo;
+                  stock.marketCapitalization = profile.marketCapitalization || stock.marketCapitalization;
+                  stock.ipo = profile.ipo || stock.ipo;
+                  await stock.save();
+               }
+            } catch (err) {
+               console.log(`Failed to heal stock ${stock.stockSymbol}:`, err.message);
+            }
+         }
+         return stock;
+      }));
 
       const totalStocks =
          await stockModel.countDocuments(
@@ -260,8 +274,7 @@ async (req, res, next) => {
 
          totalStocks,
 
-         payload: stocks
-
+         payload: healedStocks
       });
 
    } catch (error) {
