@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import api from "../service/api";
 
 import { getSingleStock } from "../service/stockService";
 import { buyStock, sellStock } from "../service/tradeService";
@@ -47,9 +48,21 @@ function StockDetails() {
       const data = await getSingleStock(stockSymbol);
       const fetchedStock = data.payload;
       
+      let ownedQuantity = 0;
+      try {
+        const portfolioRes = await api.get("/portfolio");
+        const portfolio = portfolioRes.data.payload || [];
+        const ownedStock = portfolio.find(s => s.stockSymbol === stockSymbol);
+        if (ownedStock) {
+          ownedQuantity = ownedStock.ownedQuantity;
+        }
+      } catch (err) {
+        console.log("Failed to fetch portfolio:", err);
+      }
+
       setStock({
         ...fetchedStock,
-        ownedQuantity: 0,
+        ownedQuantity,
         stats: {
            open: (fetchedStock.currentPrice * 0.99).toFixed(2),
            high: (fetchedStock.currentPrice * 1.05).toFixed(2),
@@ -168,9 +181,11 @@ function StockDetails() {
          setStock(prev => ({ ...prev, ownedQuantity: prev.ownedQuantity - tradeQuantity }));
       }
     } catch (err) {
-      addToast("Transaction failed", "error");
+      const errorMessage = err.response?.data?.message || "Transaction failed";
+      addToast(errorMessage, "error");
     } finally {
       setTrading(false);
+      setQuantity(0);
     }
   };
 

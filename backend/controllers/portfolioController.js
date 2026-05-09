@@ -1,11 +1,20 @@
 import axios from "axios";
+<<<<<<< HEAD
+import { transactionModel } from "../models/TransactionModel.js";
+import { userModel } from "../models/UserModel.js";
+=======
 import { transactionModel } from "../models/transactionModel.js";
+>>>>>>> dce6c3842dcf71e47a1b8ac8d0960deec982b894
 
 // GET USER PORTFOLIO
 export const getPortfolio = async (req, res, next) => {
   try {
     // Get logged-in user
     const userId = req.user.id;
+    
+    // Fetch user for wallet balance
+    const user = await userModel.findById(userId);
+    const walletBalance = user ? user.walletBalance : 0;
 
     // 2. Fetch all transactions of user
     const transactions = await transactionModel.find({ userId });
@@ -90,6 +99,7 @@ export const getPortfolio = async (req, res, next) => {
         totalInvestment,
         totalCurrentValue,
         totalProfit,
+        walletBalance,
       },
       payload: filteredPortfolio,
     });

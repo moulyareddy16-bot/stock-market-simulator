@@ -22,25 +22,19 @@ function Root() {
   }, [navigate, role, location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200">
+    <div className="min-h-screen bg-[#020617] text-slate-200 flex flex-col">
       <Navbar />
       
-      <div className="flex pt-16">
+      <div className="flex flex-1 pt-16">
         {showSidebar && <Sidebar />}
         
-        <main className={`flex-1 transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
-          <div className={location.pathname.startsWith("/admin") ? "" : "p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto"}>
+        <main className={`flex-1 flex flex-col transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
+          <div className={`flex-1 ${location.pathname.startsWith("/admin") ? "" : "p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto"}`}>
             <Outlet />
           </div>
-          {!showSidebar && <Footer />}
+          <Footer />
         </main>
       </div>
-
-      {showSidebar && (
-        <div className="ml-20 lg:ml-64 border-t border-slate-800">
-          <Footer />
-        </div>
-      )}
     </div>
   );
 }

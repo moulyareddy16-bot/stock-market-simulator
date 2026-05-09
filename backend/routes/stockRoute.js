@@ -45,7 +45,7 @@ stockRouter.get(
 );
 
 // Get single stock details
-stockRouter.get("/:stockSymbol", getStockDetails);
+stockRouter.get("/:stockSymbol", getSingleStock);
 
 
 stockRouter.patch(

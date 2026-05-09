@@ -27,6 +27,7 @@ function Stocks() {
   const [totalStocks, setTotalStocks] = useState(0);
   const [totalActive, setTotalActive] = useState(0);
   const [totalInactive, setTotalInactive] = useState(0);
+  const [totalExchanges, setTotalExchanges] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -58,6 +59,7 @@ const [loading, setLoading] = useState(false);
       setTotalStocks(data.totalStocks || 0);
       setTotalActive(data.totalActive || 0);
       setTotalInactive(data.totalInactive || 0);
+      setTotalExchanges(data.totalExchanges || 0);
     } catch (error) {
       console.log(error);
     } finally {
@@ -335,7 +337,7 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold">
-            {role === "trader" ? filteredStocks.length : stocks.length}
+            {role === "trader" ? totalActive : totalStocks}
           </h2>
         </div>
 
@@ -347,10 +349,7 @@ const [loading, setLoading] = useState(false);
               </p>
 
               <h2 className="mt-2 text-3xl font-bold text-emerald-400">
-                {
-                  stocks.filter((s) => s.isActive)
-                    .length
-                }
+                {totalActive}
               </h2>
             </div>
 
@@ -360,10 +359,7 @@ const [loading, setLoading] = useState(false);
               </p>
 
               <h2 className="mt-2 text-3xl font-bold text-red-400">
-                {
-                  stocks.filter((s) => !s.isActive)
-                    .length
-                }
+                {totalInactive}
               </h2>
             </div>
           </>
@@ -375,15 +371,7 @@ const [loading, setLoading] = useState(false);
           </p>
 
           <h2 className="mt-2 text-3xl font-bold text-blue-400">
-            {
-              [
-                ...new Set(
-                  stocks.map(
-                    (stock) => stock.exchange
-                  )
-                ),
-              ].length
-            }
+            {totalExchanges}
           </h2>
         </div>
       </section>
@@ -462,12 +450,12 @@ const [loading, setLoading] = useState(false);
                   </div>
 
                   {/* INFO */}
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="text-2xl font-black">
                       {stock.stockSymbol}
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-400 truncate" title={stock.companyName}>
                       {stock.companyName}
                     </p>
                   </div>
