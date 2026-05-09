@@ -138,7 +138,6 @@ function Portfolio() {
                 <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Profit / Loss</th>
               </tr>
             </thead>
-<<<<<<< HEAD
             <tbody className="divide-y divide-slate-800/50">
               {portfolio.length === 0 ? (
                 <tr>
@@ -175,45 +174,6 @@ function Portfolio() {
                 ))
               )}
             </tbody>
-=======
-           <tbody className="divide-y divide-slate-800/50">
-  {portfolio.length === 0 ? (
-    <tr>
-      <td className="px-8 py-10 text-center text-slate-500 font-medium" colSpan="5">
-        No active positions. <Link to="/stocks" className="text-emerald-400 hover:underline">Start trading</Link>
-      </td>
-    </tr>
-  ) : (
-    portfolio.map((stock) => (
-      <tr key={stock.stockSymbol} className="hover:bg-white/5 transition-colors group">
-        <td className="px-8 py-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-black text-white text-xs group-hover:bg-emerald-500 group-hover:text-black transition-colors">
-              {stock.stockSymbol[0]}
-            </div>
-            <div>
-              <p className="font-black text-white uppercase">{stock.stockSymbol}</p>
-              <p className="text-xs font-medium text-slate-500">Equity Position</p>
-            </div>
-          </div>
-        </td>
-        <td className="px-8 py-6 text-right font-black text-white">{stock.ownedQuantity}</td>
-        <td className="px-8 py-6 text-right font-medium text-slate-400">${stock.avgPrice?.toFixed(2)}</td>
-        <td className="px-8 py-6 text-right font-black text-white">${stock.currentPrice?.toFixed(2)}</td>
-        <td className="px-8 py-6 text-right">
-          <div className={`font-black ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-            {stock.profitLoss >= 0 ? "+" : ""}${stock.profitLoss?.toFixed(2)}
-          </div>
-          <div className={`text-[10px] font-bold ${stock.profitLoss >= 0 ? "text-emerald-500/50" : "text-red-500/50"}`}>
-            {stock.profitPercent?.toFixed(2)}%
-          </div>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
-
->>>>>>> 6075d5852673aa11f9a149556392ceb9ab79ae3c
           </table>
         </div>
       </section>
