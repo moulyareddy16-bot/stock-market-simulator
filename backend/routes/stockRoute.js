@@ -91,12 +91,6 @@ stockRouter.get(
 );
 
 
-//Public Route to get stock details
-stockRouter.get("/:stockSymbol", getStockDetails );
-
-
-
-
 stockRouter.patch(
    "/toggle-status/:symbol",
    verifyToken("stockmanager"),

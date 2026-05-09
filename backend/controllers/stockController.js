@@ -492,123 +492,51 @@ export const toggleStockStatus =
          });
 
       } catch (error) {
-
          next(error);
-
       }
-
-<<<<<<< HEAD
-
-      // 4. Format response
-      const formattedData =
-      data.t.map((timestamp, index) => {
-
-         return {
-
-            date:
-            new Date(timestamp * 1000)
-            .toISOString()
-            .split("T")[0],
-
-            open: data.o[index],
-
-            high: data.h[index],
-
-            low: data.l[index],
-
-            close: data.c[index],
-
-            volume: data.v[index]
-
-         };
-
-      });
-
-
-      // 5. Send response
-      res.status(200).json({
-
-         message:
-         "Historical stock data",
-
-         stockSymbol:
-         symbol,
-
-         totalDays:
-         days,
-
-         payload:
-         formattedData
-
-      });
-
-   } catch(error) {
-
-      next(error);
-
-   }
-
 };
 
 
 // GET SINGLE STOCK
 
-export const getSingleStock =
-async (req, res, next) => {
-
+export const getSingleStock = async (req, res, next) => {
    try {
+      const { stockSymbol } = req.params;
 
-      // get stock symbol from params
-      const { stockSymbol } =
-         req.params;
-
-
-      // find stock from DB
-      const stock =
-         await stockModel.findOne({
-
-            stockSymbol:
-            stockSymbol.toUpperCase()
-
-         });
-
-
-      // stock not found
-      if (!stock) {
-
-         return res.status(404).json({
-
-            message:
-            "Stock not found"
-
-         });
-
-      }
-
-
-      // send stock details
-      res.status(200).json({
-
-         payload: {
-
-            stockSymbol:
-            stock.stockSymbol,
-
-            companyName:
-            stock.companyName
-
-         }
-
+      const stock = await stockModel.findOne({
+         stockSymbol: stockSymbol.toUpperCase()
       });
 
+      if (!stock) {
+         return res.status(404).json({
+            message: "Stock not found"
+         });
+      }
+
+      let currentPrice = 0;
+      let change = "+0.00%";
+      try {
+         const response = await axios.get(
+            `https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
+         );
+         currentPrice = response.data.c || 0;
+         const dp = response.data.dp || 0;
+         change = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
+      } catch (e) {
+         console.error("Finnhub error:", e.message);
+      }
+
+      res.status(200).json({
+         payload: {
+            stockSymbol: stock.stockSymbol,
+            companyName: stock.companyName,
+            description: `${stock.companyName} is a global company.`,
+            currentPrice,
+            change
+         }
+      });
    } catch(error) {
-
       next(error);
-
    }
-
 };
 
-=======
-   };
->>>>>>> d7f48ec47f1a2d3667d7bc8b66a666856a5a76db
