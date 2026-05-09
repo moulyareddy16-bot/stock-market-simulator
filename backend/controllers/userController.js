@@ -1,5 +1,5 @@
 import { userModel } from "../models/UserModel.js";
-import { transactionModel } from "../models/TransactionModel.js";
+import { transactionModel } from "../models/transactionModel.js";
 import axios from "axios";
 
 // Get all users with total transactions

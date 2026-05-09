@@ -5,6 +5,7 @@ function Sidebar() {
     { name: "Portfolio", path: "/portfolio", icon: <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /> },
     { name: "Market", path: "/stocks", icon: <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5" /> },
     { name: "History", path: "/transactions", icon: <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> },
+    { name: "AI Suggestions", path: "/ai-suggestions", icon: <path d="M12 8V4H8M16 4h-4v4M8 12h8M12 16v4M12 12v4M20 12h-4M8 12H4M12 8l4 4-4 4-4-4 4-4z" /> },
     { name: "Profile", path: "/profile", icon: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /> },
   ];
 

@@ -10,6 +10,7 @@ import portfolioRouter from "./routes/portfolioRoute.js";
 import alertRouter from "./routes/alertRoute.js";
 import historicalRouter from "./routes/historicalRoute.js";
 import userRouter from "./routes/userRoute.js";
+import aiRouter from "./routes/aiRoute.js";
 import { getStockDetails } from "./controllers/stockController.js";
 
 
@@ -29,11 +30,14 @@ app.use(cookieParser())
 
 //enable cors
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true
 }))
 
 app.use('/uploads', exp.static('uploads'))
+
+// AI ROUTE (Moved to top for priority)
+app.use("/api/ai", aiRouter)
 
 
 
@@ -52,6 +56,7 @@ app.use("/api/alerts", alertRouter)
 
 app.use("/api/historical", historicalRouter)
 app.use("/api/users", userRouter)
+app.get("/api/ai/sanity", (req, res) => res.json({ success: true, message: "AI Server is reachable" }));
 
 
 
