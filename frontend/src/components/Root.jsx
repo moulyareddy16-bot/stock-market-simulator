@@ -12,7 +12,7 @@ function Root() {
   // Auth pages should not have sidebar/navbar sometimes, 
   // but for now, we'll just toggle the sidebar based on role and path.
   const isAuthPage = ["/signin", "/register"].includes(location.pathname);
-  const showSidebar = role && !isAuthPage && location.pathname !== "/";
+  const showSidebar = role === "trader" && !isAuthPage && location.pathname !== "/";
 
   useEffect(() => {
     const navEntry = window.performance.getEntriesByType("navigation")[0];
@@ -29,7 +29,7 @@ function Root() {
         {showSidebar && <Sidebar />}
         
         <main className={`flex-1 transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
-          <div className="p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto">
+          <div className={location.pathname.startsWith("/admin") ? "" : "p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto"}>
             <Outlet />
           </div>
           {!showSidebar && <Footer />}

@@ -24,19 +24,21 @@ function Stocks() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   // LOADING STATES
   const [loadingStock, setLoadingStock] = useState("");
   const [addingStock, setAddingStock] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const [fetchingStocks, setFetchingStocks] = useState(false);
   // FILTER STATES
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+// MAIN LOADING
+const [loading, setLoading] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
     stockSymbol: "",
+    companyName: "",
   });
 
   // FETCH STOCKS
@@ -94,13 +96,21 @@ function Stocks() {
   }, [stocks, search, statusFilter]);
 
   // HANDLE INPUT
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
   const handleChange = (e) => {
+
     const { name, value } = e.target;
+
     setStockData({
       ...stockData,
-      [name]: name === "stockSymbol" ? value.toUpperCase() : value,
-    });
-  };
+
+    [name]:
+      name === "stockSymbol"
+        ? value.toUpperCase()
+        : value,
+  });
+};
 
   // =====================================
   // ADD STOCK
@@ -212,7 +222,7 @@ function Stocks() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="min-h-screen bg-[#020617] text-white px-6 py-8 space-y-8">
 
       {/* HEADER */}
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">

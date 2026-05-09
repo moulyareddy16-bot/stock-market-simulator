@@ -20,4 +20,12 @@ INSTALL ICONS
 
   - npm install lucide-react
 
+
+npm install recharts
+
   
+  npm install socket.io-client
+
+
+npm install recharts socket.io-client
+
