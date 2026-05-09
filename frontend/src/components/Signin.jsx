@@ -2,9 +2,13 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authImage from "../assets/sign.jpeg";
 import api from "../service/api";
+<<<<<<< HEAD
 import Home from "./Home";
 import { useAuth } from "../context/AuthContext";
 
+=======
+import { useAuth } from "../context/AuthContext";
+>>>>>>> 6075d5852673aa11f9a149556392ceb9ab79ae3c
 function Signin() {
   const navigate = useNavigate();
   const { login } = useAuth(); // 🔥 from context

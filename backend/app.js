@@ -7,6 +7,7 @@ import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
 import portfolioRouter from "./routes/portfolioRoute.js";
 import alertRouter from "./routes/alertRoute.js";
+import historicalRouter from "./routes/historicalRoute.js";
 import userRouter from "./routes/userRoute.js";
 
 
@@ -44,6 +45,7 @@ app.use("/api/portfolio", portfolioRouter)
 
 app.use("/api/alerts", alertRouter)
 
+app.use("/api/historical", historicalRouter)
 app.use("/api/users", userRouter)
 
 

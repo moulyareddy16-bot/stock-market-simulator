@@ -31,6 +31,12 @@ function Stocks() {
   const [loadingStock, setLoadingStock] = useState("");
   const [addingStock, setAddingStock] = useState(false);
   const [fetchingStocks, setFetchingStocks] = useState(false);
+  // FILTER STATES
+const [statusFilter, setStatusFilter] = useState("all");
+const [showFilters, setShowFilters] = useState(false);
+
+// MAIN LOADING
+const [loading, setLoading] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
@@ -92,18 +98,25 @@ function Stocks() {
   }, [stocks, search, statusFilter]);
 
   // HANDLE INPUT
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
   const handleChange = (e) => {
-    const { name, value } = e.target;
 
+<<<<<<< HEAD
     setStockData({
+=======
+  const { name, value } = e.target;
 
-      ...stockData,
-      [name]:
-        name === "stockSymbol"
-          ? value.toUpperCase()
-          : value,
-    });
-  };
+  setStockData({
+    ...stockData,
+>>>>>>> 6075d5852673aa11f9a149556392ceb9ab79ae3c
+
+    [name]:
+      name === "stockSymbol"
+        ? value.toUpperCase()
+        : value,
+  });
+};
 
   // =====================================
   // ADD STOCK

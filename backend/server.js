@@ -1,6 +1,10 @@
-import dotenv from "dotenv";
 import { config } from "dotenv";
 config();
+
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
+import mongoose from "mongoose";
 
 // import dotenv from "dotenv";
 // dotenv.config();
@@ -18,7 +22,6 @@ from "./socket/socketServer.js";
 
 import { checkAlerts }
 from "./services/alertService.js";
-import { clearScreenDown } from "readline";
 
 
 // CONNECT TO DATABASE
@@ -56,8 +59,21 @@ const connectDB = async () => {
     // ALERT CHECKER (Phase-3)
 
     setInterval(() => {
-      checkAlerts(io);
-    }, 60000); // every 1 min
+
+   // DB NOT CONNECTED
+   if (mongoose.connection.readyState !== 1) {
+
+      console.log(
+         "MongoDB disconnected..."
+      );
+
+      return;
+
+   }
+
+   checkAlerts(io);
+
+}, 60000);
 
 
     // START SERVER
@@ -72,10 +88,7 @@ const connectDB = async () => {
 
     console.log("Error in DB connect:", err);
 
-  }clearScreenDown
-   
-
-  // console.log(process.env.FINNHUB_API_KEY);
+  }
 
 };
 
