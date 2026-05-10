@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import CoinIcon from "./CoinIcon";
 
 function StockCard({ stock }) {
   // Mocking some data that might not be in the stock object yet
@@ -26,7 +27,7 @@ function StockCard({ stock }) {
 
       <div className="mt-8 flex justify-between items-end">
         <div className="space-y-1">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Live Price</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Current Price</p>
           <p className="text-2xl font-black text-white">${price.toFixed(2)}</p>
         </div>
         <div className="text-right space-y-1">
