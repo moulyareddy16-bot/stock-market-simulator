@@ -10,6 +10,7 @@ import { socket } from "../socket/socket";
 import StockChart from "./StockChart";
 import Skeleton from "./Skeleton";
 import { useToast } from "./Toast";
+import CoinIcon from "./CoinIcon";
 
 function StockDetails() {
   const { stockSymbol } = useParams();
@@ -203,11 +204,21 @@ function StockDetails() {
             </h2>
             <p className="mt-3 text-sm font-medium leading-6 text-slate-300">
               {pendingTrade.type === "BUY" ? "Buy" : "Sell"} {pendingTrade.quantity} {stockSymbol} share{pendingTrade.quantity === 1 ? "" : "s"} for approximately{" "}
-              <span className={`font-black ${pendingTrade.type === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
+              <span className={`font-black flex items-center justify-center gap-1 ${pendingTrade.type === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
                 ${(pendingTrade.quantity * stock.currentPrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
               ?
             </p>
+            
+            <div className="mt-4 flex flex-col items-center justify-center py-2 border-y border-slate-800/50">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Exchange Rate:</span>
+              <div className="flex items-center gap-2">
+                <CoinIcon className="w-3 h-3 text-amber-500" />
+                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                  1 Coin = $1.00
+                </span>
+              </div>
+            </div>
 
             <div className="mt-6 flex gap-3">
               <button
@@ -250,7 +261,11 @@ function StockDetails() {
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">{stock.stockSymbol}</h1>
                   {stock.change && (
-                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-black">
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                      stock.change.includes('-') 
+                        ? 'bg-red-500/10 text-red-400' 
+                        : 'bg-emerald-500/10 text-emerald-400'
+                    }`}>
                       {stock.change}
                     </span>
                   )}
@@ -259,10 +274,11 @@ function StockDetails() {
                 
                 <div className="w-full h-px bg-slate-700/50 mb-6"></div>
                 
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 opacity-60">Live Price</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 opacity-60">Current Price</p>
                 <div className="flex items-center gap-2 justify-center">
-                  <h2 className="text-4xl font-black text-emerald-400 tracking-tight">${livePrice}</h2>
-                  <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.4)]"></div>
+                  <span className="text-4xl font-black text-emerald-400">$</span>
+                  <h2 className="text-5xl font-black text-emerald-400 tracking-tight">{livePrice}</h2>
+                  <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]"></div>
                 </div>
              </div>
 
@@ -386,8 +402,10 @@ function StockDetails() {
                         <p className="text-xs font-medium text-slate-400">Shares Owned</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-black text-emerald-400">${(stock.ownedQuantity * livePrice).toLocaleString()}</p>
-                        <p className="text-xs font-medium text-slate-400">Market Value</p>
+                        <p className="text-xl font-black text-emerald-400 flex items-center justify-end gap-1">
+                          ${(stock.ownedQuantity * livePrice).toLocaleString()}
+                        </p>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-tighter">Market Value</p>
                       </div>
                     </div>
                   </div>
@@ -405,12 +423,24 @@ function StockDetails() {
 
                   <div className="py-4 border-y border-slate-700 space-y-2">
                     <div className="flex justify-between text-sm font-medium">
-                      <span className="text-slate-400">Estimated Cost</span>
-                      <span className="text-white">${(quantity * livePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      <span className="text-slate-400">Total Investment</span>
+                      <span className="text-white flex items-center gap-1">
+                        ${(quantity * livePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-slate-400">Trading Fee</span>
                       <span className="text-emerald-400">FREE</span>
+                    </div>
+
+                    <div className="mt-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 flex flex-col items-center justify-center">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Exchange Rate:</span>
+                      <div className="flex items-center gap-2">
+                        <CoinIcon className="w-3 h-3 text-amber-500" />
+                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                          1 Coin = $1.00
+                        </span>
+                      </div>
                     </div>
                   </div>
 

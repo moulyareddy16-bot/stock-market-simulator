@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../service/api";
 import { TableSkeleton } from "./Skeleton";
+import CoinIcon from "./CoinIcon";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -65,8 +66,12 @@ function Transactions() {
                       <p className="font-black text-white uppercase">{tx.stockSymbol}</p>
                     </td>
                     <td className="px-8 py-6 text-right font-black text-white">{tx.quantity}</td>
-                    <td className="px-8 py-6 text-right font-medium text-slate-400">${tx.pricePerShare?.toFixed(2)}</td>
-                    <td className="px-8 py-6 text-right font-black text-white">${tx.totalAmount?.toFixed(2)}</td>
+                    <td className="px-8 py-6 text-right font-medium text-slate-400">
+                      ${tx.pricePerShare?.toFixed(2)}
+                    </td>
+                    <td className="px-8 py-6 text-right font-black text-white">
+                      ${tx.totalAmount?.toFixed(2)}
+                    </td>
                     <td className="px-8 py-6 text-right font-medium text-slate-500 text-sm">
                       {new Date(tx.createdAt).toLocaleDateString()}
                       <span className="block text-[10px] uppercase">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

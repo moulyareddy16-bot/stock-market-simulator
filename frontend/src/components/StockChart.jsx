@@ -181,10 +181,8 @@ function StockChart({
    }}
 
    formatter={(value) => [
-
-      `₹${Number(value).toFixed(2)}`,
+      `$${Number(value).toFixed(2)}`,
       "Price"
-
    ]}
 
    contentStyle={{

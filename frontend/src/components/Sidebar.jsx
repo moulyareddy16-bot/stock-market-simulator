@@ -1,64 +1,80 @@
 import { NavLink } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({ isCollapsed, setIsCollapsed }) {
   const navItems = [
-    { name: "Portfolio", path: "/portfolio", icon: <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /> },
-    { name: "Market", path: "/stocks", icon: <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5" /> },
-    { name: "History", path: "/transactions", icon: <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-    { name: "AI Analysis", path: "/ai-suggestions", icon: <path d="M12 8V4H8M16 4h-4v4M8 12h8M12 16v4M12 12v4M20 12h-4M8 12H4M12 8l4 4-4 4-4-4 4-4z" /> },
+    { name: "Portfolio", path: "/portfolio", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
+    { name: "Market", path: "/stocks", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5" /></svg> },
+    { name: "History", path: "/transactions", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+    { name: "AI Analysis", path: "/ai-suggestions", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8M16 4h-4v4M8 12h8M12 16v4M12 12v4M20 12h-4M8 12H4M12 8l4 4-4 4-4-4 4-4z" /></svg> },
     { 
-  name: "Leaderboard", 
-  path: "/leaderboard",
-  icon: (
-    <path d="M8 21h8M12 17v4M7 4h10l-1 7a4 4 0 0 1-4 3 4 4 0 0 1-4-3L7 4z" />
-  )
-},
-    { name: "Profile", path: "/profile", icon: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /> },
+      name: "Leaderboard", 
+      path: "/leaderboard",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 21h8M12 17v4M7 4h10l-1 7a4 4 0 0 1-4 3 4 4 0 0 1-4-3L7 4z" /></svg>
+      )
+    },
+    { name: "Profile", path: "/profile", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg> },
   ];
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 lg:w-64 bg-[#020617] border-r border-slate-800 transition-all duration-300 z-40 overflow-y-auto">
-      <div className="flex flex-col h-full py-6">
+    <aside className={`fixed left-0 top-16 h-[calc(100vh-64px)] ${isCollapsed ? "w-20" : "w-20 lg:w-64"} bg-[#020617] border-r border-slate-800 transition-all duration-300 z-40 overflow-y-auto`}>
+      <div className="flex flex-col h-full py-4">
+        {/* Toggle Button */}
+        <div className={`px-4 mb-4 flex ${isCollapsed ? "justify-center" : "justify-end"}`}>
+           <button 
+             onClick={() => setIsCollapsed(!isCollapsed)}
+             className="p-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all group"
+             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+           >
+             <svg 
+               width="18" 
+               height="18" 
+               viewBox="0 0 24 24" 
+               fill="none" 
+               stroke="currentColor" 
+               strokeWidth="2.5" 
+               strokeLinecap="round" 
+               strokeLinejoin="round"
+               className={`transition-transform duration-500 ${isCollapsed ? "rotate-180" : ""}`}
+             >
+                <polyline points="11 17 6 12 11 7" />
+                <polyline points="18 17 13 12 18 7" />
+             </svg>
+           </button>
+        </div>
+
         <nav className="flex-1 px-4 space-y-2">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-4 px-4 py-3 rounded-xl transition-all group ${
+                `flex items-center ${isCollapsed ? "justify-center" : "gap-4"} px-4 py-3 rounded-xl transition-all group ${
                   isActive
                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent"
                 }`
               }
+              title={isCollapsed ? item.name : ""}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="shrink-0"
-              >
+              <div className="shrink-0 flex items-center justify-center w-5 h-5">
                 {item.icon}
-              </svg>
-              <span className="hidden lg:block font-medium">{item.name}</span>
+              </div>
+              {!isCollapsed && <span className="hidden lg:block font-bold text-sm tracking-tight">{item.name}</span>}
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-4 mt-auto">
-          <div className="p-4 rounded-2xl bg-linear-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 hidden lg:block">
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Pro Tip</p>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Leverage our advanced AI Analysis to identify market trends and maximize your virtual gains!
-            </p>
+        {!isCollapsed && (
+          <div className="px-4 mt-auto mb-4 hidden lg:block">
+            <div className="p-4 rounded-2xl bg-linear-to-br from-emerald-500/10 to-transparent border border-emerald-500/10">
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">AI Intelligence</p>
+              <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase">
+                Identify market trends with our smart analysis tools.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );
