@@ -1,5 +1,6 @@
 import { userModel } from "../models/UserModel.js";
 import { transactionModel } from "../models/transactionModel.js";
+import { logAdminActivity } from "./adminActivityController.js";
 import axios from "axios";
 
 // Get all users with total transactions
@@ -54,6 +55,15 @@ export const toggleUserStatus = async (req, res, next) => {
     // Use findByIdAndUpdate to bypass pre-save validators (like username length) for older records
     await userModel.findByIdAndUpdate(userId, { isUserActive: newStatus });
 
+    // Log Activity
+    await logAdminActivity(
+      req.user.id,
+      "USER_STATUS",
+      "USER",
+      user.username,
+      `Admin ${newStatus ? 'activated' : 'deactivated'} trader: ${user.username}`
+    );
+
     res.status(200).json({
       message: `User ${newStatus ? 'activated' : 'deactivated'} successfully`,
       payload: { ...user.toObject(), isUserActive: newStatus }
@@ -67,15 +77,24 @@ export const toggleUserStatus = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-
-    // Optional: Also delete their transactions to clean up DB
-    await transactionModel.deleteMany({ userId });
-
-    const user = await userModel.findByIdAndDelete(userId);
-
+    
+    const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    // Optional: Also delete their transactions to clean up DB
+    await transactionModel.deleteMany({ userId });
+    await userModel.findByIdAndDelete(userId);
+
+    // Log Activity
+    await logAdminActivity(
+      req.user.id,
+      "DELETE_USER",
+      "USER",
+      userId,
+      `Admin permanently deleted trader: ${user.username}`
+    );
 
     res.status(200).json({ message: "User and their transactions deleted successfully" });
   } catch (error) {

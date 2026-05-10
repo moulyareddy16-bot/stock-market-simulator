@@ -1,6 +1,7 @@
 import { stockModel } from "../models/StockModel.js";
 import axios from "axios";
 import { getHistoricalStockData } from "../services/stockService.js";
+import { logAdminActivity } from "./adminActivityController.js";
 // import { config } from "dotenv";
 // config();
 import { validateStockSymbol } from "../services/finnhubService.js";
@@ -159,6 +160,15 @@ export const addStock =
 
             });
 
+         // Log Activity
+         await logAdminActivity(
+            req.user.id,
+            "ADD_STOCK",
+            "STOCK",
+            stockSymbol,
+            `Stock manager added new stock to market: ${stockSymbol} (${companyData.name})`
+         );
+
          // RESPONSE
          res.status(201).json({
 
@@ -273,10 +283,13 @@ async (req, res, next) => {
             isActive: false
          });
 
+      const uniqueExchanges = await stockModel.distinct("exchange", searchFilter);
+      const totalExchanges = uniqueExchanges.length;
+
       const totalPages =
          Math.ceil(totalStocks / limit);
 
-      console.log("Backend sending stocks data:", { totalStocks, totalActive, totalInactive });
+      console.log("Backend sending stocks data:", { totalStocks, totalActive, totalInactive, totalExchanges });
 
       res.status(200).json({
 
@@ -287,6 +300,12 @@ async (req, res, next) => {
          totalPages,
 
          totalStocks,
+
+         totalActive,
+
+         totalInactive,
+
+         totalExchanges,
 
          payload: healedStocks
       });
@@ -327,6 +346,15 @@ export const deleteStock = async (req, res, next) => {
 
       }
 
+
+      // Log Activity
+      await logAdminActivity(
+         req.user.id,
+         "DELETE_STOCK",
+         "STOCK",
+         stockSymbol,
+         `Stock manager permanently removed stock from market: ${stockSymbol}`
+      );
 
       res.status(200).json({
 
@@ -539,6 +567,15 @@ export const toggleStockStatus =
 
          await stock.save();
 
+         // Log Activity
+         await logAdminActivity(
+            req.user.id,
+            "STOCK_STATUS",
+            "STOCK",
+            symbol,
+            `Stock manager ${stock.isActive ? 'activated' : 'deactivated'} stock: ${symbol}`
+         );
+
          res.status(200).json({
 
             message:
@@ -580,28 +617,22 @@ export const getSingleStock = async (req, res, next) => {
       let profile = {};
 
       try {
-         // 1. Get Quote for Price & Change
-         const quoteRes = await axios.get(
-            `https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
-         );
+         // Fetch quote, metrics, and profile in parallel
+         const [quoteRes, metricRes, profileRes] = await Promise.all([
+            axios.get(`https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`),
+            axios.get(`https://finnhub.io/api/v1/stock/metric?symbol=${stockSymbol}&metric=all&token=${process.env.FINNHUB_API_KEY}`),
+            axios.get(`https://finnhub.io/api/v1/stock/profile2?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`)
+         ]);
+
          currentPrice = quoteRes.data.c || 0;
          const dp = quoteRes.data.dp || 0;
          change = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
 
-         // 2. Get Basic Financials for PE & Dividend
-         const metricRes = await axios.get(
-            `https://finnhub.io/api/v1/stock/metric?symbol=${stockSymbol}&metric=all&token=${process.env.FINNHUB_API_KEY}`
-         );
-         
          if (metricRes.data && metricRes.data.metric) {
             peRatio = metricRes.data.metric.peExclExtraTTM ? metricRes.data.metric.peExclExtraTTM.toFixed(2) : "N/A";
             divYield = metricRes.data.metric.dividendYieldIndicatedAnnual ? metricRes.data.metric.dividendYieldIndicatedAnnual.toFixed(2) + "%" : "N/A";
          }
 
-         // 3. Get Company Profile
-         const profileRes = await axios.get(
-            `https://finnhub.io/api/v1/stock/profile2?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`
-         );
          if (profileRes.data) {
             profile = {
                sector: profileRes.data.finnhubIndustry,

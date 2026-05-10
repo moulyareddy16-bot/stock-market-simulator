@@ -1,4 +1,4 @@
-import {Schema, model} from mongoose
+import mongoose, { Schema, model } from "mongoose";
 
 //portfolio model
 //userId, stockSymbol, StockName, quantity, avgBuyPrice
@@ -28,4 +28,4 @@ const portfolioSchema = new Schema({
 })
 
 //generate portfolio model
-export const portfolioModel = model("portfolio", portfolioSchema)
+export const portfolioModel = mongoose.models.portfolio || model("portfolio", portfolioSchema)

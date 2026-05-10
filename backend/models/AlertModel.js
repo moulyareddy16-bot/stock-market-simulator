@@ -1,5 +1,4 @@
-import { Schema, model }
-from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 // Alert model
 const alertSchema = new Schema({
@@ -65,4 +64,4 @@ const alertSchema = new Schema({
 
 
 // Generate model
-export const alertModel = model("alert", alertSchema);
+export const alertModel = mongoose.models.alert || model("alert", alertSchema);

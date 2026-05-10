@@ -46,6 +46,11 @@ export const loginUser = async(req, res, next)=>{
             return res.status(400).json({message:"Please Register"})
         }
 
+        // Check if user is blocked by admin
+        if (user.role === "trader" && user.isUserActive === false) {
+            return res.status(403).json({ message: "Your account has been blocked by the Administrator. Please contact support." })
+        }
+
         //compare passwords
         const isMatched = await compare(password, user.password)
 

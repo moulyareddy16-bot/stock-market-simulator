@@ -24,13 +24,13 @@ function Transactions() {
   if (loading) return <div className="p-10"><TableSkeleton rows={10} /></div>;
 
   return (
-    <div className="space-y-10 animate-fade-in pb-20">
-      <header>
+    <div className="w-full space-y-10 animate-fade-in pb-20">
+      <header className="text-center">
         <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">Transaction History</h1>
         <p className="text-slate-400 mt-1 font-medium">Keep track of all your simulated trading activity</p>
       </header>
 
-      <section className="glass-card rounded-[2.5rem] overflow-hidden border-slate-800/50">
+      <section className="glass-card rounded-[2.5rem] overflow-hidden border-slate-800/50 w-full">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

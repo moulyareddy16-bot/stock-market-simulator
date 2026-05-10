@@ -11,6 +11,7 @@ import alertRouter from "./routes/alertRoute.js";
 import historicalRouter from "./routes/historicalRoute.js";
 import userRouter from "./routes/userRoute.js";
 import aiRouter from "./routes/aiRoute.js";
+import adminActivityRouter from "./routes/adminActivityRoute.js";
 import { getStockDetails } from "./controllers/stockController.js";
 import leaderboardApp from "./routes/leaderboardRoute.js";
 
@@ -57,6 +58,7 @@ app.use("/api/alerts", alertRouter)
 
 app.use("/api/historical", historicalRouter)
 app.use("/api/users", userRouter)
+app.use("/api/admin/activity", adminActivityRouter)
 app.get("/api/ai/sanity", (req, res) => res.json({ success: true, message: "AI Server is reachable" }));
 
 // const leaderboardApp = require("./routes/leaderboardRoute");
