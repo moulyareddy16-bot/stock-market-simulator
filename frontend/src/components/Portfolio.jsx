@@ -4,6 +4,7 @@ import { TableSkeleton } from "./Skeleton";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler } from 'chart.js';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Link } from "react-router-dom";
+import CoinIcon from "./CoinIcon";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
 
@@ -68,20 +69,23 @@ function Portfolio() {
       </header>
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          { label: "Wallet Balance", value: summary?.walletBalance, icon: "💵" },
-          { label: "Total Investment", value: summary?.totalInvestment, icon: "💰" },
-          { label: "Current Value", value: summary?.totalCurrentValue, icon: "🏦" },
-          { label: "Total Profit", value: summary?.totalProfit, icon: "📈", highlight: true }
+          { label: "Finnova Credits", value: summary?.walletBalance, isCredits: true },
+          { label: "Total Spent", value: summary?.totalInvestment },
+          { label: "Market Value", value: summary?.totalCurrentValue }
         ].map((item, i) => (
           <div key={i} className="glass-card p-8 rounded-[2rem] relative overflow-hidden group">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">{item.label}</p>
             <div className="flex items-end justify-between">
-              <h3 className={`text-3xl font-black ${item.highlight ? (item.value >= 0 ? "text-emerald-400" : "text-red-400") : "text-white"}`}>
-                ${(item.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <h3 className={`text-3xl font-black flex items-center ${item.highlight ? (item.value >= 0 ? "text-emerald-400" : "text-red-400") : "text-white"}`}>
+                {item.isCredits ? (
+                  <CoinIcon className="w-6 h-6 mr-2 text-amber-400" />
+                ) : (
+                  <span className="mr-1">$</span>
+                )}
+                {(item.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </h3>
-              <span className="text-2xl">{item.icon}</span>
             </div>
             <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
           </div>
@@ -107,7 +111,7 @@ function Portfolio() {
               <Doughnut data={donutData} options={{ cutout: '82%', plugins: { legend: { display: false } } }} />
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total P/L</p>
-                <p className={`text-2xl font-black ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                <p className={`text-2xl font-black flex items-center ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                   ${Math.abs(summary?.totalProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
                 <div className={`w-8 h-1 rounded-full mt-2 ${summary?.totalProfit >= 0 ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
@@ -179,11 +183,15 @@ function Portfolio() {
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right font-black text-white">{stock.ownedQuantity}</td>
-                    <td className="px-8 py-6 text-right font-medium text-slate-400">${stock.avgPrice?.toFixed(2)}</td>
-                    <td className="px-8 py-6 text-right font-black text-white">${stock.currentPrice?.toFixed(2)}</td>
+                    <td className="px-8 py-6 text-right font-medium text-slate-400">
+                      ${stock.avgPrice?.toFixed(2)}
+                    </td>
+                    <td className="px-8 py-6 text-right font-black text-white">
+                      ${stock.currentPrice?.toFixed(2)}
+                    </td>
                     <td className="px-8 py-6 text-right">
                       <div className={`font-black ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {stock.profitLoss >= 0 ? "+" : ""}${stock.profitLoss?.toFixed(2)}
+                        {stock.profitLoss >= 0 ? "+" : "-"}${Math.abs(stock.profitLoss || 0).toFixed(2)}
                       </div>
                       <div className={`text-[10px] font-bold ${stock.profitLoss >= 0 ? "text-emerald-500/50" : "text-red-500/50"}`}>
                         {stock.profitPercent?.toFixed(2)}%

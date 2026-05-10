@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../service/api";
 import Skeleton from "./Skeleton";
+import CoinIcon from "./CoinIcon";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -193,12 +194,13 @@ function Profile() {
         {/* WALLET SUMMARY */}
         <aside>
           <div className="glass-card p-8 rounded-[2.5rem] bg-linear-to-br from-emerald-500/10 via-transparent to-transparent border-emerald-500/10">
-            <h3 className="text-xl font-black text-white mb-6">Financial Overview</h3>
+            <h3 className="text-xl font-black text-white mb-6">Finnova Credits</h3>
             <div className="space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Available Wallet</p>
-                <h4 className="text-4xl font-black text-white">
-                  ${user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Available Credits</p>
+                <h4 className="text-4xl font-black text-white flex items-center gap-2">
+                  <CoinIcon className="w-8 h-8 text-amber-400" />
+                  {user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </h4>
               </div>
               
@@ -306,9 +308,10 @@ function Profile() {
 
                 {/* WALLET (READ ONLY) */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Wallet Balance</label>
-                  <div className="w-full bg-slate-950/30 border border-slate-800/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-500">
-                    ${user?.walletBalance?.toLocaleString()}
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Finnova Credits</label>
+                  <div className="w-full bg-slate-950/30 border border-slate-800/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 flex items-center gap-2">
+                    <CoinIcon className="w-4 h-4 text-amber-600" />
+                    {user?.walletBalance?.toLocaleString()}
                   </div>
                 </div>
               </div>

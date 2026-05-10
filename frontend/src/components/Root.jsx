@@ -2,12 +2,13 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function Root() {
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem("role");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Auth pages should not have sidebar/navbar sometimes, 
   // but for now, we'll just toggle the sidebar based on role and path.
@@ -26,9 +27,9 @@ function Root() {
       <Navbar />
       
       <div className="flex flex-1 pt-16">
-        {showSidebar && <Sidebar />}
+        {showSidebar && <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />}
         
-        <main className={`flex-1 flex flex-col transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
+        <main className={`flex-1 flex flex-col transition-all duration-300 ${showSidebar ? (isSidebarCollapsed ? "ml-20" : "ml-20 lg:ml-64") : ""}`}>
           <div className={`flex-1 ${location.pathname.startsWith("/admin") ? "" : "p-6 lg:px-14 py-10 w-full"}`}>
             <Outlet />
           </div>

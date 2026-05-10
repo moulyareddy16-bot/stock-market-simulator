@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import CoinIcon from "./CoinIcon";
 
 function StockCard({ stock }) {
   // Mocking some data that might not be in the stock object yet

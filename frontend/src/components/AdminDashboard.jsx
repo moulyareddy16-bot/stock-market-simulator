@@ -8,6 +8,7 @@ import {
 } from "../service/userService";
 import { getAllStocks, getStockDetails } from "../service/stockService";
 import { getAdminActivities, clearAdminActivities as clearHistory } from "../service/adminActivityService";
+import CoinIcon from "./CoinIcon";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -128,9 +129,8 @@ function AdminDashboard() {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
       minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount || 0);
   };
 
@@ -323,7 +323,8 @@ function AdminDashboard() {
                   <div className={`flex-1 space-y-4 mb-6 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-slate-400">Wallet Balance</span>
-                      <span className="font-semibold text-emerald-300">
+                      <span className="font-semibold text-amber-300 flex items-center gap-1">
+                        <CoinIcon className="w-4 h-4 text-amber-400" />
                         {formatCurrency(user.walletBalance)}
                       </span>
                     </div>
@@ -499,7 +500,7 @@ function AdminDashboard() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Day High/Low</span>
-                        <span className="text-slate-300">{stock.h ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
+                        <span className="text-slate-300">{stock.h && stock.l ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
                       </div>
                       {/* Removed Available Qty */}
                     </div>
@@ -738,10 +739,10 @@ function AdminDashboard() {
                                   <tr key={stock.stockSymbol} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
                                     <td className="px-6 py-4 font-bold text-white">{stock.stockSymbol}</td>
                                     <td className="px-6 py-4">{stock.ownedQuantity}</td>
-                                    <td className="px-6 py-4">{formatCurrency(stock.avgPrice)}</td>
-                                    <td className="px-6 py-4">{formatCurrency(stock.currentPrice)}</td>
+                                    <td className="px-6 py-4">${formatCurrency(stock.avgPrice)}</td>
+                                    <td className="px-6 py-4">${formatCurrency(stock.currentPrice)}</td>
                                     <td className={`px-6 py-4 font-medium ${stock.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                      {stock.profitLoss >= 0 ? '+' : ''}{formatCurrency(stock.profitLoss)} ({stock.profitPercent.toFixed(2)}%)
+                                      {stock.profitLoss >= 0 ? '+' : '-'}${formatCurrency(Math.abs(stock.profitLoss))} ({stock.profitPercent.toFixed(2)}%)
                                     </td>
                                   </tr>
                                 ))

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+import CoinIcon from "./CoinIcon";
+
 function Leaderboard() {
 
   const [leaders, setLeaders] = useState([]);
@@ -220,7 +222,7 @@ function Leaderboard() {
           <div>Rank</div>
           <div>Trader</div>
           <div>Score</div>
-          <div>Profit</div>
+          <div>Profit/Loss</div>
           <div>Win Rate</div>
           <div>Trades</div>
           <div>Status</div>
@@ -259,7 +261,7 @@ function Leaderboard() {
               {trader.score}
             </div>
 
-            <div className="font-semibold text-emerald-400">
+            <div className={`font-semibold ${trader.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
               {trader.totalProfit >= 0 ? "+" : ""}${trader.totalProfit?.toFixed(2)}
             </div>
 
