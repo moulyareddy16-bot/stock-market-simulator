@@ -11,7 +11,7 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StockDetails from "./components/StockDetails";
 import AdminDashboard from "./components/AdminDashboard";
-import AiSuggestions from "./components/AiSuggestions";
+
 import Leaderboard from "./components/Leaderboard";
 import AICommandCenter from "./components/ai/AICommandCenter";
 
@@ -66,14 +66,6 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["trader"]}>
               <Transactions />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "ai-suggestions",
-          element: (
-            <ProtectedRoute allowedRoles={["trader"]}>
-              <AiSuggestions />
             </ProtectedRoute>
           ),
         },

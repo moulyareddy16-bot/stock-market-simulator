@@ -17,7 +17,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
         </svg>
       )
     },
-    { name: "AI Analysis", path: "/ai-suggestions", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8M16 4h-4v4M8 12h8M12 16v4M12 12v4M20 12h-4M8 12H4M12 8l4 4-4 4-4-4 4-4z" /></svg> },
+
     { 
       name: "Leaderboard", 
       path: "/leaderboard",
