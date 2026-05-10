@@ -1,18 +1,9 @@
 import api from "./api";
 
 // GET ALL STOCKS
-export const getAllStocks =
-  async (page = 1, search = "") => {
-
-    const response =
-      await api.get(
-
-        `/stocks?page=${page}&search=${search}`
-
-      );
-
-    return response.data;
-
+export const getAllStocks = async (page = 1, search = "", limit = 8) => {
+  const response = await api.get(`/stocks?page=${page}&search=${search}&limit=${limit}`);
+  return response.data;
 };
 
 // ADD STOCK

@@ -21,6 +21,9 @@ function AdminDashboard() {
   const [stocks, setStocks] = useState([]);
   const [stockPage, setStockPage] = useState(1);
   const [totalStockPages, setTotalStockPages] = useState(1);
+
+  // Users Pagination State
+  const [userPage, setUserPage] = useState(1);
   const [stocksLoading, setStocksLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [stockSearch, setStockSearch] = useState("");
@@ -198,6 +201,16 @@ function AdminDashboard() {
     );
   }
 
+  const filteredUsers = users
+    .filter(u => 
+      u.username.toLowerCase().includes(userSearch.toLowerCase()) || 
+      u.email.toLowerCase().includes(userSearch.toLowerCase())
+    )
+    .sort((a, b) => (b.isUserActive === a.isUserActive ? 0 : b.isUserActive ? 1 : -1));
+
+  const totalUserPages = Math.ceil(filteredUsers.length / 8) || 1;
+  const displayedUsers = filteredUsers.slice((userPage - 1) * 8, userPage * 8);
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] text-white">
 
@@ -249,7 +262,10 @@ function AdminDashboard() {
                     type="text"
                     placeholder="Search traders..."
                     value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
+                    onChange={(e) => {
+                      setUserSearch(e.target.value);
+                      setUserPage(1);
+                    }}
                     className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
                   />
                 </div>
@@ -265,13 +281,7 @@ function AdminDashboard() {
 
             {/* Users Grid */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {users
-                .filter(u => 
-                  u.username.toLowerCase().includes(userSearch.toLowerCase()) || 
-                  u.email.toLowerCase().includes(userSearch.toLowerCase())
-                )
-                .sort((a, b) => (b.isUserActive === a.isUserActive ? 0 : b.isUserActive ? 1 : -1))
-                .map((user) => (
+              {displayedUsers.map((user) => (
                 <div
                   key={user._id}
                   className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!user.isUserActive ? 'border-red-500/20' : ''}`}
@@ -356,6 +366,27 @@ function AdminDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-8 flex justify-center gap-4">
+              <button
+                onClick={() => setUserPage(Math.max(1, userPage - 1))}
+                disabled={userPage === 1}
+                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-white disabled:opacity-40 transition hover:bg-slate-700"
+              >
+                Previous
+              </button>
+              <span className="flex items-center text-slate-400">
+                Page {userPage} of {totalUserPages}
+              </span>
+              <button
+                onClick={() => setUserPage(Math.min(totalUserPages, userPage + 1))}
+                disabled={userPage === totalUserPages}
+                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-white disabled:opacity-40 transition hover:bg-slate-700"
+              >
+                Next
+              </button>
             </div>
           </>
         )}
