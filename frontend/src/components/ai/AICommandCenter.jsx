@@ -1,6 +1,7 @@
 // frontend/src/components/ai/AICommandCenter.jsx
 
 import { useEffect, useState } from "react";
+import api from "../../service/api";
 
 import AISummaryCard from "./AISummaryCard";
 import AITradeSignals from "./AITradeSignals";
@@ -58,30 +59,15 @@ function AICommandCenter() {
 
         setLoading(true);
 
-        const response = await fetch(
-          "http://localhost:5000/api/ai/suggestions",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const res = await api.get("/ai/suggestions");
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "AI fetch failed");
-        }
-
-        if (data?.payload) {
-          setAiData(data.payload);
+        if (res?.data?.payload) {
+          setAiData(res.data.payload);
         }
 
       } catch (err) {
 
-        console.log(err);
+        console.error(err);
 
         setError(
           "Institutional AI engine temporarily unavailable."

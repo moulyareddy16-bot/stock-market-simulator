@@ -39,19 +39,16 @@ function AIChatPanel() {
 
     try {
       const res = await api.post(
-        "/api/ai/chat",
+        "/ai/chat",
         {
           message: question,
-        },
-        {
-          withCredentials: true,
         }
       );
 
       const aiReply = {
         role: "assistant",
         content:
-          res?.data?.payload?.reply ||
+          res?.data?.response ||
           "AI engine could not generate a response.",
       };
 

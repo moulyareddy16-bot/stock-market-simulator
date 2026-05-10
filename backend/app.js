@@ -1,10 +1,11 @@
-import exp from "express"
+import exp from "express";
 import cookieParser from "cookie-parser";
-import cors from 'cors'
-import path from 'path';
-import aiRouter from "./routes/aiRoute.js";
+import cors from "cors";
+import path from "path";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
-import authRouter from "./routes/authRoute.js"
+import authRouter from "./routes/authRoute.js";
 import stockRouter from "./routes/stockRoute.js";
 import transactionRouter from "./routes/transactionRoute.js";
 import portfolioRouter from "./routes/portfolioRoute.js";
@@ -12,97 +13,131 @@ import alertRouter from "./routes/alertRoute.js";
 import historicalRouter from "./routes/historicalRoute.js";
 import userRouter from "./routes/userRoute.js";
 import aiRouter from "./routes/aiRoute.js";
+import aiChatRouter from "./routes/aiChatRoute.js";
 import adminActivityRouter from "./routes/adminActivityRoute.js";
-import { getStockDetails } from "./controllers/stockController.js";
 import leaderboardApp from "./routes/leaderboardRoute.js";
 
-import aiChatRouter from "./routes/aiChatRoute.js";
-
-
-
-//create express app
+// ──────────────────────────────────────────────
+// CREATE EXPRESS APP
+// ──────────────────────────────────────────────
 const app = exp();
 
+// ──────────────────────────────────────────────
+// SECURITY HEADERS (helmet)
+// ──────────────────────────────────────────────
+app.use(helmet());
 
-//body parser middleware
-app.use(exp.json());
+// ──────────────────────────────────────────────
+// BODY PARSER
+// ──────────────────────────────────────────────
+app.use(exp.json({ limit: "1mb" }));
 
+// ──────────────────────────────────────────────
+// COOKIE PARSER
+// ──────────────────────────────────────────────
+app.use(cookieParser());
 
-//add cookie parser middeleware
-app.use(cookieParser())
-
-
-//enable cors
+// ──────────────────────────────────────────────
+// CORS — Explicit origins only
+// ──────────────────────────────────────────────
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-  credentials: true
-}))
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    credentials: true,
+}));
 
-app.use('/uploads', exp.static('uploads'))
+// ──────────────────────────────────────────────
+// STATIC UPLOADS
+// ──────────────────────────────────────────────
+app.use("/uploads", exp.static("uploads"));
 
-// AI ROUTE (Moved to top for priority)
-app.use("/api/ai", aiRouter)
-
-
-
-
-// Routes
-app.use("/api/auth", authRouter)
-
-app.use("/api/stocks", stockRouter)
-app.get("/api/stocks/test", (req, res) => res.json({ msg: "test" }));
-
-app.use("/api/transactions", transactionRouter)
-
-app.use("/api/portfolio", portfolioRouter)
-
-app.use("/api/alerts", alertRouter)
-
-app.use("/api/historical", historicalRouter)
-app.use("/api/users", userRouter)
-app.use("/api/admin/activity", adminActivityRouter)
-app.get("/api/ai/sanity", (req, res) => res.json({ success: true, message: "AI Server is reachable" }));
-
-// const leaderboardApp = require("./routes/leaderboardRoute");
-
-app.use("/trader-api", leaderboardApp);
-
-app.use("/api/ai", aiRouter);
-
-app.use("/api/ai", aiChatRouter);
-
-//to handle invalid path
-app.use((req, res, next) => {
-  console.log(req.url);
-  res.status(404).json({ message: `path ${req.url} is invalid` });
+// ──────────────────────────────────────────────
+// RATE LIMITERS
+// ──────────────────────────────────────────────
+const authLimiter = rateLimit({
+    windowMs: 60 * 1000,       // 1 minute
+    max: 20,
+    message: { message: "Too many auth attempts. Try again in 1 minute." },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
-//Error handling middleware
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000,       // 1 minute
+    max: 10,
+    message: { message: "AI rate limit reached. Try again in 1 minute." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    message: { message: "Too many requests. Please slow down." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Apply general limiter to all routes
+app.use(generalLimiter);
+
+// ──────────────────────────────────────────────
+// ROUTES
+// ──────────────────────────────────────────────
+app.use("/api/auth", authLimiter, authRouter);
+app.use("/api/stocks", stockRouter);
+app.use("/api/transactions", transactionRouter);
+app.use("/api/portfolio", portfolioRouter);
+app.use("/api/alerts", alertRouter);
+app.use("/api/historical", historicalRouter);
+app.use("/api/users", userRouter);
+app.use("/api/admin/activity", adminActivityRouter);
+
+// AI routes — with dedicated rate limiter (Gemini API costs money)
+app.use("/api/ai", aiLimiter, aiRouter);
+app.use("/api/ai", aiLimiter, aiChatRouter);
+
+// Trader leaderboard
+app.use("/trader-api", leaderboardApp);
+
+// ──────────────────────────────────────────────
+// 404 HANDLER
+// ──────────────────────────────────────────────
+app.use((req, res, next) => {
+    res.status(404).json({ message: `Path ${req.url} not found` });
+});
+
+// ──────────────────────────────────────────────
+// GLOBAL ERROR HANDLER
+// ──────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.log("error is ", err)
-  console.log("Full error:", JSON.stringify(err, null, 2));
-  //ValidationError
-  if (err.name === "ValidationError") {
-    return res.status(400).json({ message: "error occurred", error: err.message });
-  }
-  //CastError
-  if (err.name === "CastError") {
-    return res.status(400).json({ message: "error occurred", error: err.message });
-  }
-  const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
-  const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
+    // Only log full error in development
+    if (process.env.NODE_ENV !== "production") {
+        console.error("Error:", err);
+    } else {
+        console.error("Error:", err.message);
+    }
 
-  if (errCode === 11000) {
-    const field = Object.keys(keyValue)[0];
-    const value = keyValue[field];
-    return res.status(409).json({
-      message: "error occurred",
-      error: `${field} "${value}" already exists`,
-    });
-  }
+    if (err.name === "ValidationError") {
+        return res.status(400).json({ message: "Validation error", error: err.message });
+    }
 
-  //send server side error
-  res.status(500).json({ message: "error occurred", error: "Server side error" });
+    if (err.name === "CastError") {
+        return res.status(400).json({ message: "Invalid ID format", error: err.message });
+    }
+
+    const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
+    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
+
+    if (errCode === 11000) {
+        const field = Object.keys(keyValue)[0];
+        const value = keyValue[field];
+        return res.status(409).json({
+            message: "Duplicate entry",
+            error: `${field} "${value}" already exists`,
+        });
+    }
+
+    res.status(500).json({ message: "Internal server error" });
 });
 
 export default app;

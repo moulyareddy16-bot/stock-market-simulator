@@ -1,111 +1,65 @@
-import {
-    GoogleGenerativeAI,
-}
-from "@google/generative-ai";
+import { generateText } from "./aiGeminiService.js";
+import { getUserMemory, saveUserMemory, saveAIResponse } from "./aiMemoryService.js";
 
-import dotenv from "dotenv";
-
-dotenv.config();
-
-import {
-    getUserMemory,
-    saveUserMemory,
-    saveAIResponse,
-}
-from "./aiMemoryService.js";
-
-const genAI =
-    new GoogleGenerativeAI(
-        process.env.GEMINI_API_KEY
-    );
-
-export const generateAIChatResponse =
-async ({
-
+// ──────────────────────────────────────────────
+// GENERATE AI CHAT RESPONSE
+// Uses centralized Gemini client (generateText)
+// ──────────────────────────────────────────────
+export const generateAIChatResponse = async ({
     userId,
     message,
     portfolioData,
     marketData,
-
 }) => {
-
     try {
+        // Persist user message to memory
+        saveUserMemory(userId, message);
 
-        // SAVE USER MESSAGE
-        saveUserMemory(
-            userId,
-            message
-        );
+        // Retrieve conversation context (last 20 messages)
+        const memory = getUserMemory(userId);
 
-        // GET MEMORY
-        const memory =
-            getUserMemory(userId);
-
-        // BUILD CONTEXT
-        const conversationContext =
-            memory.map((m) => {
-
-                return `${m.role}: ${m.content}`;
-
-            }).join("\n");
+        const conversationContext = memory
+            .map((m) => `${m.role === "user" ? "Trader" : "Alpha-Insight"}: ${m.content}`)
+            .join("\n");
 
         const prompt = `
+You are Alpha-Insight AI — a professional institutional financial assistant.
 
-You are Alpha-Insight AI.
+SYSTEM RULES:
+- Be concise and trader-focused. Maximum 3 paragraphs.
+- Always provide actionable advice with reasoning.
+- Warn about risks when relevant.
+- Reference technical indicators (RSI, sentiment) when available.
+- Never hallucinate prices or data not provided below.
+- If asked about a stock not in the portfolio or market data, say so honestly.
 
-You are a professional financial AI assistant.
+CONVERSATION HISTORY:
+${conversationContext || "No prior conversation."}
 
-MEMORY:
-${conversationContext}
-
-PORTFOLIO:
+TRADER'S PORTFOLIO:
 ${JSON.stringify(portfolioData, null, 2)}
 
-MARKET:
+MARKET INTELLIGENCE:
 ${JSON.stringify(marketData, null, 2)}
 
-USER MESSAGE:
+TRADER'S QUESTION:
 ${message}
 
-RULES:
-- concise
-- trader focused
-- actionable
-- explain reasoning
-- warn about risk
-- use technical indicators
-- explain sentiment conflicts
+Respond as Alpha-Insight AI:`;
 
-`;
+        const text = await generateText(prompt);
 
-        const model =
-            genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-            });
+        if (!text) {
+            return "AI conversation engine is temporarily unavailable. Please try again shortly.";
+        }
 
-        const result =
-            await model.generateContent(
-                prompt
-            );
-
-        const response =
-            await result.response;
-
-        const text =
-            response.text();
-
-        // SAVE AI MEMORY
-        saveAIResponse(
-            userId,
-            text
-        );
+        // Persist AI response to memory
+        saveAIResponse(userId, text);
 
         return text;
 
     } catch (err) {
-
-        console.log(err);
-
-        return "AI conversation unavailable.";
+        console.error("AI Conversation error:", err.message);
+        return "AI conversation engine is temporarily unavailable. Please try again shortly.";
     }
 };

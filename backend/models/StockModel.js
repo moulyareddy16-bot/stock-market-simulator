@@ -121,4 +121,10 @@ const stockSchema = new Schema({
 });
 
 
-export const stockModel = model("stock", stockSchema)
+// ── INDEXES ──
+// isActive: used every 5s by realtimeService (find active stocks)
+stockSchema.index({ isActive: 1 });
+// companyName for text search in getAllStocks
+stockSchema.index({ companyName: 1 });
+
+export const stockModel = model("stock", stockSchema);

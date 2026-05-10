@@ -13,6 +13,7 @@ import StockDetails from "./components/StockDetails";
 import AdminDashboard from "./components/AdminDashboard";
 import AiSuggestions from "./components/AiSuggestions";
 import Leaderboard from "./components/Leaderboard";
+import AICommandCenter from "./components/ai/AICommandCenter";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -73,6 +74,14 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["trader"]}>
               <AiSuggestions />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "ai",
+          element: (
+            <ProtectedRoute allowedRoles={["trader"]}>
+              <AICommandCenter />
             </ProtectedRoute>
           ),
         },

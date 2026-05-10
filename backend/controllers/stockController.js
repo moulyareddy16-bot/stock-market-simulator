@@ -200,8 +200,10 @@ async (req, res, next) => {
       const limit =
          Number(req.query.limit) || 9;
 
-      const search =
-         req.query.search || "";
+      const search = req.query.search || "";
+
+      // Sanitize regex input to prevent ReDoS attacks
+      const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
       const skip =
          (page - 1) * limit;
@@ -215,24 +217,16 @@ async (req, res, next) => {
 
             {
                stockSymbol: {
-
-                  $regex: search,
-
+                  $regex: sanitizedSearch,
                   $options: "i"
-
                }
-
             },
 
             {
                companyName: {
-
-                  $regex: search,
-
+                  $regex: sanitizedSearch,
                   $options: "i"
-
                }
-
             }
 
          ]
