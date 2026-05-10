@@ -28,3 +28,15 @@ export const logAdminActivity = async (adminId, action, targetType, targetId, de
         console.error("Failed to log admin activity:", err);
     }
 };
+
+export const clearAdminActivities = async (req, res, next) => {
+    try {
+        await adminActivityModel.deleteMany({});
+        res.status(200).json({
+            success: true,
+            message: "Activity history cleared successfully"
+        });
+    } catch (err) {
+        next(err);
+    }
+};

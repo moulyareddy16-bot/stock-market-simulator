@@ -233,7 +233,7 @@ function StockDetails() {
         
         {/* TOP NAVBAR: BACK LINK & LOGOUT SPACE */}
         <div className="flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-black text-slate-500 hover:text-emerald-400 transition group">
+          <Link to={role === "stockmanager" ? "/manager" : "/stocks"} className="inline-flex items-center gap-2 text-sm font-black text-slate-500 hover:text-emerald-400 transition group">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
             Back to Market
           </Link>

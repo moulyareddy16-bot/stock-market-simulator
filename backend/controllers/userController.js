@@ -61,7 +61,7 @@ export const toggleUserStatus = async (req, res, next) => {
       "USER_STATUS",
       "USER",
       user.username,
-      `Admin ${user.isUserActive ? 'activated' : 'deactivated'} trader: ${user.username}`
+      `Admin ${newStatus ? 'activated' : 'deactivated'} trader: ${user.username}`
     );
 
     res.status(200).json({

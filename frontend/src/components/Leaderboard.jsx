@@ -260,7 +260,7 @@ function Leaderboard() {
             </div>
 
             <div className="font-semibold text-emerald-400">
-              +${trader.totalProfit}
+              {trader.totalProfit >= 0 ? "+" : ""}${trader.totalProfit?.toFixed(2)}
             </div>
 
             <div>

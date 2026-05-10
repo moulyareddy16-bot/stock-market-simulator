@@ -1,5 +1,5 @@
 import axios from "axios";
-import { transactionModel } from "../models/TransactionModel.js";
+import { transactionModel } from "../models/transactionModel.js";
 import { userModel } from "../models/UserModel.js";
 
 // GET USER PORTFOLIO
@@ -39,9 +39,10 @@ export const getPortfolio = async (req, res, next) => {
 
       // Handle SELL
       else if (tx.transactionType === "SELL") {
+        // Calculate average cost before this sell to maintain correct basis
+        const avgCost = portfolio[symbol].totalInvestment / portfolio[symbol].ownedQuantity;
         portfolio[symbol].ownedQuantity -= tx.quantity;
-        portfolio[symbol].totalInvestment -=
-          tx.quantity * tx.pricePerShare; // simple approach
+        portfolio[symbol].totalInvestment -= tx.quantity * avgCost;
       }
     });
 
@@ -86,7 +87,7 @@ export const getPortfolio = async (req, res, next) => {
     });
 
     const totalProfit =
-      totalCurrentValue - totalInvestment;
+      (totalCurrentValue + walletBalance) - 100000;
 
     // 7. Send response
     res.status(200).json({

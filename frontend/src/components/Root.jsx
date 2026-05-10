@@ -29,7 +29,7 @@ function Root() {
         {showSidebar && <Sidebar />}
         
         <main className={`flex-1 flex flex-col transition-all duration-300 ${showSidebar ? "ml-20 lg:ml-64" : ""}`}>
-          <div className={`flex-1 ${location.pathname.startsWith("/admin") ? "" : "p-6 lg:p-10 max-w-(--breakpoint-2xl) mx-auto"}`}>
+          <div className={`flex-1 ${location.pathname.startsWith("/admin") ? "" : "p-6 lg:px-14 py-10 w-full"}`}>
             <Outlet />
           </div>
           <Footer />

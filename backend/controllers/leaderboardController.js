@@ -23,8 +23,9 @@ export const getLeaderboard = async (req, res) => {
           portfolio[symbol].ownedQuantity += tx.quantity;
           portfolio[symbol].totalInvestment += tx.quantity * tx.pricePerShare;
         } else if (tx.transactionType === "SELL") {
+          const avgCost = portfolio[symbol].totalInvestment / portfolio[symbol].ownedQuantity;
           portfolio[symbol].ownedQuantity -= tx.quantity;
-          portfolio[symbol].totalInvestment -= tx.quantity * tx.pricePerShare;
+          portfolio[symbol].totalInvestment -= tx.quantity * avgCost;
         }
       });
 

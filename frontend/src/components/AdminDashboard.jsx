@@ -7,7 +7,7 @@ import {
   getUserPortfolioForAdmin
 } from "../service/userService";
 import { getAllStocks, getStockDetails } from "../service/stockService";
-import { getAdminActivities } from "../service/adminActivityService";
+import { getAdminActivities, clearAdminActivities as clearHistory } from "../service/adminActivityService";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -84,6 +84,17 @@ function AdminDashboard() {
       console.error("Failed to fetch activities:", err);
     } finally {
       setActivitiesLoading(false);
+    }
+  };
+
+  const handleClearHistory = async () => {
+    if (window.confirm("Are you sure you want to clear the entire activity history? This cannot be undone.")) {
+      try {
+        await clearHistory();
+        setActivities([]); // Update UI immediately
+      } catch (err) {
+        alert("Failed to clear history");
+      }
     }
   };
 
@@ -418,9 +429,9 @@ function AdminDashboard() {
                     {/* Stock Info Header */}
                     <div className="mb-6 flex items-center gap-4">
                       {stock.logo ? (
-                        <img src={stock.logo} alt={stock.stockSymbol} className={`h-12 w-12 rounded-full object-contain bg-white p-1 ${!stock.isActive ? 'grayscale opacity-50' : ''}`} />
+                        <img src={stock.logo} alt={stock.stockSymbol} className={`h-12 w-12 rounded-2xl object-contain ${!stock.isActive ? 'grayscale opacity-50' : ''}`} />
                       ) : (
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner ${!stock.isActive ? 'from-red-500 to-rose-600' : ''}`}>
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner ${!stock.isActive ? 'from-red-500 to-rose-600' : ''}`}>
                           {stock.stockSymbol.charAt(0)}
                         </div>
                       )}
@@ -497,13 +508,22 @@ function AdminDashboard() {
         {activeMenu === 'history' && (
           <>
             {/* Header */}
-            <div className="mb-10">
-              <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-                Activity History
-              </h1>
-              <p className="mt-2 text-slate-400">
-                Audit log of all administrative actions
-              </p>
+            <div className="mb-10 flex items-center justify-between">
+              <div>
+                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                  Activity History
+                </h1>
+                <p className="mt-2 text-slate-400">
+                  Audit log of all administrative actions
+                </p>
+              </div>
+              <button
+                onClick={handleClearHistory}
+                disabled={activities.length === 0}
+                className="group flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-6 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500/20 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-red-500/10"
+              >
+                <span className="text-lg group-hover:rotate-12 transition-transform">🗑️</span> Clear History
+              </button>
             </div>
 
             {/* Activities Table */}

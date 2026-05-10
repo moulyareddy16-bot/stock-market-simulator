@@ -44,8 +44,11 @@ stockRouter.get(
    getStockHistory
 );
 
-// Get single stock details
+// Get single stock details (DB + Basic Live)
 stockRouter.get("/:stockSymbol", getSingleStock);
+
+// Get live stock quote details (Full Finnhub format)
+stockRouter.get("/details/:stockSymbol", getStockDetails);
 
 
 stockRouter.patch(

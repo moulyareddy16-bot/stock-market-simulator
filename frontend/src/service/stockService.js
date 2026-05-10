@@ -86,9 +86,7 @@ export const getStockDetails =
 
     const response =
       await api.get(
-
-        `/stocks/${stockSymbol}`
-
+        `/stocks/details/${stockSymbol}`
       );
 
     return response.data;

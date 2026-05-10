@@ -98,27 +98,45 @@ function Portfolio() {
         </div>
 
         {/* ASSET ALLOCATION */}
-        <div className="glass-card p-8 rounded-[2.5rem] space-y-6 flex flex-col items-center">
-          <h2 className="text-xl font-black text-white self-start">Asset Allocation</h2>
-          <div className="w-full max-w-[200px] aspect-square">
-            <Doughnut data={donutData} options={{ cutout: '70%', plugins: { legend: { display: false } } }} />
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm text-slate-400">Profit / Loss</p>
-              <p
-                className={`mt-2 text-2xl font-semibold ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"
-                  }`}
-              >
-                ${summary?.totalProfit?.toFixed(2) || "0.00"}
-              </p>
-            </div>
-          </div>
-          <div className="w-full space-y-2 mt-4">
-            {portfolio.slice(0, 3).map((s, i) => (
-              <div key={s.stockSymbol} className="flex justify-between text-xs font-bold">
-                <span className="text-slate-500 uppercase tracking-wider">{s.stockSymbol}</span>
-                <span className="text-white">{((s.currentValue / summary.totalCurrentValue) * 100).toFixed(1)}%</span>
+        <div className="glass-card p-8 rounded-[2.5rem] flex flex-col">
+          <h2 className="text-xl font-black text-white mb-8">Asset Allocation</h2>
+          
+          <div className="flex flex-col items-center gap-10">
+            {/* CHART AREA */}
+            <div className="relative w-full max-w-[220px] aspect-square flex items-center justify-center">
+              <Doughnut data={donutData} options={{ cutout: '82%', plugins: { legend: { display: false } } }} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total P/L</p>
+                <p className={`text-2xl font-black ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  ${Math.abs(summary?.totalProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </p>
+                <div className={`w-8 h-1 rounded-full mt-2 ${summary?.totalProfit >= 0 ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
               </div>
-            ))}
+            </div>
+
+            {/* ASSET LIST */}
+            <div className="w-full space-y-3">
+              {portfolio.slice(0, 4).map((s, i) => (
+                <div key={s.stockSymbol} className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-slate-900/40 border border-slate-800/50 hover:border-emerald-500/30 transition-all group">
+                   <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xs font-black text-white group-hover:bg-emerald-500 group-hover:text-black transition-all">
+                     {s.stockSymbol[0]}
+                   </div>
+                   <div className="flex-1">
+                     <p className="text-sm font-black text-white uppercase leading-none mb-1">{s.stockSymbol}</p>
+                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest opacity-60">Portfolio Weight</p>
+                   </div>
+                   <div className="text-right">
+                     <p className="text-base font-black text-white">
+                       {((s.currentValue / summary.totalCurrentValue) * 100).toFixed(1)}%
+                     </p>
+                   </div>
+                </div>
+              ))}
+              
+              {portfolio.length === 0 && (
+                <p className="text-center text-xs font-bold text-slate-600 uppercase py-10 tracking-widest">No Assets Allocated</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
