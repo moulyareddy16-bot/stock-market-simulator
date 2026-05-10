@@ -1,6 +1,10 @@
 import exp from "express"
 import { verifyToken } from "../middleware/verifyToken.js"
 import { getAiSuggestions } from "../controllers/aiController.js"
+import {
+    chatWithAI
+}
+from "../controllers/aiChatController.js";
 
 const aiRouter = exp.Router()
 
@@ -9,5 +13,11 @@ aiRouter.get("/sanity", (req, res) => res.json({ success: true, message: "AI Ser
 
 // Only traders can get personalized AI suggestions
 aiRouter.get("/suggestions", verifyToken("trader"), getAiSuggestions)
+
+aiRouter.post(
+    "/chat",
+    verifyToken("trader"),
+    chatWithAI
+);
 
 export default aiRouter

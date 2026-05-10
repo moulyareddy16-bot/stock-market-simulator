@@ -1,71 +1,173 @@
 import { userModel } from "../models/UserModel.js";
 import { transactionModel } from "../models/transactionModel.js";
 
-export const getAiSuggestions = async (req, res, next) => {
+import { analyzePortfolioWithAI }
+from "../services/ai/aiPortfolioAnalyzer.js";
+
+import {
+    getCachedAIResponse,
+    setCachedAIResponse,
+}
+from "../services/ai/aiCacheService.js";
+
+export const getAiSuggestions = async (req, res) => {
+
     try {
-        console.log("AI Controller hit for user:", req.user.id);
+
+        console.log("AI Controller hit");
+
         const userId = req.user.id;
-        
-        // 1. Fetch Data with fallbacks
-        let user = null;
-        try {
-            user = await userModel.findById(userId);
-        } catch (e) {
-            console.error("User fetch fail:", e);
+
+        // ============================
+        // CACHE CHECK
+        // ============================
+
+        const cached =
+            getCachedAIResponse(userId);
+
+        if (cached) {
+
+            console.log("Returning AI cache");
+
+            return res.status(200).json({
+                success: true,
+                payload: cached,
+                cached: true,
+            });
         }
 
-        const username = user?.username || "Trader";
-        const balance = user?.walletBalance || 0;
+        // ============================
+        // USER DATA
+        // ============================
 
-        // 2. Mock Analysis (Guaranteed Success)
-        const aiResult = {
-            summary: `Hello ${username}, our AI has analyzed your portfolio. You have $${balance.toLocaleString()} in liquidity available for new strategic positions.`,
-            marketSentiment: "BULLISH",
-            traderScore: 82,
-            suggestions: [
-                {
-                    type: "STRATEGY",
-                    title: "Diversification Edge",
-                    description: "AI suggests increasing exposure to Tech and Energy sectors to balance your current risk profile.",
-                    impact: "High"
-                },
-                {
-                    type: "OPPORTUNITY",
-                    title: "Market Entry Point",
-                    description: "Current RSI indicators suggest a strong buy zone for blue-chip stocks like IBM and AAPL.",
-                    impact: "Medium"
-                },
-                {
-                    type: "HOLD",
-                    title: "Steady Accumulation",
-                    description: "Maintain your current long-term positions. The overall market trend remains positive for the next quarter.",
-                    impact: "Low"
-                },
-                {
-                    type: "BUY",
-                    title: "Growth Trend",
-                    description: "High-growth sectors are showing momentum. Consider a small position in emerging tech stocks.",
-                    impact: "Medium"
-                }
-            ]
+        const user =
+            await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        // ============================
+        // TRANSACTIONS
+        // ============================
+
+        const transactions =
+            await transactionModel.find({
+                userId,
+            });
+
+        // ============================
+        // USER PROFILE
+        // ============================
+
+        const userProfile = {
+
+            riskTolerance: "Medium",
+
+            timeHorizon: "Long Term",
+
+            primaryGoal: "Growth",
+
+            username: user.username,
+
+            balance: user.walletBalance,
         };
 
-        console.log("AI Result generated, sending response...");
+        // ============================
+        // PORTFOLIO DATA
+        // ============================
+
+        const portfolioData =
+            transactions.map((tx) => ({
+
+                symbol: tx.stockSymbol,
+
+                quantity: tx.quantity,
+
+                price: tx.pricePerShare,
+
+                type: tx.transactionType,
+
+                total: tx.totalAmount,
+            }));
+
+        // ============================
+        // MOCK MARKET DATA
+        // STEP 7 => REAL FINNHUB
+        // ============================
+
+        const marketData = [
+            {
+                symbol: "AAPL",
+                currentPrice: 210,
+                rsi: 62,
+                movingAverage50: 195,
+                sentiment: 0.82,
+                volatility: "Medium",
+            },
+            {
+                symbol: "TSLA",
+                currentPrice: 171,
+                rsi: 78,
+                movingAverage50: 165,
+                sentiment: 0.42,
+                volatility: "High",
+            },
+            {
+                symbol: "NVDA",
+                currentPrice: 980,
+                rsi: 69,
+                movingAverage50: 910,
+                sentiment: 0.91,
+                volatility: "Medium",
+            },
+        ];
+
+        // ============================
+        // AI ANALYSIS
+        // ============================
+
+        const aiResult =
+            await analyzePortfolioWithAI({
+
+                userProfile,
+
+                portfolioData,
+
+                marketData,
+            });
+
+        // ============================
+        // SAVE CACHE
+        // ============================
+
+        setCachedAIResponse(
+            userId,
+            aiResult
+        );
+
+        // ============================
+        // RESPONSE
+        // ============================
+
         return res.status(200).json({
             success: true,
-            payload: aiResult
+            payload: aiResult,
         });
 
     } catch (err) {
-        console.error("CRITICAL AI ERROR:", err);
-        return res.status(200).json({
-            success: true,
-            payload: {
-                summary: "AI analysis is currently refreshing. Using general market insights.",
-                marketSentiment: "NEUTRAL",
-                traderScore: 50,
-                suggestions: []
-            }
+
+        console.log("AI ERROR:", err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                "AI analysis failed",
         });
     }
 };
