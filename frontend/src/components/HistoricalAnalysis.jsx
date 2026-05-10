@@ -114,7 +114,7 @@ function HistoricalAnalysis({ symbol }) {
                   }
                   return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
                 }}
-                formatter={(value) => [`₹${Number(value).toFixed(2)}`, "Price"]}
+                formatter={(value) => [`$${Number(value).toFixed(2)}`, "Price"]}
               />
 
               <Line
