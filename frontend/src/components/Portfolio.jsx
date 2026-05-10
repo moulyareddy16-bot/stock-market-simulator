@@ -112,7 +112,7 @@ function Portfolio() {
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total P/L</p>
                 <p className={`text-2xl font-black flex items-center ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                  ${Math.abs(summary?.totalProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  {summary?.totalProfit < 0 ? "-" : ""}${Math.abs(summary?.totalProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
                 <div className={`w-8 h-1 rounded-full mt-2 ${summary?.totalProfit >= 0 ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
               </div>

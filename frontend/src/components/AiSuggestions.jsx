@@ -1,171 +1,547 @@
-import { useEffect, useState } from "react";
-import api from "../service/api";
-import Skeleton from "./Skeleton";
+import { useEffect, useRef, useState } from "react";
 
 function AiSuggestions() {
+
+  // ==============================
+  // MAIN AI DATA
+  // ==============================
+
   const [data, setData] = useState({
-    summary: "AI Engine is analyzing your market data...",
+    summary: "",
     marketSentiment: "NEUTRAL",
-    traderScore: 85,
-    suggestions: [
-      {
-        type: "STRATEGY",
-        title: "Diversification Edge",
-        description: "AI suggests increasing exposure to Tech and Energy sectors to balance your current risk profile.",
-        impact: "High"
-      },
-      {
-        type: "OPPORTUNITY",
-        title: "Market Entry Point",
-        description: "Current RSI indicators suggest a strong buy zone for blue-chip stocks like IBM and AAPL.",
-        impact: "Medium"
-      }
-    ]
+    traderScore: 0,
+    riskWarning: "",
+    portfolioHealth: {
+      diversificationScore: 0,
+      concentrationRisk: "LOW",
+    },
+    suggestions: [],
   });
-  const [loading, setLoading] = useState(true);
+
+  // ==============================
+  // CHAT STATES
+  // ==============================
+
+  const [chatOpen, setChatOpen] =
+    useState(false);
+
+  const [chatInput, setChatInput] =
+    useState("");
+
+  const [chatLoading, setChatLoading] =
+    useState(false);
+
+  const [messages, setMessages] =
+    useState([
+      {
+        role: "assistant",
+        content:
+          "Alpha-Insight AI initialized. Ask about your portfolio, risk, or market opportunities.",
+      },
+    ]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const chatEndRef = useRef(null);
+
+  // ==============================
+  // AUTO SCROLL CHAT
+  // ==============================
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
+
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+
+  }, [messages]);
+
+  // ==============================
+  // FETCH AI ANALYSIS
+  // ==============================
+
+  useEffect(() => {
+
+    const fetchAI = async () => {
+
       try {
-        console.log("Running AI Sync...");
-        const response = await fetch("http://localhost:5000/api/ai/suggestions", {
-          method: "GET",
-          headers: { 
-            "Content-Type": "application/json",
-          },
-          // CRITICAL: Send cookies to backend
-          credentials: 'include' 
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-        
-        const resData = await response.json();
-        console.log("Sync Complete:", resData);
+
+        const response =
+          await fetch(
+            "http://localhost:5000/api/ai/suggestions",
+            {
+              credentials: "include",
+            }
+          );
+
+        const resData =
+          await response.json();
+
         if (resData?.payload) {
           setData(resData.payload);
         }
+
       } catch (err) {
-        console.error("AI Sync Fail:", err);
-        // Show the reason for the failure in the summary box
-        setData(prev => ({
-          ...prev,
-          summary: `Sync status: Analysis paused (${err.message}). Using cached intelligence.`
-        }));
+
+        console.log(err);
+
       } finally {
+
         setLoading(false);
       }
     };
-    fetchSuggestions();
+
+    fetchAI();
+
   }, []);
 
-  if (loading) return (
-    <div className="space-y-10 p-4 lg:p-0 animate-pulse">
-      <div className="h-20 bg-slate-800/50 rounded-3xl" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-48 bg-slate-800/50 rounded-[2rem]" />
-        ))}
+  // ==============================
+  // AI CHAT
+  // ==============================
+
+  const sendMessage = async () => {
+
+    if (!chatInput.trim()) return;
+
+    const userMessage = {
+      role: "user",
+      content: chatInput,
+    };
+
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+    ]);
+
+    setChatLoading(true);
+
+    const currentInput = chatInput;
+
+    setChatInput("");
+
+    try {
+
+      const response =
+        await fetch(
+          "http://localhost:5000/api/ai/chat",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              message: currentInput,
+            }),
+          }
+        );
+
+      const resData =
+        await response.json();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            resData.response ||
+            "AI unavailable.",
+        },
+      ]);
+
+    } catch (err) {
+
+      console.log(err);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "AI communication failed.",
+        },
+      ]);
+
+    } finally {
+
+      setChatLoading(false);
+    }
+  };
+
+  // ==============================
+  // LOADING SCREEN
+  // ==============================
+
+  if (loading) {
+
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="space-y-6 text-center">
+          <div className="w-20 h-20 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <h1 className="text-2xl font-black tracking-widest uppercase">
+            Initializing Alpha Insight Engine
+          </h1>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // ==============================
+  // UI
+  // ==============================
 
   return (
-    <div className="space-y-10 animate-fade-in pb-20">
-      {/* HEADER */}
-      <header className="relative overflow-hidden rounded-[2.5rem] bg-linear-to-r from-indigo-500/20 via-purple-500/20 to-emerald-500/20 p-10 border border-white/5">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
-              AI Powered
+
+    <div className="min-h-screen bg-[#050816] text-white pb-40">
+
+      {/* ================================= */}
+      {/* HERO */}
+      {/* ================================= */}
+
+      <section className="relative overflow-hidden border-b border-slate-800">
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.15),transparent_30%)]" />
+
+        <div className="relative z-10 p-8 lg:p-14">
+
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+
+            <div className="px-4 py-1 bg-emerald-500/20 border border-emerald-500/20 rounded-full text-xs uppercase font-black tracking-widest text-emerald-400">
+              Alpha Insight Engine
             </div>
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400 font-black">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              AI LIVE
+            </div>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tight mb-4">
-            Market Intelligence
+
+          <h1 className="text-5xl lg:text-7xl font-black leading-tight tracking-tight max-w-5xl">
+            Institutional Grade
+            <span className="text-emerald-400">
+              {" "}Portfolio Intelligence
+            </span>
           </h1>
-          <p className="text-slate-300 text-lg max-w-2xl font-medium leading-relaxed">
-            {data?.summary}
+
+          <p className="mt-8 text-slate-300 max-w-3xl text-lg leading-relaxed font-medium">
+            {data.summary}
           </p>
-        </div>
-        
-        {/* DECORATIVE ELEMENTS */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full" />
-      </header>
 
-      {/* STATS OVERVIEW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="glass-card p-8 rounded-[2rem] flex items-center justify-between group overflow-hidden relative">
-          <div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Trader Score</p>
-            <h2 className="text-5xl font-black text-white">{data?.traderScore}%</h2>
+        </div>
+      </section>
+
+      {/* ================================= */}
+      {/* DASHBOARD */}
+      {/* ================================= */}
+
+      <div className="p-6 lg:p-10 space-y-8">
+
+        {/* ============================= */}
+        {/* METRICS */}
+        {/* ============================= */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
+          {/* SCORE */}
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-7">
+
+            <p className="text-xs uppercase tracking-widest font-black text-slate-500">
+              Trader Score
+            </p>
+
+            <h2 className="text-6xl font-black mt-4 text-white">
+              {data.traderScore}
+            </h2>
+
+            <p className="text-emerald-400 mt-2 text-sm font-bold">
+              AI confidence calibrated
+            </p>
+
           </div>
-          <div className="text-5xl opacity-80 group-hover:scale-110 transition duration-500 group-hover:opacity-100">📈</div>
-        </div>
 
-        <div className="glass-card p-8 rounded-[2rem] flex items-center justify-between group overflow-hidden relative">
-          <div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Market Sentiment</p>
-            <h2 className="text-4xl font-black text-emerald-400 uppercase italic tracking-tighter">{data?.marketSentiment}</h2>
+          {/* SENTIMENT */}
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-7">
+
+            <p className="text-xs uppercase tracking-widest font-black text-slate-500">
+              Market Sentiment
+            </p>
+
+            <h2 className={`text-5xl font-black mt-4 ${
+              data.marketSentiment === "BULLISH"
+                ? "text-emerald-400"
+                : data.marketSentiment === "BEARISH"
+                ? "text-red-400"
+                : "text-yellow-400"
+            }`}>
+              {data.marketSentiment}
+            </h2>
+
+            <p className="text-slate-400 mt-2 text-sm">
+              Based on technical + sentiment fusion
+            </p>
+
           </div>
-          <div className="text-5xl opacity-80 group-hover:rotate-12 transition duration-500 group-hover:opacity-100">⚡</div>
-        </div>
 
-        <div className="glass-card p-8 rounded-[2rem] flex items-center justify-between group overflow-hidden relative bg-linear-to-br from-emerald-500/10 to-transparent">
-          <div>
-            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Live Status</p>
-            <h2 className="text-2xl font-black text-white uppercase">Operational</h2>
+          {/* DIVERSIFICATION */}
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-7">
+
+            <p className="text-xs uppercase tracking-widest font-black text-slate-500">
+              Diversification
+            </p>
+
+            <h2 className="text-6xl font-black mt-4 text-white">
+              {Math.floor(
+                data?.portfolioHealth?.diversificationScore || 0
+              )}
+            </h2>
+
+            <p className="text-slate-400 mt-2 text-sm">
+              Portfolio distribution health
+            </p>
+
           </div>
-          <div className="text-5xl animate-spin-slow opacity-80 group-hover:opacity-100">⚙️</div>
+
+          {/* RISK */}
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-7">
+
+            <p className="text-xs uppercase tracking-widest font-black text-slate-500">
+              Concentration Risk
+            </p>
+
+            <h2 className={`text-5xl font-black mt-4 ${
+              data?.portfolioHealth?.concentrationRisk === "HIGH"
+                ? "text-red-400"
+                : data?.portfolioHealth?.concentrationRisk === "MEDIUM"
+                ? "text-yellow-400"
+                : "text-emerald-400"
+            }`}>
+              {data?.portfolioHealth?.concentrationRisk}
+            </h2>
+
+            <p className="text-slate-400 mt-2 text-sm">
+              Exposure concentration analysis
+            </p>
+
+          </div>
         </div>
-      </div>
 
-      {/* SUGGESTIONS GRID */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-black text-white uppercase tracking-widest px-4 border-l-4 border-emerald-500">
-          Strategic Recommendations
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {data?.suggestions.map((s, i) => (
-            <div 
-              key={i} 
-              className="glass-card p-8 rounded-[2.5rem] border border-white/5 hover:border-emerald-500/30 transition-all duration-500 group relative overflow-hidden"
-            >
-              <div className="flex items-start justify-between mb-6">
-                <div className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                  s.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' :
-                  s.type === 'SELL' ? 'bg-red-500/20 text-red-400' :
-                  'bg-blue-500/20 text-blue-400'
-                }`}>
-                  {s.type}
-                </div>
-                <div className="text-[10px] font-black text-slate-500 uppercase">Impact: {s.impact}</div>
-              </div>
+        {/* ============================= */}
+        {/* RISK WARNING */}
+        {/* ============================= */}
 
-              <h4 className="text-2xl font-black text-white mb-3 group-hover:text-emerald-400 transition-colors">
-                {s.title}
-              </h4>
-              <p className="text-slate-400 font-medium leading-relaxed">
-                {s.description}
+        <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8">
+
+          <div className="flex items-start gap-5">
+
+            <div className="text-4xl">
+              ⚠️
+            </div>
+
+            <div>
+
+              <h3 className="text-xl font-black text-red-400 uppercase tracking-widest mb-2">
+                AI Risk Warning
+              </h3>
+
+              <p className="text-slate-300 leading-relaxed">
+                {data.riskWarning ||
+                  "Current market volatility remains elevated. Monitor overbought assets and avoid emotional trades."}
               </p>
 
-              {/* ACCENT LINE */}
-              <div className="absolute bottom-0 left-0 h-1 bg-linear-to-r from-transparent via-emerald-500/50 to-transparent w-full opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-          ))}
+          </div>
         </div>
+
+        {/* ============================= */}
+        {/* SIGNALS */}
+        {/* ============================= */}
+
+        <div>
+
+          <div className="flex items-center justify-between mb-6">
+
+            <h2 className="text-2xl font-black uppercase tracking-widest">
+              AI Trade Signals
+            </h2>
+
+            <div className="text-xs uppercase tracking-widest text-slate-500 font-black">
+              Real-Time Strategic Intelligence
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {data?.suggestions?.map((s, i) => (
+
+              <div
+                key={i}
+                className="bg-slate-900/70 border border-slate-800 rounded-3xl p-8 hover:border-emerald-500/30 transition-all duration-300"
+              >
+
+                <div className="flex items-center justify-between mb-6">
+
+                  <div className={`px-4 py-2 rounded-xl text-xs uppercase tracking-widest font-black ${
+                    s.type === "BUY"
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : s.type === "SELL"
+                      ? "bg-red-500/20 text-red-400"
+                      : s.type === "HOLD"
+                      ? "bg-yellow-500/20 text-yellow-400"
+                      : "bg-blue-500/20 text-blue-400"
+                  }`}>
+                    {s.type}
+                  </div>
+
+                  <div className="text-xs uppercase tracking-widest text-slate-500 font-black">
+                    Impact: {s.impact}
+                  </div>
+
+                </div>
+
+                <h3 className="text-3xl font-black mb-4">
+                  {s.title}
+                </h3>
+
+                <p className="text-slate-300 leading-relaxed">
+                  {s.description}
+                </p>
+
+              </div>
+            ))}
+
+          </div>
+        </div>
+
       </div>
 
-      {/* FOOTER NOTE */}
-      <footer className="text-center p-10 border-t border-slate-800/50">
-        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-          AI analysis is based on historical patterns and current market liquidity. Always trade responsibly.
-        </p>
-      </footer>
+      {/* ================================= */}
+      {/* FLOATING AI CHAT */}
+      {/* ================================= */}
+
+      <div className="fixed bottom-6 right-6 z-50">
+
+        {/* CHAT WINDOW */}
+
+        {chatOpen && (
+
+          <div className="w-[380px] h-[620px] bg-[#0b1020] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+
+            {/* HEADER */}
+
+            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+
+              <div>
+
+                <h2 className="font-black text-lg">
+                  Alpha AI
+                </h2>
+
+                <p className="text-xs uppercase tracking-widest text-emerald-400 font-black">
+                  Live Trading Assistant
+                </p>
+
+              </div>
+
+              <button
+                onClick={() =>
+                  setChatOpen(false)
+                }
+                className="text-slate-400 hover:text-white text-xl"
+              >
+                ✕
+              </button>
+
+            </div>
+
+            {/* MESSAGES */}
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+
+              {messages.map((m, i) => (
+
+                <div
+                  key={i}
+                  className={`flex ${
+                    m.role === "user"
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-5 py-4 text-sm leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-emerald-500 text-black font-semibold"
+                        : "bg-slate-800 text-slate-200"
+                    }`}
+                  >
+                    {m.content}
+                  </div>
+
+                </div>
+              ))}
+
+              {chatLoading && (
+
+                <div className="bg-slate-800 px-5 py-4 rounded-2xl w-fit text-sm text-slate-400">
+                  Alpha AI analyzing market conditions...
+                </div>
+              )}
+
+              <div ref={chatEndRef} />
+
+            </div>
+
+            {/* INPUT */}
+
+            <div className="p-4 border-t border-slate-800 flex gap-3">
+
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) =>
+                  setChatInput(e.target.value)
+                }
+                placeholder="Ask about your portfolio..."
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+
+              <button
+                onClick={sendMessage}
+                className="bg-emerald-500 hover:bg-emerald-400 text-black font-black px-5 rounded-2xl transition"
+              >
+                ↑
+              </button>
+
+            </div>
+          </div>
+        )}
+
+        {/* FLOAT BUTTON */}
+
+        {!chatOpen && (
+
+          <button
+            onClick={() =>
+              setChatOpen(true)
+            }
+            className="w-20 h-20 rounded-full bg-emerald-500 hover:scale-110 transition-all duration-300 text-black text-4xl shadow-2xl shadow-emerald-500/30"
+          >
+            🤖
+          </button>
+        )}
+      </div>
     </div>
   );
 }

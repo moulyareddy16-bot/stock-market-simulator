@@ -39,4 +39,10 @@ npm install express-rate-limit
   - npm install node-cache
 # multer is used for file uploads.
   - npm install multer
+
+# Now real Gemini integration.
+
+Install Google SDK:
+
+- npm install @google/generative-ai
   

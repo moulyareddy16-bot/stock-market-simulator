@@ -217,13 +217,12 @@ function Leaderboard() {
       {/* TABLE */}
       <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
 
-        <div className="grid grid-cols-7 border-b border-slate-800 bg-slate-950 px-6 py-4 text-sm font-bold text-slate-400">
+        <div className="grid grid-cols-6 border-b border-slate-800 bg-slate-950 px-6 py-4 text-sm font-bold text-slate-400">
 
           <div>Rank</div>
           <div>Trader</div>
           <div>Score</div>
           <div>Profit/Loss</div>
-          <div>Win Rate</div>
           <div>Trades</div>
           <div>Status</div>
 
@@ -233,7 +232,7 @@ function Leaderboard() {
 
           <div
             key={trader._id}
-            className="grid grid-cols-7 items-center border-b border-slate-800 px-6 py-5 transition hover:bg-slate-800/40"
+            className="grid grid-cols-6 items-center border-b border-slate-800 px-6 py-5 transition hover:bg-slate-800/40"
           >
 
             <div className="font-black text-lg">
@@ -265,9 +264,6 @@ function Leaderboard() {
               {trader.totalProfit >= 0 ? "+" : ""}${trader.totalProfit?.toFixed(2)}
             </div>
 
-            <div>
-              {trader.winRate}%
-            </div>
 
             <div>
               {trader.totalTrades}

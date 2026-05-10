@@ -261,7 +261,11 @@ function StockDetails() {
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">{stock.stockSymbol}</h1>
                   {stock.change && (
-                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-black">
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                      stock.change.includes('-') 
+                        ? 'bg-red-500/10 text-red-400' 
+                        : 'bg-emerald-500/10 text-emerald-400'
+                    }`}>
                       {stock.change}
                     </span>
                   )}
@@ -270,7 +274,7 @@ function StockDetails() {
                 
                 <div className="w-full h-px bg-slate-700/50 mb-6"></div>
                 
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 opacity-60">Live Price</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 opacity-60">Current Price</p>
                 <div className="flex items-center gap-2 justify-center">
                   <span className="text-4xl font-black text-emerald-400">$</span>
                   <h2 className="text-5xl font-black text-emerald-400 tracking-tight">{livePrice}</h2>

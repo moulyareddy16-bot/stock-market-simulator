@@ -2,6 +2,7 @@ import exp from "express"
 import cookieParser from "cookie-parser";
 import cors from 'cors'
 import path from 'path';
+import aiRouter from "./routes/aiRoute.js";
 
 import authRouter from "./routes/authRoute.js"
 import stockRouter from "./routes/stockRoute.js";
@@ -15,6 +16,7 @@ import adminActivityRouter from "./routes/adminActivityRoute.js";
 import { getStockDetails } from "./controllers/stockController.js";
 import leaderboardApp from "./routes/leaderboardRoute.js";
 
+import aiChatRouter from "./routes/aiChatRoute.js";
 
 
 
@@ -65,6 +67,9 @@ app.get("/api/ai/sanity", (req, res) => res.json({ success: true, message: "AI S
 
 app.use("/trader-api", leaderboardApp);
 
+app.use("/api/ai", aiRouter);
+
+app.use("/api/ai", aiChatRouter);
 
 //to handle invalid path
 app.use((req, res, next) => {

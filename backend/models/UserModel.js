@@ -3,51 +3,69 @@ import mongoose, { Schema, model } from "mongoose";
 //user model
 //username , email , password , role, wallet-balance , isuseractive 
 const userSchema = new Schema({
-    username:{
-        type:String,
-        required:[true,"username is required"],
-        minLength:[4,"min length of username is 4 characters"],
-        maxLength:[17,"username exceeds the 17 characters"],
-        unique:true
+    username: {
+        type: String,
+        required: [true, "username is required"],
+        minLength: [4, "min length of username is 4 characters"],
+        maxLength: [17, "username exceeds the 17 characters"],
+        unique: true
     },
-    email:{
-        type:String,
-        required:[true,"email required"],
-        unique:true
+    email: {
+        type: String,
+        required: [true, "email required"],
+        unique: true
     },
-    password:{
-        type:String,
-        required:[true,"password required"],
-        minLength:[6,"min 6 characters are required"]
+    password: {
+        type: String,
+        required: [true, "password required"],
+        minLength: [6, "min 6 characters are required"]
     },
-    role:{
-        type:String,
-        enum:["trader","admin","stockmanager"],
-        required:[true,"role is required"]
+    role: {
+        type: String,
+        enum: ["trader", "admin", "stockmanager"],
+        required: [true, "role is required"]
     },
-    walletBalance:{
-        type:Number,
+    walletBalance: {
+        type: Number,
         default: function () {
             return this.role === "trader" ? 100000 : undefined;
         }
     },
-    isUserActive:{
-        type:Boolean,
-        default:true,
+    isUserActive: {
+        type: Boolean,
+        default: true,
     },
-    profileImage:{
-        type:String,
-        default:""
-    }},
+    profileImage: {
+        type: String,
+        default: ""
+    },
+    riskTolerance: {
+        type: String,
+        enum: ["Low", "Medium", "High"],
+        default: "Medium"
+    },
+
+    timeHorizon: {
+        type: String,
+        enum: ["Short Term", "Long Term"],
+        default: "Long Term"
+    },
+
+    goal: {
+        type: String,
+        enum: ["Growth", "Income", "Capital Preservation"],
+        default: "Growth"
+    }
+},
     {
-        timestamps:true,
-        versionKey:false,
-        strict:"throw"
+        timestamps: true,
+        versionKey: false,
+        strict: "throw"
     }
 )
 
 
 //generate user model
 export const userModel =
-  mongoose.models.user ||
-  model("user", userSchema);
+    mongoose.models.user ||
+    model("user", userSchema);
