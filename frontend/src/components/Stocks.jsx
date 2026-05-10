@@ -49,7 +49,7 @@ const [loading, setLoading] = useState(false);
     try {
       setLoading(true);
 
-      const data = await getAllStocks(page, search);
+      const data = await getAllStocks(page, search, 9);
       console.log("Stocks data received:", data);
 
       const allStocks = data.payload || [];

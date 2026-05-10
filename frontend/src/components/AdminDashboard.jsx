@@ -8,7 +8,6 @@ import {
 } from "../service/userService";
 import { getAllStocks, getStockDetails } from "../service/stockService";
 import { getAdminActivities, clearAdminActivities as clearHistory } from "../service/adminActivityService";
-import CoinIcon from "./CoinIcon";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -24,6 +23,7 @@ function AdminDashboard() {
   const [totalStockPages, setTotalStockPages] = useState(1);
   const [stocksLoading, setStocksLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
   const [stockSearch, setStockSearch] = useState("");
 
   // Activity History State
@@ -51,7 +51,7 @@ function AdminDashboard() {
   const fetchStocksData = async () => {
     try {
       setStocksLoading(true);
-      const response = await getAllStocks(stockPage, stockSearch);
+      const response = await getAllStocks(stockPage, stockSearch, 8);
       const stockList = response.payload || [];
       setTotalStockPages(response.totalPages || 1);
 
@@ -126,8 +126,9 @@ function AdminDashboard() {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
     }).format(amount || 0);
   };
 
@@ -178,6 +179,13 @@ function AdminDashboard() {
   const closeModal = () => {
     setSelectedUser(null);
   };
+
+  const filteredUsers = users.filter(u =>
+    u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearch.toLowerCase())
+  ).sort((a, b) => (b.isUserActive === a.isUserActive ? 0 : b.isUserActive ? 1 : -1));
+
+  const totalUserPages = Math.ceil(filteredUsers.length / 8) || 1;
 
   if (loading) {
     return (
@@ -241,7 +249,7 @@ function AdminDashboard() {
                   System overview and traders management
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
                 <div className="relative flex-1 max-w-md">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
@@ -249,11 +257,14 @@ function AdminDashboard() {
                     type="text"
                     placeholder="Search traders..."
                     value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
+                    onChange={(e) => {
+                      setUserSearch(e.target.value);
+                      setUserPage(1);
+                    }}
                     className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
                   />
                 </div>
-                
+
                 <div className="hidden sm:block">
                   <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 shadow-lg backdrop-blur-md whitespace-nowrap">
                     <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Traders</p>
@@ -265,98 +276,118 @@ function AdminDashboard() {
 
             {/* Users Grid */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {users
-                .filter(u => 
-                  u.username.toLowerCase().includes(userSearch.toLowerCase()) || 
-                  u.email.toLowerCase().includes(userSearch.toLowerCase())
-                )
-                .sort((a, b) => (b.isUserActive === a.isUserActive ? 0 : b.isUserActive ? 1 : -1))
+              {filteredUsers
+                .slice((userPage - 1) * 8, userPage * 8)
                 .map((user) => (
-                <div
-                  key={user._id}
-                  className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!user.isUserActive ? 'border-red-500/20' : ''}`}
-                >
-                  {/* Status Badge */}
-                  <div className="absolute right-4 top-4">
-                    {user.isUserActive ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
-                        <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                        Inactive
-                      </span>
-                    )}
-                  </div>
+                  <div
+                    key={user._id}
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!user.isUserActive ? 'border-red-500/20' : ''}`}
+                  >
+                    {/* User Info Header with Status Badge */}
+                    <div className={`mb-6 flex items-center justify-between gap-4 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner`}>
+                          {user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-lg font-bold text-slate-100 break-words" title={user.username}>
+                            {user.username}
+                          </h3>
+                          <p className="text-xs text-slate-400 truncate" title={user.email}>
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* User Info Header (Dimmed when inactive) */}
-                  <div className={`mb-6 flex items-center gap-4 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner`}>
-                      {user.username.charAt(0).toUpperCase()}
+                      {/* Status Badge */}
+                      <div className="flex-shrink-0">
+                        {user.isUserActive ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+                            Inactive
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
-                        {user.username}
-                      </h3>
-                      <p className="text-xs text-slate-400 line-clamp-1">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Divider */}
-                  <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+                    {/* Divider */}
+                    <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
 
-                  {/* User Stats (Dimmed when inactive) */}
-                  <div className={`flex-1 space-y-4 mb-6 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Wallet Balance</span>
-                      <span className="font-semibold text-amber-300 flex items-center gap-1">
-                        <CoinIcon className="w-4 h-4 text-amber-400" />
-                        {formatCurrency(user.walletBalance)}
-                      </span>
+                    {/* User Stats (Dimmed when inactive) */}
+                    <div className={`flex-1 space-y-4 mb-6 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-400">Wallet Balance</span>
+                        <span className="font-semibold text-emerald-300">
+                          {formatCurrency(user.walletBalance)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-400">Total Transactions</span>
+                        <span className="rounded-md bg-slate-700/50 px-2 py-0.5 text-sm font-medium text-slate-300">
+                          {user.totalTransactions}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-400">Joined Date</span>
+                        <span className="text-sm font-medium text-slate-300">
+                          {formatDate(user.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Total Transactions</span>
-                      <span className="rounded-md bg-slate-700/50 px-2 py-0.5 text-sm font-medium text-slate-300">
-                        {user.totalTransactions}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Joined Date</span>
-                      <span className="text-sm font-medium text-slate-300">
-                        {formatDate(user.createdAt)}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 mt-auto">
-                    <button
-                      onClick={() => openUserDetails(user)}
-                      className={`w-full rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-slate-700/20 text-slate-500 border-slate-700/50' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
-                    >
-                      View Details
-                    </button>
-                    <div className="flex gap-2">
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2 mt-auto">
                       <button
-                        onClick={() => handleToggleStatus(user._id)}
-                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition shadow-lg ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500 text-white border border-emerald-400 hover:bg-emerald-600 shadow-emerald-500/20'}`}
+                        onClick={() => openUserDetails(user)}
+                        className={`w-full rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-slate-700/20 text-slate-500 border-slate-700/50' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'}`}
                       >
-                        {user.isUserActive ? "Block" : "Unblock"}
+                        View Details
                       </button>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-red-500/10 text-red-900 border-red-500/20' : 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30'}`}
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleToggleStatus(user._id)}
+                          className={`flex-1 rounded-lg py-2 text-sm font-semibold transition shadow-lg ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500 text-white border border-emerald-400 hover:bg-emerald-600 shadow-emerald-500/20'}`}
+                        >
+                          {user.isUserActive ? "Block" : "Unblock"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className={`flex-1 rounded-lg py-2 text-sm font-semibold transition border ${!user.isUserActive ? 'bg-red-500/10 text-red-900 border-red-500/20' : 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30'}`}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
+
+            {/* PAGINATION */}
+            <div className="flex items-center justify-center gap-4 pt-6">
+              <button
+                disabled={userPage === 1}
+                onClick={() => setUserPage(userPage - 1)}
+                className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 transition hover:border-emerald-500 disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              <span className="text-sm text-slate-400">
+                Page {userPage} of {totalUserPages}
+              </span>
+
+              <button
+                disabled={userPage === totalUserPages}
+                onClick={() => setUserPage(userPage + 1)}
+                className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 transition hover:border-emerald-500 disabled:opacity-40"
+              >
+                Next
+              </button>
             </div>
           </>
         )}
@@ -388,7 +419,7 @@ function AdminDashboard() {
                     className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
                   />
                 </div>
-                
+
                 <div className="hidden sm:block">
                   <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 shadow-lg backdrop-blur-md whitespace-nowrap">
                     <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Active</p>
@@ -408,78 +439,78 @@ function AdminDashboard() {
                 {[...stocks]
                   .sort((a, b) => (b.isActive === a.isActive ? 0 : b.isActive ? 1 : -1))
                   .map((stock) => (
-                  <div
-                    key={stock._id}
-                    className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!stock.isActive ? 'border-red-500/20' : ''}`}
-                  >
-                    {/* Status Badge */}
-                    <div className="absolute right-4 top-4">
-                      {stock.isActive ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                          Inactive
-                        </span>
-                      )}
-                    </div>
+                    <div
+                      key={stock._id}
+                      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!stock.isActive ? 'border-red-500/20' : ''}`}
+                    >
+                      {/* Status Badge */}
+                      <div className="absolute right-4 top-4">
+                        {stock.isActive ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+                            Inactive
+                          </span>
+                        )}
+                      </div>
 
-                    {/* Stock Info Header */}
-                    <div className="mb-6 flex items-center gap-4">
-                      {stock.logo ? (
-                        <img src={stock.logo} alt={stock.stockSymbol} className={`h-12 w-12 rounded-2xl object-contain ${!stock.isActive ? 'grayscale opacity-50' : ''}`} />
-                      ) : (
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner ${!stock.isActive ? 'from-red-500 to-rose-600' : ''}`}>
-                          {stock.stockSymbol.charAt(0)}
+                      {/* Stock Info Header */}
+                      <div className="mb-6 flex items-center gap-4">
+                        {stock.logo ? (
+                          <img src={stock.logo} alt={stock.stockSymbol} className={`h-12 w-12 rounded-2xl object-contain ${!stock.isActive ? 'grayscale opacity-50' : ''}`} />
+                        ) : (
+                          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner ${!stock.isActive ? 'from-red-500 to-rose-600' : ''}`}>
+                            {stock.stockSymbol.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
+                            {stock.stockSymbol}
+                          </h3>
+                          <p className="text-xs text-slate-400 line-clamp-1">
+                            {stock.companyName}
+                          </p>
                         </div>
-                      )}
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-100 line-clamp-1">
-                          {stock.stockSymbol}
-                        </h3>
-                        <p className="text-xs text-slate-400 line-clamp-1">
-                          {stock.companyName}
-                        </p>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+
+                      {/* Stock Stats (Dimmed when inactive) */}
+                      <div className={`flex-1 space-y-3 mb-6 text-sm transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Current Price</span>
+                          <span className="font-semibold text-white">
+                            {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Change</span>
+                          <span className={`font-semibold ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {stock.d ? `${stock.d >= 0 ? '+' : ''}${stock.d.toFixed(2)} (${stock.dp.toFixed(2)}%)` : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Prev Close</span>
+                          <span className="text-slate-300">{stock.pc ? `$${stock.pc.toFixed(2)}` : 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Day High/Low</span>
+                          <span className="text-slate-300">{stock.h ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
+                        </div>
+                        {/* Removed Available Qty */}
+                      </div>
+
+                      {/* Actions (Optional or just info) */}
+                      <div className="mt-auto text-xs text-slate-500 text-center">
+                        Last updated: {stock.t ? new Date(stock.t * 1000).toLocaleTimeString() : 'N/A'}
                       </div>
                     </div>
-
-                    {/* Divider */}
-                    <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-
-                    {/* Stock Stats (Dimmed when inactive) */}
-                    <div className={`flex-1 space-y-3 mb-6 text-sm transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Current Price</span>
-                        <span className="font-semibold text-white">
-                          {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Change</span>
-                        <span className={`font-semibold ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {stock.d ? `${stock.d >= 0 ? '+' : ''}${stock.d.toFixed(2)} (${stock.dp.toFixed(2)}%)` : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Prev Close</span>
-                        <span className="text-slate-300">{stock.pc ? `$${stock.pc.toFixed(2)}` : 'N/A'}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Day High/Low</span>
-                        <span className="text-slate-300">{stock.h && stock.l ? `$${stock.h.toFixed(2)} / $${stock.l.toFixed(2)}` : 'N/A'}</span>
-                      </div>
-                      {/* Removed Available Qty */}
-                    </div>
-
-                    {/* Actions (Optional or just info) */}
-                    <div className="mt-auto text-xs text-slate-500 text-center">
-                      Last updated: {stock.t ? new Date(stock.t * 1000).toLocaleTimeString() : 'N/A'}
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
 
@@ -529,9 +560,9 @@ function AdminDashboard() {
 
             {/* Activities Table */}
             {activitiesLoading ? (
-               <div className="flex items-center justify-center p-20">
-                 <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
-               </div>
+              <div className="flex items-center justify-center p-20">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+              </div>
             ) : (
               <div className="rounded-2xl border border-slate-700/50 bg-slate-800/40 shadow-xl backdrop-blur-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -558,11 +589,10 @@ function AdminDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4 w-1/4 text-center">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${
-                                act.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
-                                act.action.includes('ADD') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
-                                'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                              }`}>
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${act.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                  act.action.includes('ADD') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                    'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                }`}>
                                 {act.action.replace(/_/g, ' ').replace('TOGGLE ', '')}
                               </span>
                             </td>
@@ -708,10 +738,10 @@ function AdminDashboard() {
                                   <tr key={stock.stockSymbol} className="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
                                     <td className="px-6 py-4 font-bold text-white">{stock.stockSymbol}</td>
                                     <td className="px-6 py-4">{stock.ownedQuantity}</td>
-                                    <td className="px-6 py-4">${formatCurrency(stock.avgPrice)}</td>
-                                    <td className="px-6 py-4">${formatCurrency(stock.currentPrice)}</td>
+                                    <td className="px-6 py-4">{formatCurrency(stock.avgPrice)}</td>
+                                    <td className="px-6 py-4">{formatCurrency(stock.currentPrice)}</td>
                                     <td className={`px-6 py-4 font-medium ${stock.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                      {stock.profitLoss >= 0 ? '+' : '-'}${formatCurrency(Math.abs(stock.profitLoss))} ({stock.profitPercent.toFixed(2)}%)
+                                      {stock.profitLoss >= 0 ? '+' : ''}{formatCurrency(stock.profitLoss)} ({stock.profitPercent.toFixed(2)}%)
                                     </td>
                                   </tr>
                                 ))

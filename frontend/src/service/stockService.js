@@ -2,12 +2,12 @@ import api from "./api";
 
 // GET ALL STOCKS
 export const getAllStocks =
-  async (page = 1, search = "") => {
+  async (page = 1, search = "", limit = 9) => {
 
     const response =
       await api.get(
 
-        `/stocks?page=${page}&search=${search}`
+        `/stocks?page=${page}&search=${search}&limit=${limit}`
 
       );
 
