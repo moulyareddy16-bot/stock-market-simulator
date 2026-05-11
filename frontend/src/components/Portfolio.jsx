@@ -53,8 +53,9 @@ function Portfolio() {
       label: 'Portfolio Value',
       data: [10000, 10500, 10200, 11000, 11800, (summary?.totalCurrentValue || 0) + 10000],
       borderColor: '#10b981',
+      borderWidth: 3,
       backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      tension: 0.4,
+      tension: 0.5,
     }]
   };
 
@@ -63,31 +64,47 @@ function Portfolio() {
 
   return (
     <div className="space-y-10 animate-fade-in pb-20">
-      <header>
-        <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">Your Portfolio</h1>
-        <p className="text-slate-400 mt-1 font-medium">Detailed breakdown of your virtual investments</p>
+      <header className="mb-4">
+        <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent tracking-tight pb-1">Your Portfolio</h1>
+        <p className="text-slate-400 mt-2 font-medium">Detailed breakdown of your virtual investments</p>
       </header>
 
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          { label: "Finnova Credits", value: summary?.walletBalance, isCredits: true },
-          { label: "Total Spent", value: summary?.totalInvestment },
-          { label: "Market Value", value: summary?.totalCurrentValue }
+          { 
+            label: "Finnova Credits", 
+            value: summary?.walletBalance, 
+            isCredits: true, 
+            bgStyle: "from-amber-500/10 via-transparent to-transparent border-amber-500/20 hover:border-amber-500/40 shadow-amber-500/5",
+            glowColor: "bg-amber-500/10"
+          },
+          { 
+            label: "Total Spent", 
+            value: summary?.totalInvestment, 
+            bgStyle: "from-blue-500/10 via-transparent to-transparent border-blue-500/20 hover:border-blue-500/40 shadow-blue-500/5",
+            glowColor: "bg-blue-500/10"
+          },
+          { 
+            label: "Market Value", 
+            value: summary?.totalCurrentValue, 
+            bgStyle: "from-emerald-500/10 via-transparent to-transparent border-emerald-500/20 hover:border-emerald-500/40 shadow-emerald-500/5",
+            glowColor: "bg-emerald-500/10"
+          }
         ].map((item, i) => (
-          <div key={i} className="glass-card p-8 rounded-[2rem] relative overflow-hidden group">
+          <div key={i} className={`glass-card p-8 rounded-[2rem] relative overflow-hidden group border bg-gradient-to-br transition-all hover:-translate-y-1 shadow-xl ${item.bgStyle}`}>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">{item.label}</p>
             <div className="flex items-end justify-between">
               <h3 className={`text-3xl font-black flex items-center ${item.highlight ? (item.value >= 0 ? "text-emerald-400" : "text-red-400") : "text-white"}`}>
                 {item.isCredits ? (
-                  <CoinIcon className="w-6 h-6 mr-2 text-amber-400" />
+                  <CoinIcon className="w-6 h-6 mr-2 text-amber-400 drop-shadow-md" />
                 ) : (
-                  <span className="mr-1">$</span>
+                  <span className="mr-1 opacity-70">$</span>
                 )}
                 {(item.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </h3>
             </div>
-            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
+            <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity ${item.glowColor}`} />
           </div>
         ))}
       </div>
@@ -97,7 +114,7 @@ function Portfolio() {
         <div className="lg:col-span-2 glass-card p-8 rounded-[2.5rem] space-y-6">
           <h2 className="text-xl font-black text-white">Growth Analysis</h2>
           <div className="h-[300px]">
-            <Line data={growthData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#1e293b' } } } }} />
+            <Line data={growthData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false, drawBorder: false } }, y: { grid: { color: 'rgba(30, 41, 59, 0.4)', drawBorder: false } } } }} />
           </div>
         </div>
 
@@ -111,7 +128,7 @@ function Portfolio() {
               <Doughnut data={donutData} options={{ cutout: '82%', plugins: { legend: { display: false } } }} />
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total P/L</p>
-                <p className={`text-2xl font-black flex items-center ${summary?.totalProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                <p className={`text-4xl font-black flex items-center tracking-tighter ${summary?.totalProfit >= 0 ? "text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]" : "text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.3)]"}`}>
                   {summary?.totalProfit < 0 ? "-" : ""}${Math.abs(summary?.totalProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
                 <div className={`w-8 h-1 rounded-full mt-2 ${summary?.totalProfit >= 0 ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
@@ -170,7 +187,7 @@ function Portfolio() {
                 </tr>
               ) : (
                 portfolio.map((stock) => (
-                  <tr key={stock.stockSymbol} className="hover:bg-white/5 transition-colors group">
+                  <tr key={stock.stockSymbol} className="hover:bg-slate-800/40 transition-colors group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-black text-white text-xs group-hover:bg-emerald-500 group-hover:text-black transition-colors">

@@ -5,7 +5,7 @@ import myImage from '../assets/logo.jpeg'
 function Navbar() {
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
 
   const handleLogout = async () => {
     try {
@@ -13,8 +13,8 @@ function Navbar() {
     } catch (error) {
       console.error("Logout Error:", error.response?.data || error.message);
     } finally {
-      localStorage.removeItem("role");
-      localStorage.removeItem("username");
+      sessionStorage.removeItem("role");
+      sessionStorage.removeItem("username");
 
       navigate("/signin");
     }

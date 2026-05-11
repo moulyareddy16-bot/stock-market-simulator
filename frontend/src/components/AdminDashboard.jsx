@@ -134,9 +134,12 @@ function AdminDashboard() {
 
   // --- ACTIONS ---
 
-  const handleToggleStatus = async (userId) => {
+  const handleToggleStatus = async (user) => {
+    if (user.isUserActive && !window.confirm(`Are you sure you want to block user ${user.username}?`)) {
+      return;
+    }
     try {
-      await toggleUserStatus(userId);
+      await toggleUserStatus(user._id);
       fetchUsers(); // Refresh list
     } catch (err) {
       alert("Failed to update user status");
@@ -350,7 +353,7 @@ function AdminDashboard() {
                       </button>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleToggleStatus(user._id)}
+                          onClick={() => handleToggleStatus(user)}
                           className={`flex-1 rounded-lg py-2 text-sm font-semibold transition shadow-lg ${user.isUserActive ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500 text-white border border-emerald-400 hover:bg-emerald-600 shadow-emerald-500/20'}`}
                         >
                           {user.isUserActive ? "Block" : "Unblock"}

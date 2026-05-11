@@ -33,10 +33,10 @@ function Signin() {
         return;
       }
 
-      // 🔥 IMPORTANT: use context login instead of localStorage directly
+      // 🔥 IMPORTANT: use context login instead of sessionStorage directly
       login(res.data.token);
-      localStorage.setItem("role", role);
-      localStorage.setItem("username", user.username);
+      sessionStorage.setItem("role", role);
+      sessionStorage.setItem("username", user.username);
 
       alert("Login Successful");
 

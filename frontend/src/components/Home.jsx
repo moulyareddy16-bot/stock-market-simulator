@@ -5,7 +5,7 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = localStorage.getItem("role");
+    const role = sessionStorage.getItem("role");
 
     if (role === "trader") {
       navigate("/portfolio", { replace: true });

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 function Root() {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Auth pages should not have sidebar/navbar sometimes, 

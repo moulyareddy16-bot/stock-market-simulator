@@ -2,7 +2,7 @@
 import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const role = localStorage.getItem("role"); // Use role as the proof of login
+  const role = sessionStorage.getItem("role"); // Use role as the proof of login
 
   if (!role) {
     return <Navigate to="/signin" />;

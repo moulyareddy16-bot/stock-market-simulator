@@ -14,7 +14,7 @@ import { CardSkeleton } from "./Skeleton";
 function Stocks() {
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
 
   // STOCK DATA
   const [stocks, setStocks] = useState([]);
@@ -193,11 +193,14 @@ const [loading, setLoading] = useState(false);
   };
 
   // TOGGLE STATUS
-  const handleToggleStatus = async (stockSymbol) => {
+  const handleToggleStatus = async (stock) => {
+    if (stock.isActive && !window.confirm(`Are you sure you want to make ${stock.stockSymbol} inactive?`)) {
+      return;
+    }
     try {
-      setLoadingStock(stockSymbol);
+      setLoadingStock(stock.stockSymbol);
 
-      await toggleStockStatus(stockSymbol);
+      await toggleStockStatus(stock.stockSymbol);
 
       fetchStocks();
     } catch (error) {
@@ -469,9 +472,7 @@ const [loading, setLoading] = useState(false);
                       stock.stockSymbol
                     }
                     onClick={() =>
-                      handleToggleStatus(
-                        stock.stockSymbol
-                      )
+                      handleToggleStatus(stock)
                     }
                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-all ${
                       stock.isActive

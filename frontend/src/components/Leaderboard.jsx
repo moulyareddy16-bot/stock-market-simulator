@@ -16,7 +16,7 @@ function Leaderboard() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       const response = await axios.get(
         "http://localhost:5000/trader-api/leaderboard",

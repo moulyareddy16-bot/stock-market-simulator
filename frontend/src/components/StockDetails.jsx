@@ -28,11 +28,12 @@ function StockDetails() {
 
   // TRADING STATES
   const [quantity, setQuantity] = useState(1);
+  const [quantityError, setQuantityError] = useState("");
   const [trading, setTrading] = useState(false);
   const [pendingTrade, setPendingTrade] = useState(null);
   const { addToast } = useToast();
 
-  const role = localStorage.getItem("role");
+  const role = sessionStorage.getItem("role");
   const historicalSectionRef = useRef(null);
 
   // 1. FETCH STOCK DETAILS
@@ -163,6 +164,10 @@ function StockDetails() {
   // 5. TRADING
   const handleTrade = async (type) => {
     const tradeQuantity = Number(quantity);
+    if (tradeQuantity <= 0) {
+      setQuantityError("Please provide a valid number of quantity first");
+      return;
+    }
     setPendingTrade({ type, quantity: tradeQuantity });
   };
 
@@ -416,9 +421,15 @@ function StockDetails() {
                       type="number"
                       min="1"
                       value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 text-xl font-black text-white outline-none focus:border-emerald-500 transition-all"
+                      onChange={(e) => {
+                        setQuantity(e.target.value);
+                        setQuantityError("");
+                      }}
+                      className={`w-full bg-slate-900 border ${quantityError ? 'border-red-500' : 'border-slate-700 focus:border-emerald-500'} rounded-2xl p-4 text-xl font-black text-white outline-none transition-all`}
                     />
+                    {quantityError && (
+                      <p className="text-red-500 text-xs ml-1 font-bold">{quantityError}</p>
+                    )}
                   </div>
 
                   <div className="py-4 border-y border-slate-700 space-y-2">

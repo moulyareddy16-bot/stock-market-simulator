@@ -7,17 +7,17 @@ export function AuthProvider({ children }) {
 
   // load token once
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken = sessionStorage.getItem("token");
     setToken(storedToken);
   }, []);
 
   const login = (tokenValue) => {
-    localStorage.setItem("token", tokenValue);
+    sessionStorage.setItem("token", tokenValue);
     setToken(tokenValue); // 🔥 instant UI update
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setToken(null);
   };
 
