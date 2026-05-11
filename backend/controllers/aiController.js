@@ -2,6 +2,7 @@ import { userModel } from "../models/UserModel.js";
 import { transactionModel } from "../models/transactionModel.js";
 import { analyzePortfolioWithAI } from "../services/ai/aiPortfolioAnalyzer.js";
 import { getCachedAIResponse, setCachedAIResponse } from "../services/ai/aiCacheService.js";
+import axios from "axios";
 
 // ──────────────────────────────────────────────
 // GET AI SUGGESTIONS — Full portfolio analysis
@@ -65,17 +66,47 @@ export const getAiSuggestions = async (req, res) => {
                 totalInvested: h.totalInvested,
             }));
 
-        // ── MARKET DATA ──
-        // TODO Step 7: Replace with real Finnhub RSI/sentiment pipeline
-        // Currently uses a placeholder that will be replaced in STEP 7
-        const marketData = portfolioData.map((p) => ({
-            symbol: p.symbol,
-            // These will be replaced by real Finnhub calculations in STEP 7
-            currentPrice: 0,
-            rsi: 50,            // neutral placeholder
-            sentiment: 0.5,     // neutral placeholder
-            volatility: "Medium",
-            note: "Real market data coming in STEP 7",
+        // ── MARKET DATA (REAL-TIME FINNHUB PIPELINE) ──
+        const marketData = await Promise.all(portfolioData.map(async (p) => {
+            try {
+                // Fetch real-time quote
+                const response = await axios.get(`https://finnhub.io/api/v1/quote?symbol=${p.symbol}&token=${process.env.FINNHUB_API_KEY}`);
+                const data = response.data;
+                
+                const currentPrice = data.c || 0;
+                const dp = data.dp || 0; // Daily percentage change
+
+                // Heuristic RSI based on daily momentum (0 to 100)
+                // A neutral day (0%) gives RSI 50. +5% gives 75. -5% gives 25.
+                const rsi = Math.min(100, Math.max(0, 50 + (dp * 5)));
+
+                // Heuristic Sentiment based on daily momentum (0 to 1)
+                const sentiment = Math.min(1, Math.max(0, 0.5 + (dp / 10)));
+
+                // Determine volatility class based on magnitude of change
+                let volatility = "Medium";
+                if (Math.abs(dp) > 4) volatility = "High";
+                else if (Math.abs(dp) < 1) volatility = "Low";
+
+                return {
+                    symbol: p.symbol,
+                    currentPrice,
+                    rsi: Number(rsi.toFixed(2)),
+                    sentiment: Number(sentiment.toFixed(2)),
+                    volatility,
+                    note: `Real-time Finnhub data (dp: ${dp.toFixed(2)}%)`,
+                };
+            } catch (err) {
+                console.error(`Failed to fetch Finnhub data for ${p.symbol}:`, err.message);
+                return {
+                    symbol: p.symbol,
+                    currentPrice: p.avgBuyPrice, // Fallback
+                    rsi: 50,
+                    sentiment: 0.5,
+                    volatility: "Medium",
+                    note: "Fallback data (API error)",
+                };
+            }
         }));
 
         // ── AI ANALYSIS ──

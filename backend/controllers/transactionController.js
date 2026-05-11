@@ -26,31 +26,22 @@ const fetchLivePrice = async (stockSymbol) => {
 // BUY STOCK — Atomic MongoDB session
 // ──────────────────────────────────────────────
 export const buyStock = async (req, res, next) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const { stockSymbol, quantity } = req.body;
         const userId = req.user?.id;
 
         // Validate quantity
         if (!quantity || quantity <= 0 || !Number.isInteger(Number(quantity))) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "Quantity must be a positive integer" });
         }
 
         // Validate stock exists
-        const stock = await stockModel.findOne({ stockSymbol }).session(session);
+        const stock = await stockModel.findOne({ stockSymbol });
         if (!stock) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(404).json({ message: "Stock not found" });
         }
 
         if (!stock.isActive) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "This stock is currently inactive and cannot be traded" });
         }
 
@@ -59,8 +50,6 @@ export const buyStock = async (req, res, next) => {
         try {
             currentPrice = await fetchLivePrice(stockSymbol);
         } catch {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "Unable to fetch stock price from market" });
         }
 
@@ -73,32 +62,22 @@ export const buyStock = async (req, res, next) => {
                 walletBalance: { $gte: totalAmount }, // atomic balance check
             },
             { $inc: { walletBalance: -totalAmount } },
-            { new: true, session }
+            { new: true }
         );
 
         if (!user) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "Insufficient wallet balance" });
         }
 
-        // Create BUY transaction inside the same session
-        const [transaction] = await transactionModel.create(
-            [
-                {
-                    userId,
-                    stockSymbol,
-                    transactionType: "BUY",
-                    quantity: Number(quantity),
-                    pricePerShare: currentPrice,
-                    totalAmount,
-                },
-            ],
-            { session }
-        );
-
-        await session.commitTransaction();
-        session.endSession();
+        // Create BUY transaction
+        const transaction = await transactionModel.create({
+            userId,
+            stockSymbol,
+            transactionType: "BUY",
+            quantity: Number(quantity),
+            pricePerShare: currentPrice,
+            totalAmount,
+        });
 
         res.status(201).json({
             message: "Stock purchased successfully",
@@ -106,8 +85,6 @@ export const buyStock = async (req, res, next) => {
             payload: transaction,
         });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
         next(error);
     }
 };
@@ -116,33 +93,25 @@ export const buyStock = async (req, res, next) => {
 // SELL STOCK — Atomic MongoDB session
 // ──────────────────────────────────────────────
 export const sellStock = async (req, res, next) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const { stockSymbol, quantity } = req.body;
         const userId = req.user?.id;
 
         // Validate quantity
         if (!quantity || quantity <= 0 || !Number.isInteger(Number(quantity))) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "Quantity must be a positive integer" });
         }
 
         // Validate stock exists
-        const stock = await stockModel.findOne({ stockSymbol }).session(session);
+        const stock = await stockModel.findOne({ stockSymbol });
         if (!stock) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(404).json({ message: "Stock not found" });
         }
 
         // Calculate owned quantity from transactions
         const transactions = await transactionModel
             .find({ userId, stockSymbol })
-            .lean()
-            .session(session);
+            .lean();
 
         let ownedQuantity = 0;
         for (const tx of transactions) {
@@ -151,8 +120,6 @@ export const sellStock = async (req, res, next) => {
         }
 
         if (quantity > ownedQuantity) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({
                 message: `Not enough shares. You own ${ownedQuantity} shares of ${stockSymbol}`,
             });
@@ -163,8 +130,6 @@ export const sellStock = async (req, res, next) => {
         try {
             currentPrice = await fetchLivePrice(stockSymbol);
         } catch {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({ message: "Unable to fetch stock price from market" });
         }
 
@@ -174,26 +139,18 @@ export const sellStock = async (req, res, next) => {
         const user = await userModel.findByIdAndUpdate(
             userId,
             { $inc: { walletBalance: totalAmount } },
-            { new: true, session }
+            { new: true }
         );
 
-        // Create SELL transaction inside the same session
-        const [transaction] = await transactionModel.create(
-            [
-                {
-                    userId,
-                    stockSymbol,
-                    transactionType: "SELL",
-                    quantity: Number(quantity),
-                    pricePerShare: currentPrice,
-                    totalAmount,
-                },
-            ],
-            { session }
-        );
-
-        await session.commitTransaction();
-        session.endSession();
+        // Create SELL transaction
+        const transaction = await transactionModel.create({
+            userId,
+            stockSymbol,
+            transactionType: "SELL",
+            quantity: Number(quantity),
+            pricePerShare: currentPrice,
+            totalAmount,
+        });
 
         res.status(201).json({
             message: "Stock sold successfully",
@@ -202,8 +159,6 @@ export const sellStock = async (req, res, next) => {
             payload: transaction,
         });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
         next(error);
     }
 };

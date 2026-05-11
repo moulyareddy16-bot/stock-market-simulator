@@ -12,8 +12,10 @@ export const getPortfolio = async (req, res, next) => {
     const user = await userModel.findById(userId);
     const walletBalance = user ? user.walletBalance : 0;
 
-    // 2. Fetch all transactions of user
-    const transactions = await transactionModel.find({ userId });
+    // 2. Fetch all transactions of user in chronological order
+    const transactions = await transactionModel
+      .find({ userId })
+      .sort({ createdAt: 1 });
 
     // 3. Build portfolio object
     const portfolio = {};
@@ -43,6 +45,12 @@ export const getPortfolio = async (req, res, next) => {
         const avgCost = portfolio[symbol].totalInvestment / portfolio[symbol].ownedQuantity;
         portfolio[symbol].ownedQuantity -= tx.quantity;
         portfolio[symbol].totalInvestment -= tx.quantity * avgCost;
+
+        // Prevent floating-point math drift when fully sold
+        if (portfolio[symbol].ownedQuantity <= 0) {
+            portfolio[symbol].ownedQuantity = 0;
+            portfolio[symbol].totalInvestment = 0;
+        }
       }
     });
 

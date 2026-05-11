@@ -13,11 +13,16 @@ export function AuthProvider({ children }) {
 
   const login = (tokenValue) => {
     sessionStorage.setItem("token", tokenValue);
+    // JWT expires in 1 hour (3600 seconds)
+    sessionStorage.setItem("sessionExpiry", Date.now() + 3600 * 1000);
     setToken(tokenValue); // 🔥 instant UI update
   };
 
   const logout = () => {
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("sessionExpiry");
     setToken(null);
   };
 

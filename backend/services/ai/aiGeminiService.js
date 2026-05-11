@@ -21,17 +21,20 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 export const generateStructuredJSON = async (prompt) => {
     try {
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json", // guarantees JSON output
                 temperature: 0.3,                     // lower = more deterministic
-                maxOutputTokens: 2048,
             },
         });
 
         const result = await model.generateContent(prompt);
         const response = result.response;
-        const text = response.text();
+        let text = response.text();
+        console.log("Raw Gemini Text:", text);
+
+        // Strip markdown backticks if Gemini erroneously includes them
+        text = text.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
 
         // Parse JSON — responseMimeType should guarantee clean JSON
         return JSON.parse(text);
@@ -49,7 +52,7 @@ export const generateStructuredJSON = async (prompt) => {
 export const generateText = async (prompt) => {
     try {
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: 0.5,
                 maxOutputTokens: 1024,

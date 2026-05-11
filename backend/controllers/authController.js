@@ -32,7 +32,9 @@ export const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email }).lean();
+        const user = await userModel.findOne({ 
+            email: new RegExp('^' + email + '$', 'i') 
+        }).lean();
 
         if (!user) {
             return res.status(400).json({ message: "Please register first" });
