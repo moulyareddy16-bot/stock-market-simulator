@@ -84,7 +84,7 @@ function AICommandCenter() {
 
   }, []);
 
-  if (loading) {
+  if (loading || !aiData) {
     return (
       <div className="min-h-screen bg-[#050816] p-6 lg:p-10">
         <div className="animate-pulse space-y-6">
@@ -156,15 +156,18 @@ function AICommandCenter() {
         />
 
         <AIConfidenceMeter
-          score={aiData.confidenceScore}
+          confidence={aiData?.confidenceScore}
+          prediction={aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
+          risk={aiData?.riskAnalysis?.level}
+          volatility={aiData?.riskAnalysis?.score || 45}
         />
 
         <AIMarketSentiment
-          sentiment={aiData.marketSentiment}
+          sentimentData={aiData?.marketSentiment}
         />
 
         <AIRiskPanel
-          risk={aiData.riskAnalysis}
+          riskData={aiData?.riskAnalysis}
         />
 
       </div>
