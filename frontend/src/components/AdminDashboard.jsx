@@ -25,6 +25,7 @@ function AdminDashboard() {
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [stockSearch, setStockSearch] = useState("");
+  const [totalActiveStocks, setTotalActiveStocks] = useState(0);
 
   // Activity History State
   const [activities, setActivities] = useState([]);
@@ -54,6 +55,7 @@ function AdminDashboard() {
       const response = await getAllStocks(stockPage, stockSearch, 8);
       const stockList = response.payload || [];
       setTotalStockPages(response.totalPages || 1);
+      setTotalActiveStocks(response.totalActive || 0);
 
       // Fetch live details for each stock
       const detailedStocks = await Promise.all(
@@ -426,7 +428,7 @@ function AdminDashboard() {
                 <div className="hidden sm:block">
                   <div className="rounded-xl border border-slate-700 bg-slate-800/50 px-5 py-2 shadow-lg backdrop-blur-md whitespace-nowrap">
                     <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Total Active</p>
-                    <p className="text-xl font-bold text-emerald-400">{stocks.filter(s => s.isActive).length}</p>
+                    <p className="text-xl font-bold text-emerald-400">{totalActiveStocks}</p>
                   </div>
                 </div>
               </div>
@@ -593,8 +595,8 @@ function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4 w-1/4 text-center">
                               <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${act.action.includes('DELETE') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                  act.action.includes('ADD') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                    'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                act.action.includes('ADD') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                  'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                 }`}>
                                 {act.action.replace(/_/g, ' ').replace('TOGGLE ', '')}
                               </span>

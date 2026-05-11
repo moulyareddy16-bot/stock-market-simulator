@@ -5,7 +5,19 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
     { name: "Portfolio", path: "/portfolio", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
     { name: "Market", path: "/stocks", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5" /></svg> },
     { name: "History", path: "/transactions", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
-    { name: "AI Analysis", path: "/ai-suggestions", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8M16 4h-4v4M8 12h8M12 16v4M12 12v4M20 12h-4M8 12H4M12 8l4 4-4 4-4-4 4-4z" /></svg> },
+    {
+      name: "Alpha-Insight AI",
+      path: "/ai",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4 4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z" />
+          <path d="M8 11v2a4 4 0 0 0 4 4 4 4 0 0 0 4-4v-2" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+        </svg>
+      )
+    },
+
     { 
       name: "Leaderboard", 
       path: "/leaderboard",

@@ -1,71 +1,100 @@
 import { userModel } from "../models/UserModel.js";
 import { transactionModel } from "../models/transactionModel.js";
+import { analyzePortfolioWithAI } from "../services/ai/aiPortfolioAnalyzer.js";
+import { getCachedAIResponse, setCachedAIResponse } from "../services/ai/aiCacheService.js";
 
-export const getAiSuggestions = async (req, res, next) => {
+// ──────────────────────────────────────────────
+// GET AI SUGGESTIONS — Full portfolio analysis
+// ──────────────────────────────────────────────
+export const getAiSuggestions = async (req, res) => {
     try {
-        console.log("AI Controller hit for user:", req.user.id);
+        console.log("AI Controller: suggestion request for user:", req.user.id);
+
         const userId = req.user.id;
-        
-        // 1. Fetch Data with fallbacks
-        let user = null;
-        try {
-            user = await userModel.findById(userId);
-        } catch (e) {
-            console.error("User fetch fail:", e);
+
+        // ── CACHE CHECK ──
+        const cached = getCachedAIResponse(userId);
+        if (cached) {
+            console.log("AI Controller: returning cached response");
+            return res.status(200).json({ success: true, payload: cached, cached: true });
         }
 
-        const username = user?.username || "Trader";
-        const balance = user?.walletBalance || 0;
+        // ── FETCH REAL USER DATA ──
+        const user = await userModel.findById(userId).select("-password").lean();
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
 
-        // 2. Mock Analysis (Guaranteed Success)
-        const aiResult = {
-            summary: `Hello ${username}, our AI has analyzed your portfolio. You have $${balance.toLocaleString()} in liquidity available for new strategic positions.`,
-            marketSentiment: "BULLISH",
-            traderScore: 82,
-            suggestions: [
-                {
-                    type: "STRATEGY",
-                    title: "Diversification Edge",
-                    description: "AI suggests increasing exposure to Tech and Energy sectors to balance your current risk profile.",
-                    impact: "High"
-                },
-                {
-                    type: "OPPORTUNITY",
-                    title: "Market Entry Point",
-                    description: "Current RSI indicators suggest a strong buy zone for blue-chip stocks like IBM and AAPL.",
-                    impact: "Medium"
-                },
-                {
-                    type: "HOLD",
-                    title: "Steady Accumulation",
-                    description: "Maintain your current long-term positions. The overall market trend remains positive for the next quarter.",
-                    impact: "Low"
-                },
-                {
-                    type: "BUY",
-                    title: "Growth Trend",
-                    description: "High-growth sectors are showing momentum. Consider a small position in emerging tech stocks.",
-                    impact: "Medium"
-                }
-            ]
+        // ── FETCH REAL TRANSACTIONS ──
+        const transactions = await transactionModel
+            .find({ userId })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // ── BUILD REAL USER PROFILE (reads actual DB fields — not hardcoded) ──
+        const userProfile = {
+            username: user.username,
+            balance: user.walletBalance,
+            riskTolerance: user.riskTolerance || "Medium",   // real field from UserModel
+            timeHorizon: user.timeHorizon || "Long Term",     // real field from UserModel
+            primaryGoal: user.goal || "Growth",               // real field from UserModel
+            totalTrades: transactions.length,
         };
 
-        console.log("AI Result generated, sending response...");
-        return res.status(200).json({
-            success: true,
-            payload: aiResult
+        // ── BUILD PORTFOLIO FROM REAL TRANSACTIONS ──
+        // Net holdings map (BUY - SELL aggregation)
+        const holdingsMap = {};
+        for (const tx of transactions) {
+            const sym = tx.stockSymbol;
+            if (!holdingsMap[sym]) holdingsMap[sym] = { symbol: sym, netQty: 0, totalInvested: 0 };
+            if (tx.transactionType === "BUY") {
+                holdingsMap[sym].netQty += tx.quantity;
+                holdingsMap[sym].totalInvested += tx.totalAmount;
+            } else {
+                holdingsMap[sym].netQty -= tx.quantity;
+                holdingsMap[sym].totalInvested -= tx.totalAmount;
+            }
+        }
+
+        const portfolioData = Object.values(holdingsMap)
+            .filter((h) => h.netQty > 0)
+            .map((h) => ({
+                symbol: h.symbol,
+                quantity: h.netQty,
+                avgBuyPrice: h.netQty > 0 ? h.totalInvested / h.netQty : 0,
+                totalInvested: h.totalInvested,
+            }));
+
+        // ── MARKET DATA ──
+        // TODO Step 7: Replace with real Finnhub RSI/sentiment pipeline
+        // Currently uses a placeholder that will be replaced in STEP 7
+        const marketData = portfolioData.map((p) => ({
+            symbol: p.symbol,
+            // These will be replaced by real Finnhub calculations in STEP 7
+            currentPrice: 0,
+            rsi: 50,            // neutral placeholder
+            sentiment: 0.5,     // neutral placeholder
+            volatility: "Medium",
+            note: "Real market data coming in STEP 7",
+        }));
+
+        // ── AI ANALYSIS ──
+        const aiResult = await analyzePortfolioWithAI({
+            userProfile,
+            portfolioData,
+            marketData,
         });
 
+        // ── CACHE RESULT ──
+        setCachedAIResponse(userId, aiResult);
+
+        return res.status(200).json({ success: true, payload: aiResult });
+
     } catch (err) {
-        console.error("CRITICAL AI ERROR:", err);
-        return res.status(200).json({
-            success: true,
-            payload: {
-                summary: "AI analysis is currently refreshing. Using general market insights.",
-                marketSentiment: "NEUTRAL",
-                traderScore: 50,
-                suggestions: []
-            }
+        console.error("AI Controller ERROR:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "AI analysis failed. Please try again shortly.",
         });
     }
 };

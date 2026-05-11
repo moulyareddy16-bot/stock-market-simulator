@@ -1,53 +1,75 @@
 import mongoose, { Schema, model } from "mongoose";
 
-//user model
-//username , email , password , role, wallet-balance , isuseractive 
-const userSchema = new Schema({
-    username:{
-        type:String,
-        required:[true,"username is required"],
-        minLength:[4,"min length of username is 4 characters"],
-        maxLength:[17,"username exceeds the 17 characters"],
-        unique:true
-    },
-    email:{
-        type:String,
-        required:[true,"email required"],
-        unique:true
-    },
-    password:{
-        type:String,
-        required:[true,"password required"],
-        minLength:[6,"min 6 characters are required"]
-    },
-    role:{
-        type:String,
-        enum:["trader","admin","stockmanager"],
-        required:[true,"role is required"]
-    },
-    walletBalance:{
-        type:Number,
-        default: function () {
-            return this.role === "trader" ? 100000 : undefined;
-        }
-    },
-    isUserActive:{
-        type:Boolean,
-        default:true,
-    },
-    profileImage:{
-        type:String,
-        default:""
-    }},
+const userSchema = new Schema(
     {
-        timestamps:true,
-        versionKey:false,
-        strict:"throw"
+        username: {
+            type: String,
+            required: [true, "username is required"],
+            minLength: [4, "Min length of username is 4 characters"],
+            maxLength: [17, "Username exceeds 17 characters"],
+            unique: true,
+            trim: true,
+        },
+        email: {
+            type: String,
+            required: [true, "email is required"],
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+        password: {
+            type: String,
+            required: [true, "password is required"],
+            minLength: [6, "Min 6 characters required"],
+        },
+        role: {
+            type: String,
+            enum: ["trader", "admin", "stockmanager"],
+            required: [true, "role is required"],
+        },
+        walletBalance: {
+            type: Number,
+            default: function () {
+                return this.role === "trader" ? 100000 : undefined;
+            },
+        },
+        isUserActive: {
+            type: Boolean,
+            default: true,
+        },
+        profileImage: {
+            type: String,
+            default: "",
+        },
+        riskTolerance: {
+            type: String,
+            enum: ["Low", "Medium", "High"],
+            default: "Medium",
+        },
+        timeHorizon: {
+            type: String,
+            enum: ["Short Term", "Long Term"],
+            default: "Long Term",
+        },
+        goal: {
+            type: String,
+            enum: ["Growth", "Income", "Capital Preservation"],
+            default: "Growth",
+        },
+    },
+    {
+        timestamps: true,
+        versionKey: false,
+        strict: "throw",
     }
-)
+);
 
+// ── INDEXES ──
+// email: used in login (findOne by email)
+userSchema.index({ email: 1 });
+// role: used in leaderboard (find all traders)
+userSchema.index({ role: 1 });
+// Combined for active trader queries
+userSchema.index({ role: 1, isUserActive: 1 });
 
-//generate user model
-export const userModel =
-  mongoose.models.user ||
-  model("user", userSchema);
+export const userModel = mongoose.models.user || model("user", userSchema);
