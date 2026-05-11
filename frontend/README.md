@@ -29,3 +29,6 @@ npm install recharts
 
 npm install recharts socket.io-client
 
+# . Install new packages
+cd stock-market-simulator/backend
+- npm install helmet express-rate-limit
