@@ -46,3 +46,7 @@ Install Google SDK:
 
 - npm install @google/generative-ai
   
+
+# 1. Install new packages
+cd stock-market-simulator/backend
+npm install helmet express-rate-limit
