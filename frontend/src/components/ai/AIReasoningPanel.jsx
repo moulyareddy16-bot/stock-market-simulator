@@ -5,31 +5,19 @@ function AIReasoningPanel({
 }) {
   const fallbackReasoning = [
     {
-      ticker: "AAPL",
-      action: "BUY",
-      confidence: 91,
-      reason:
-        "RSI recovered from oversold territory while institutional accumulation increased over the last 3 sessions.",
-      sentiment: 0.82,
-      horizon: "Long Term",
+      step: "Concentration Analysis",
+      finding: "Your portfolio is well-diversified across 12 sectors with no single position exceeding 15%.",
+      impact: "LOW",
     },
     {
-      ticker: "TSLA",
-      action: "HOLD",
-      confidence: 73,
-      reason:
-        "Price momentum remains positive but weakening sentiment indicates possible short-term consolidation risk.",
-      sentiment: 0.41,
-      horizon: "Swing Trade",
+      step: "Volatility Stress Test",
+      finding: "Expected drawdown in a 10% market correction is -6.2%, indicating higher stability than the S&P 500.",
+      impact: "MEDIUM",
     },
     {
-      ticker: "NVDA",
-      action: "STRONG BUY",
-      confidence: 95,
-      reason:
-        "AI models detect sustained bullish momentum supported by earnings growth and semiconductor demand expansion.",
-      sentiment: 0.91,
-      horizon: "Growth",
+      step: "Sentiment Correlation",
+      finding: "Institutional buying pressure detected in tech holdings despite retail fear, suggesting a potential bull flag.",
+      impact: "HIGH",
     },
   ];
 
@@ -38,24 +26,24 @@ function AIReasoningPanel({
       ? reasoning
       : fallbackReasoning;
 
-  const getActionStyle = (action) => {
-    if (action.includes("BUY")) {
-      return {
-        text: "text-emerald-400",
-        bg: "bg-emerald-500/10 border-emerald-500/20",
-      };
-    }
-
-    if (action.includes("SELL")) {
+  const getImpactStyle = (impact = "") => {
+    if (impact.includes("HIGH") || impact.includes("CRITICAL")) {
       return {
         text: "text-red-400",
         bg: "bg-red-500/10 border-red-500/20",
       };
     }
 
+    if (impact.includes("MEDIUM")) {
+      return {
+        text: "text-yellow-400",
+        bg: "bg-yellow-500/10 border-yellow-500/20",
+      };
+    }
+
     return {
-      text: "text-yellow-400",
-      bg: "bg-yellow-500/10 border-yellow-500/20",
+      text: "text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
     };
   };
 
@@ -85,7 +73,7 @@ function AIReasoningPanel({
       {/* REASONING LIST */}
       <div className="space-y-6 relative z-10">
         {data.map((item, index) => {
-          const style = getActionStyle(item.action);
+          const style = getImpactStyle(item?.impact);
 
           return (
             <div
@@ -95,59 +83,27 @@ function AIReasoningPanel({
               {/* TOP */}
               <div className="flex items-start justify-between mb-5">
                 <div>
-                  <h3 className="text-3xl font-black text-white mb-1">
-                    {item.ticker}
+                  <h3 className="text-xl font-black text-white mb-1">
+                    {item?.step}
                   </h3>
 
                   <p className="text-xs uppercase tracking-widest text-slate-500 font-black">
-                    AI Confidence {item.confidence}%
+                    Analysis Vector
                   </p>
                 </div>
 
                 <div
-                  className={`px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-widest ${style.bg} ${style.text}`}
+                  className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}
                 >
-                  {item.action}
+                  {item?.impact} IMPACT
                 </div>
               </div>
 
-              {/* REASON */}
-              <div className="rounded-2xl bg-black/20 border border-white/5 p-5 mb-5">
+              {/* FINDING */}
+              <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
                 <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                  {item.reason}
+                  {item?.finding}
                 </p>
-              </div>
-
-              {/* METRICS */}
-              <div className="grid grid-cols-2 gap-4">
-                
-                {/* SENTIMENT */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    Sentiment Score
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-2xl font-black text-white">
-                      {(item.sentiment * 100).toFixed(0)}
-                    </h4>
-
-                    <span className="text-slate-500 font-black">
-                      /100
-                    </span>
-                  </div>
-                </div>
-
-                {/* HORIZON */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    Time Horizon
-                  </p>
-
-                  <h4 className="text-xl font-black text-indigo-400">
-                    {item.horizon}
-                  </h4>
-                </div>
               </div>
             </div>
           );

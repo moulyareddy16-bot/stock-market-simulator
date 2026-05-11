@@ -62,12 +62,12 @@ function AIMarketSentiment({ sentimentData }) {
 
         <div
           className={`px-5 py-3 rounded-2xl border text-sm font-black uppercase tracking-widest ${
-            data.overall === "BULLISH"
+            (data.overall || data.label) === "BULLISH"
               ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
               : "bg-red-500/10 border-red-500/20 text-red-400"
           }`}
         >
-          {data.overall}
+          {data.overall || data.label || "NEUTRAL"}
         </div>
       </div>
 
@@ -79,7 +79,7 @@ function AIMarketSentiment({ sentimentData }) {
           </p>
 
           <h3 className="text-4xl font-black text-emerald-400">
-            {data.fearGreedIndex}
+            {data.fearGreedIndex || data.score || 50}
           </h3>
         </div>
 
@@ -124,7 +124,7 @@ function AIMarketSentiment({ sentimentData }) {
         </h3>
 
         <div className="space-y-5">
-          {data.sectors.map((sector, index) => (
+          {(data.sectors || []).map((sector, index) => (
             <div key={index}>
               <div className="flex items-center justify-between mb-2">
                 <div>
