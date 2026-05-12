@@ -66,12 +66,11 @@ function StockDetails() {
         ...fetchedStock,
         ownedQuantity,
         stats: {
-           open: (fetchedStock.currentPrice * 0.99).toFixed(2),
-           high: (fetchedStock.currentPrice * 1.05).toFixed(2),
-           low: (fetchedStock.currentPrice * 0.95).toFixed(2),
+           open: Number(fetchedStock.open || fetchedStock.currentPrice).toFixed(2),
+           high: Number(fetchedStock.high || fetchedStock.currentPrice).toFixed(2),
+           low: Number(fetchedStock.low || fetchedStock.currentPrice).toFixed(2),
            mktCap: formatMarketCap(fetchedStock.marketCapitalization),
-           peRatio: fetchedStock.peRatio || "N/A",
-           divYield: fetchedStock.divYield || "N/A"
+           peRatio: fetchedStock.peRatio || "N/A"
         }
       });
       setLivePrice(Number(fetchedStock.currentPrice).toFixed(2));
@@ -81,6 +80,8 @@ function StockDetails() {
   };
 
   useEffect(() => {
+    setHistoricalData([]);
+    setShowHistorical(false);
     fetchStock();
   }, [stockSymbol]);
 
@@ -88,10 +89,10 @@ function StockDetails() {
   useEffect(() => {
     if (liveChartData.length === 0 && stock?.currentPrice) {
       const dummy = [];
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 50; i++) {
         dummy.push({
-          date: new Date(Date.now() - (15 - i) * 60000).toTimeString().split(' ')[0],
-          price: Number(stock.currentPrice) + (Math.random() * 2 - 1)
+          date: new Date(Date.now() - (50 - i) * 60000).toTimeString().split(' ')[0],
+          price: Number(stock.currentPrice) + (Math.random() * 0.4 - 0.2)
         });
       }
       setLiveChartData(dummy);
@@ -119,7 +120,7 @@ function StockDetails() {
               price: Number(latestPrice.toFixed(2))
             }
           ];
-          return updated.slice(-10);
+          return updated.slice(-50);
         });
         
         // Update stock current price so stats/terminal reflect it
@@ -368,7 +369,7 @@ function StockDetails() {
                   </div>
 
                   {/* STATS GRID */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                      {stock.stats && Object.entries(stock.stats).map(([key, val]) => (
                        <div key={key} className="glass-card bg-slate-800/40 p-5 rounded-2xl border border-slate-700/30 text-center hover:border-emerald-500/30 transition-all group">
                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter mb-1 group-hover:text-emerald-400">{key}</p>

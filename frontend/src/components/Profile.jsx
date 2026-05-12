@@ -134,10 +134,21 @@ function Profile() {
                 className="w-24 h-24 rounded-3xl bg-emerald-500/10 border-2 border-emerald-500/20 overflow-hidden flex items-center justify-center text-4xl shadow-2xl shadow-emerald-500/10 relative cursor-pointer group/avatar"
               >
                 {user?.profileImage ? (
-                  <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  <img 
+                    src={user.profileImage.startsWith('http') ? user.profileImage : `http://localhost:5000/${user.profileImage.replace(/^\/+/, '')}`} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Only fallback if it's actually a broken link, don't clear the user state
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
                 ) : (
                   <span className="text-emerald-500">👤</span>
                 )}
+                {/* Fallback span for when image fails */}
+                <span className="hidden text-emerald-500">👤</span>
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition duration-300">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </div>

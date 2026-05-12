@@ -25,7 +25,16 @@ const app = exp();
 // ──────────────────────────────────────────────
 // SECURITY HEADERS (helmet)
 // ──────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://127.0.0.1:5000"],
+            connectSrc: ["'self'", "http://localhost:5000", "http://127.0.0.1:5000"],
+        }
+    }
+}));
 
 // ──────────────────────────────────────────────
 // BODY PARSER

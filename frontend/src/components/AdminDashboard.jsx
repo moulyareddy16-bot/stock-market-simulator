@@ -8,6 +8,7 @@ import {
 } from "../service/userService";
 import { getAllStocks, getStockDetails } from "../service/stockService";
 import { getAdminActivities, clearAdminActivities as clearHistory } from "../service/adminActivityService";
+import CoinIcon from "./CoinIcon";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -36,6 +37,7 @@ function AdminDashboard() {
   const [modalTab, setModalTab] = useState("transactions"); // 'transactions' | 'portfolio'
   const [modalData, setModalData] = useState({ transactions: [], portfolio: [], summary: {} });
   const [modalLoading, setModalLoading] = useState(false);
+  const [isAdminCollapsed, setIsAdminCollapsed] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -127,11 +129,10 @@ function AdminDashboard() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
+    return (amount || 0).toLocaleString(undefined, {
       minimumFractionDigits: 2,
-    }).format(amount || 0);
+      maximumFractionDigits: 2
+    });
   };
 
   // --- ACTIONS ---
@@ -215,26 +216,54 @@ function AdminDashboard() {
     <div className="flex min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] text-white">
 
       {/* Sidebar */}
-      <div className="w-64 bg-[#0f172a]/50 backdrop-blur-md p-6 flex flex-col sticky top-16 h-[calc(100vh-64px)] border-r border-slate-700/50 z-20">
-        <h2 className="text-2xl font-bold mb-10 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin Panel</h2>
+      <div className={`transition-all duration-300 ${isAdminCollapsed ? "w-20" : "w-64"} bg-[#0f172a]/50 backdrop-blur-md p-6 flex flex-col sticky top-16 h-[calc(100vh-64px)] border-r border-slate-700/50 z-20`}>
+        
+        {/* Toggle Button */}
+        <div className={`mb-10 flex ${isAdminCollapsed ? "justify-center" : "justify-between items-center"}`}>
+          {!isAdminCollapsed && <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin</h2>}
+          <button 
+            onClick={() => setIsAdminCollapsed(!isAdminCollapsed)}
+            className="p-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all group"
+            title={isAdminCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className={`transition-transform duration-500 ${isAdminCollapsed ? "rotate-180" : ""}`}
+            >
+              <polyline points="11 17 6 12 11 7" />
+              <polyline points="18 17 13 12 18 7" />
+            </svg>
+          </button>
+        </div>
+
         <nav className="flex flex-col gap-2">
           <button
             onClick={() => setActiveMenu('users')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'users' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'users' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            title={isAdminCollapsed ? "Users" : ""}
           >
-            <span>👥</span> Users
+            <span className="text-xl">👥</span> {!isAdminCollapsed && "Users"}
           </button>
           <button
             onClick={() => setActiveMenu('stocks')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'stocks' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'stocks' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            title={isAdminCollapsed ? "Stocks" : ""}
           >
-            <span>📈</span> Stocks
+            <span className="text-xl">📈</span> {!isAdminCollapsed && "Stocks"}
           </button>
           <button
             onClick={() => setActiveMenu('history')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition ${activeMenu === 'history' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'history' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            title={isAdminCollapsed ? "Activity History" : ""}
           >
-            <span>📜</span> Activity History
+            <span className="text-xl">📜</span> {!isAdminCollapsed && "Activity History"}
           </button>
         </nav>
       </div>
@@ -327,7 +356,8 @@ function AdminDashboard() {
                     <div className={`flex-1 space-y-4 mb-6 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Wallet Balance</span>
-                        <span className="font-semibold text-emerald-300">
+                        <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
+                          <CoinIcon className="w-4 h-4 text-amber-400" />
                           {formatCurrency(user.walletBalance)}
                         </span>
                       </div>
@@ -694,7 +724,7 @@ function AdminDashboard() {
                                   </td>
                                   <td className="px-6 py-4">{tx.quantity}</td>
                                   <td className="px-6 py-4">{formatCurrency(tx.pricePerShare)}</td>
-                                  <td className="px-6 py-4 font-medium">{formatCurrency(tx.totalAmount)}</td>
+                                  <td className="px-6 py-4 flex items-center gap-1">{tx.transactionType === 'BUY' ? '-' : '+'}<CoinIcon className="w-3 h-3 text-amber-500" /> {formatCurrency(tx.totalAmount)}</td>
                                 </tr>
                               ))
                             )}
@@ -710,16 +740,24 @@ function AdminDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
                             <p className="text-xs text-slate-400 mb-1">Total Investment</p>
-                            <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalInvestment)}</p>
+                            <p className="text-lg font-bold flex items-center gap-1.5">
+                              <CoinIcon className="w-5 h-5 text-amber-400" />
+                              {formatCurrency(modalData.summary.totalInvestment)}
+                            </p>
                           </div>
                           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
                             <p className="text-xs text-slate-400 mb-1">Current Value</p>
-                            <p className="text-lg font-bold">{formatCurrency(modalData.summary.totalCurrentValue)}</p>
+                            <p className="text-lg font-bold flex items-center gap-1.5">
+                              <CoinIcon className="w-5 h-5 text-amber-400" />
+                              {formatCurrency(modalData.summary.totalCurrentValue)}
+                            </p>
                           </div>
                           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
                             <p className="text-xs text-slate-400 mb-1">Total P/L</p>
-                            <p className={`text-lg font-bold ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                              {modalData.summary.totalProfit >= 0 ? '+' : ''}{formatCurrency(modalData.summary.totalProfit)}
+                            <p className={`text-lg font-bold flex items-center gap-1.5 ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {modalData.summary.totalProfit >= 0 ? '+' : ''}
+                              <CoinIcon className={`w-5 h-5 ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`} />
+                              {formatCurrency(modalData.summary.totalProfit)}
                             </p>
                           </div>
                         </div>
