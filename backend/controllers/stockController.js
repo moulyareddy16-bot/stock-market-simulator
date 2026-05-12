@@ -609,44 +609,53 @@ export const getSingleStock = async (req, res, next) => {
       let peRatio = "N/A";
       let divYield = "N/A";
       let profile = {};
+      let quoteData = {};
 
       try {
          // Fetch quote, metrics, and profile in parallel
-         const [quoteRes, metricRes, profileRes] = await Promise.all([
+         const [quoteRes, metricRes, profileRes] = await Promise.allSettled([
             axios.get(`https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`),
             axios.get(`https://finnhub.io/api/v1/stock/metric?symbol=${stockSymbol}&metric=all&token=${process.env.FINNHUB_API_KEY}`),
             axios.get(`https://finnhub.io/api/v1/stock/profile2?symbol=${stockSymbol}&token=${process.env.FINNHUB_API_KEY}`)
          ]);
 
-         currentPrice = quoteRes.data.c || 0;
-         const dp = quoteRes.data.dp || 0;
-         change = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
-
-         if (metricRes.data && metricRes.data.metric) {
-            peRatio = metricRes.data.metric.peExclExtraTTM ? metricRes.data.metric.peExclExtraTTM.toFixed(2) : "N/A";
-            divYield = metricRes.data.metric.dividendYieldIndicatedAnnual ? metricRes.data.metric.dividendYieldIndicatedAnnual.toFixed(2) + "%" : "N/A";
+         if (quoteRes.status === "fulfilled" && quoteRes.value.data) {
+            quoteData = quoteRes.value.data;
+            currentPrice = quoteData.c || 0;
+            const dp = quoteData.dp || 0;
+            change = `${dp >= 0 ? "+" : ""}${dp.toFixed(2)}%`;
          }
 
-         if (profileRes.data) {
+         if (metricRes.status === "fulfilled" && metricRes.value.data && metricRes.value.data.metric) {
+            const metrics = metricRes.value.data.metric;
+            peRatio = metrics.peExclExtraTTM ? metrics.peExclExtraTTM.toFixed(2) : "N/A";
+            divYield = metrics.dividendYieldIndicatedAnnual ? metrics.dividendYieldIndicatedAnnual.toFixed(2) + "%" : "N/A";
+         }
+
+         if (profileRes.status === "fulfilled" && profileRes.value.data) {
+            const p = profileRes.value.data;
             profile = {
-               sector: profileRes.data.finnhubIndustry,
-               exchange: profileRes.data.exchange,
-               country: profileRes.data.country,
-               ipo: profileRes.data.ipo,
-               logo: profileRes.data.logo
+               sector: p.finnhubIndustry,
+               exchange: p.exchange,
+               country: p.country,
+               ipo: p.ipo,
+               logo: p.logo
             };
          }
       } catch (e) {
-         console.error("Finnhub error:", e.message);
+         console.error("Finnhub parallel fetch error:", e.message);
       }
 
       const stockData = {
          ...stock.toObject(),
-         currentPrice,
+         currentPrice: currentPrice || 150.00, // Fallback price
          change,
          peRatio,
          divYield,
-         ...profile
+         ...profile,
+         high: quoteData.h || currentPrice || 155.00,
+         low: quoteData.l || currentPrice || 145.00,
+         open: quoteData.o || currentPrice || 150.00
       };
 
       return res.status(200).json({

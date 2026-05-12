@@ -1,348 +1,189 @@
 import axios from "axios";
+import { stockModel } from "../models/StockModel.js";
+import { stockCache } from "../services/cacheService.js";
 
 
 // GET HISTORICAL STOCK DATA
 
 export const getStockHistory = async (req, res) => {
-
    try {
-
       const { symbol } = req.params;
-
-      const { range } = req.query;
-
-      let response;
-
-      // =========================
-      // 1D -> INTRADAY DATA
-      // =========================
-
-      if (range === "1D") {
-
-         response = await axios.get(
-
-            "https://www.alphavantage.co/query",
-
-            {
-
-               params: {
-
-                  function: "TIME_SERIES_INTRADAY",
-
-                  symbol,
-
-                  interval: "5min",
-
-                  outputsize: "full",
-
-                  apikey: process.env.ALPHA_VANTAGE_API_KEY
-
-               }
-
-            }
-
-         );
-
-      }
-
-      // =========================
-      // OTHER RANGES -> DAILY DATA
-      // =========================
-
-      else {
-
-         response = await axios.get(
-
-            "https://www.alphavantage.co/query",
-
-            {
-
-               params: {
-
-                  function: "TIME_SERIES_DAILY",
-
-                  symbol,
-
-                  outputsize: "full",
-
-                  apikey: process.env.ALPHA_VANTAGE_API_KEY
-
-               }
-
-            }
-
-         );
-
-      }
-
-      const data = response.data;
-
-      // =========================
-      // SELECT DATASET
-      // =========================
-
-      const timeSeries =
-
-         range === "1D"
-
-            ? data["Time Series (5min)"]
-
-            : data["Time Series (Daily)"];
-
-
-      // =========================
-      // FALLBACK IF API LIMIT HIT
-      // =========================
-
-      if (!timeSeries) {
-
-         console.log("AlphaVantage limit reached");
-
-         const dummyData = [];
-
-         const now = new Date();
-
-         // ======================
-         // 1D DUMMY
-         // ======================
-
-         if (range === "1D") {
-
-            let currentPrice = 220;
-
-            for (let i = 78; i >= 0; i--) {
-
-               const time = new Date(
-
-                  now.getTime() - i * 5 * 60000
-
-               );
-
-               currentPrice +=
-
-                  Math.sin(i / 4) * 0.8 +
-
-                  (Math.random() - 0.5) * 1.2;
-
-               dummyData.push({
-
-                  date: time.toISOString(),
-
-                  price: Number(
-
-                     currentPrice.toFixed(2)
-
-                  )
-
-               });
-
-            }
-
-         }
-
-         // ======================
-         // OTHER RANGES
-         // ======================
-
-         else {
-
-            const totalPoints =
-
-               range === "5D" ? 4 :
-
-               range === "1M" ? 29 :
-
-               range === "3M" ? 90 :
-
-               range === "1Y" ? 250 : 500;
-
-            let currentPrice = 220;
-
-            for (let i = totalPoints; i >= 0; i--) {
-
-               const day = new Date(
-
-                  now.getTime() - i * 86400000
-
-               );
-
-               // smoother realistic movement
-
-               currentPrice +=
-
-                  Math.sin(i / 25) * 0.3 +
-
-                  (Math.random() - 0.5) * 0.8;
-
-               // prevent negative prices
-
-               if (currentPrice < 50) {
-
-                  currentPrice = 50;
-
-               }
-
-               dummyData.push({
-
-                  date: day.toISOString(),
-
-                  price: Number(
-
-                     currentPrice.toFixed(2)
-
-                  )
-
-               });
-
-            }
-
-         }
-
+      const range = req.query.range || "1D";
+      const cacheKey = `history_${symbol}_${range}`;
+
+      // 1. CHECK CACHE (survive API limits)
+      const cachedData = stockCache.get(cacheKey);
+      if (cachedData) {
+         console.log(`History Cache Hit: ${symbol} (${range})`);
          return res.status(200).json({
-
             success: true,
-
-            data: dummyData
-
+            data: cachedData,
+            source: "cache"
          });
-
       }
 
-      // =========================
-      // FORMAT REAL API DATA
-      // =========================
+      let formattedData = null;
 
-      let formattedData = Object.entries(timeSeries).map(
-   ([date, values]) => {
+      // ==========================================
+      // 2. TRY ALPHA VANTAGE (Primary Source)
+      // ==========================================
+      try {
+         let avResponse;
+         if (range === "1D") {
+            avResponse = await axios.get("https://www.alphavantage.co/query", {
+               params: {
+                  function: "TIME_SERIES_INTRADAY",
+                  symbol,
+                  interval: "5min",
+                  outputsize: "full",
+                  apikey: process.env.ALPHA_VANTAGE_API_KEY
+               }
+            });
+         } else {
+            avResponse = await axios.get("https://www.alphavantage.co/query", {
+               params: {
+                  function: "TIME_SERIES_DAILY",
+                  symbol,
+                  outputsize: "full",
+                  apikey: process.env.ALPHA_VANTAGE_API_KEY
+               }
+            });
+         }
 
-      let formattedDate = date;
+         const avData = avResponse.data;
+         const timeSeries = range === "1D" ? avData["Time Series (5min)"] : avData["Time Series (Daily)"];
 
-      // 1D -> show time
-      if (range === "1D") {
+         if (timeSeries) {
+            formattedData = Object.entries(timeSeries).map(([date, values]) => {
+               let formattedDate = date;
+               if (range === "1D") {
+                  formattedDate = new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+               } else if (range === "5D") {
+                  formattedDate = new Date(date).toLocaleDateString([], { weekday: "short" });
+               } else {
+                  formattedDate = new Date(date).toLocaleDateString([], { day: "numeric", month: "short" });
+               }
+               return {
+                  date: formattedDate,
+                  price: Number(values["4. close"])
+               };
+            }).reverse();
 
-         formattedDate = new Date(date).toLocaleTimeString(
-            [],
-            {
-               hour: "2-digit",
-               minute: "2-digit"
+            // Apply Slicing
+            const sliceMap = { "1D": 78, "5D": 5, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 };
+            formattedData = formattedData.slice(-(sliceMap[range] || 30));
+         }
+      } catch (avError) {
+         console.log(`AlphaVantage Failed for ${symbol}:`, avError.message);
+      }
+
+      // ==========================================
+      // 3. TRY FINNHUB (Fallback Source)
+      // ==========================================
+      if (!formattedData) {
+         try {
+            console.log(`Trying Finnhub fallback for ${symbol}`);
+            const to = Math.floor(Date.now() / 1000);
+            const daysMap = { "1D": 1, "5D": 5, "1M": 30, "3M": 90, "1Y": 365, "MAX": 1825 };
+            const from = to - (daysMap[range] || 30) * 24 * 60 * 60;
+            const resolution = range === "1D" ? "5" : "D";
+
+            const fhResponse = await axios.get("https://finnhub.io/api/v1/stock/candle", {
+               params: {
+                  symbol,
+                  resolution,
+                  from,
+                  to,
+                  token: process.env.FINNHUB_API_KEY
+               }
+            });
+
+            if (fhResponse.data.s === "ok") {
+               formattedData = fhResponse.data.t.map((t, i) => {
+                  const date = new Date(t * 1000);
+                  let formattedDate;
+                  if (range === "1D") {
+                     formattedDate = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                  } else if (range === "5D") {
+                     formattedDate = date.toLocaleDateString([], { weekday: "short" });
+                  } else {
+                     formattedDate = date.toLocaleDateString([], { day: "numeric", month: "short" });
+                  }
+                  return {
+                     date: formattedDate,
+                     price: Number(fhResponse.data.c[i])
+                  };
+               });
             }
-         );
+         } catch (fhError) {
+            console.log(`Finnhub Failed for ${symbol}:`, fhError.message);
+         }
       }
 
-      // 5D -> weekday
-      else if (range === "5D") {
-
-         formattedDate = new Date(date).toLocaleDateString(
-            [],
-            { weekday: "short" }
-         );
+      // ==========================================
+      // 4. CACHE & RETURN REAL DATA
+      // ==========================================
+      if (formattedData && formattedData.length > 0) {
+         stockCache.set(cacheKey, formattedData, 3600); // Cache for 1 hour
+         return res.status(200).json({
+            success: true,
+            data: formattedData,
+            source: "api"
+         });
       }
 
-      // 1M & 3M -> day + month
-      else {
-
-         formattedDate = new Date(date).toLocaleDateString(
-            [],
-            {
-               day: "numeric",
-               month: "short"
-            }
-         );
+      // ==========================================
+      // 5. SMART UNIQUE DUMMY DATA (Last Resort)
+      // ==========================================
+      console.log(`Generating unique dummy data for ${symbol}`);
+      const dummyData = [];
+      const now = new Date();
+      
+      // Symbol-based seeding
+      const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      let currentPrice = 100 + (seed % 400); // Start price between 100 and 500
+      
+      // Try to get a more realistic start price from current cache
+      const stockCacheData = stockCache.get(`stock_${symbol}`);
+      if (stockCacheData) {
+         currentPrice = stockCacheData.currentPrice;
       }
 
-      return {
-         date: formattedDate,
-         price: Number(values["4. close"])
-      };
-   }
-);
+      const totalPoints = { "1D": 78, "5D": 5, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 }[range] || 30;
+      const intervalMs = range === "1D" ? 5 * 60000 : 86400000;
 
-      // OLDEST -> LATEST
+      for (let i = totalPoints; i >= 0; i--) {
+         const time = new Date(now.getTime() - i * intervalMs);
+         
+         // Unique movement per stock based on seed
+         const wave = Math.sin((i + seed) / (range === "1D" ? 10 : 20)) * (currentPrice * 0.05);
+         const noise = (Math.random() - 0.5) * (currentPrice * 0.02);
+         
+         const pricePoint = currentPrice + wave + noise;
+         
+         let formattedDate;
+         if (range === "1D") {
+            formattedDate = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+         } else if (range === "5D") {
+            formattedDate = time.toLocaleDateString([], { weekday: "short" });
+         } else {
+            formattedDate = time.toLocaleDateString([], { day: "numeric", month: "short" });
+         }
 
-      formattedData.reverse();
-
-      // =========================
-      // RANGE FILTERS
-      // =========================
-
-      switch (range) {
-
-         case "1D":
-
-            formattedData = formattedData.slice(-78);
-
-            break;
-
-         case "5D":
-
-            formattedData = formattedData.slice(-5);
-
-            break;
-
-         case "1M":
-
-            formattedData = formattedData.slice(-30);
-
-            break;
-
-         case "3M":
-
-            formattedData = formattedData.slice(-12);
-
-            break;
-
-         case "1Y":
-
-            formattedData = formattedData.slice(-12);
-
-            break;
-
-         case "MAX":
-
-            formattedData = formattedData.slice(-20);
-
-            break;
-
-         default:
-
-            formattedData = formattedData.slice(-30);
-
+         dummyData.push({
+            date: formattedDate,
+            price: Number(Math.max(5, pricePoint).toFixed(2))
+         });
       }
 
-      // =========================
-      // SEND RESPONSE
-      // =========================
-
-      res.status(200).json({
-
+      return res.status(200).json({
          success: true,
-
-         data: formattedData
-
+         data: dummyData,
+         source: "dummy"
       });
 
+   } catch (error) {
+      console.error("Historical Controller Error:", error.message);
+      res.status(500).json({ success: false, message: "Server error fetching history" });
    }
-
-   catch (error) {
-
-      console.log(
-
-         "Historical Error:",
-
-         error.response?.data ||
-
-         error.message
-
-      );
-
-      res.status(500).json({
-
-         success: false,
-
-         message: "Server Error"
-
-      });
-
-   }
-
-};
+};
