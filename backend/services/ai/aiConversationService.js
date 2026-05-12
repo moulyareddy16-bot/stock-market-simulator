@@ -10,6 +10,7 @@ export const generateAIChatResponse = async ({
     userProfile = {},
     portfolioData = [],
     marketData    = [],
+    marketTrends = [],
 }) => {
     try {
         // Persist user message first
@@ -44,6 +45,13 @@ export const generateAIChatResponse = async ({
 
         const prompt = `
 You are **Alpha-Insight AI** — an institutional-grade financial trading assistant integrated into a premium stock market simulator. 
+
+═══════════════════════════════
+EXECUTIVE STRATEGY FOR ${userProfile.username}
+═══════════════════════════════
+- Target: ${userProfile.goal}
+- Risk: ${userProfile.riskTolerance}
+- Cash Position: High (94%) - Focus on deployment strategies.
 
 ═══════════════════════════════
 SYSTEM RULES & TONE
@@ -85,6 +93,13 @@ ${newsDigest || "No recent news headlines found."}
 CONVERSATION CONTEXT
 ═══════════════════════════════
 ${conversationContext || "Fresh session started."}
+
+
+═══════════════════════════════
+GLOBAL MARKET CONTEXT (NON-PORTFOLIO)
+═══════════════════════════════
+${marketTrends.length > 0 ? marketTrends.join("\n") : "General market sentiment is mixed."}
+Use the above headlines to suggest potential opportunities if the user asks for new stocks.
 
 ═══════════════════════════════
 TRADER'S INQUIRY

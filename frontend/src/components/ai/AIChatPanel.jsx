@@ -1,18 +1,18 @@
 // frontend/src/components/ai/AIChatPanel.jsx
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import api from "../../service/api";
+import api from "../../service/api.js"
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────
 const MAX_CHARS = 1000;
 
 const QUICK_PROMPTS = [
-  { label: "📊 Portfolio Risk",   text: "Analyze my current portfolio risk and concentration." },
-  { label: "📈 Buy Signals",      text: "What are the best buy signals in my holdings right now?" },
-  { label: "📰 Market News",      text: "Give me the latest news affecting my portfolio stocks." },
-  { label: "🔀 Diversify",        text: "How can I better diversify my portfolio?" },
-  { label: "⚠️ Risk Alerts",     text: "Are there any high-risk positions I should exit?" },
-  { label: "📉 RSI Analysis",     text: "Explain the RSI levels for my top holdings." },
+  { label: "📊 Portfolio Risk", text: "Analyze my current portfolio risk and concentration." },
+  { label: "📈 Buy Signals", text: "What are the best buy signals in my holdings right now?" },
+  { label: "📰 Market News", text: "Give me the latest news affecting my portfolio stocks." },
+  { label: "🔀 Diversify", text: "How can I better diversify my portfolio?" },
+  { label: "⚠️ Risk Alerts", text: "Are there any high-risk positions I should exit?" },
+  { label: "📉 RSI Analysis", text: "Explain the RSI levels for my top holdings." },
 ];
 
 // ── INLINE RENDERER — handles **bold**, `code`, $TICKER ───────────────
@@ -33,7 +33,11 @@ function renderInline(text, key) {
         }
         if (/^\$[A-Z]{1,5}$/.test(part)) {
           return (
-            <span key={i} className="inline-flex items-center px-2 py-0.5 mx-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold tracking-wider">
+            <span
+              key={i}
+              onClick={() => window.open(`https://www.tradingview.com/symbols/${part.slice(1)}/`, '_blank')}
+              className="cursor-pointer hover:bg-emerald-500/40 inline-flex items-center px-2 py-0.5 mx-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold tracking-wider transition-colors"
+            >
               {part}
             </span>
           );
@@ -47,7 +51,7 @@ function renderInline(text, key) {
 // ── MARKDOWN-LIKE CONTENT PARSER ──────────────────────────────────────
 function parseContent(text) {
   if (!text) return null;
-  const lines  = text.split("\n");
+  const lines = text.split("\n");
   const output = [];
   let i = 0;
 
@@ -166,21 +170,19 @@ function MessageBubble({ msg }) {
   return (
     <div className={`flex group items-end gap-2 ${isUser ? "justify-end flex-row-reverse" : "justify-start"}`}>
       {/* Avatar */}
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${
-        isUser
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${isUser
           ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white"
           : "bg-gradient-to-br from-emerald-500 to-teal-600 text-black"
-      }`}>
+        }`}>
         {isUser ? "You" : "AI"}
       </div>
 
       <div className={`max-w-[80%] space-y-1 ${isUser ? "items-end" : "items-start"} flex flex-col`}>
         {/* Bubble */}
-        <div className={`rounded-2xl px-5 py-3.5 border text-sm space-y-1.5 ${
-          isUser
+        <div className={`rounded-2xl px-5 py-3.5 border text-sm space-y-1.5 ${isUser
             ? "bg-gradient-to-br from-emerald-600/20 to-teal-700/10 border-emerald-500/30 text-emerald-50 rounded-tr-sm"
             : "bg-slate-900/80 border-white/5 text-slate-200 rounded-tl-sm"
-        }`}>
+          }`}>
           {isUser
             ? <p className="leading-relaxed">{msg.content}</p>
             : parseContent(msg.content)
@@ -220,13 +222,13 @@ function AIChatPanel() {
     },
   ]);
 
-  const [input,          setInput]          = useState("");
-  const [loading,        setLoading]        = useState(false);
-  const [charCount,      setCharCount]      = useState(0);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [charCount, setCharCount] = useState(0);
   const [showQuickPrompts, setShowQuickPrompts] = useState(true);
 
   const bottomRef = useRef(null);
-  const inputRef  = useRef(null);
+  const inputRef = useRef(null);
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -250,9 +252,9 @@ function AIChatPanel() {
         setMessages((prev) => [
           ...prev,
           {
-            role:    "assistant",
+            role: "assistant",
             content: res?.data?.response || "AI engine could not generate a response.",
-            time:    getTime(),
+            time: getTime(),
           },
         ]);
       } catch (err) {
@@ -260,7 +262,7 @@ function AIChatPanel() {
         setMessages((prev) => [
           ...prev,
           {
-            role:    "assistant",
+            role: "assistant",
             content: is429
               ? "⚠️ **Rate limit reached.** Please wait 1 minute before sending another message."
               : "⚠️ **AI engine temporarily unavailable.** Please check backend and try again.",
@@ -284,9 +286,9 @@ function AIChatPanel() {
     }
     setMessages([
       {
-        role:    "assistant",
+        role: "assistant",
         content: "**Conversation memory cleared.**\n\nAlpha-Insight Engine ready for a fresh session. What would you like to analyze?",
-        time:    getTime(),
+        time: getTime(),
       },
     ]);
     setShowQuickPrompts(true);

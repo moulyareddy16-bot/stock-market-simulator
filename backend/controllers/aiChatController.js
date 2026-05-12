@@ -24,16 +24,16 @@ const fetchFinnhubQuote = async (symbol) => {
 /** Finnhub company news — last 7 days, top 3 headlines */
 const fetchFinnhubNews = async (symbol) => {
     try {
-        const to   = new Date().toISOString().split("T")[0];
+        const to = new Date().toISOString().split("T")[0];
         const from = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
-        const res  = await axios.get("https://finnhub.io/api/v1/company-news", {
+        const res = await axios.get("https://finnhub.io/api/v1/company-news", {
             params: { symbol, from, to, token: process.env.FINNHUB_API_KEY },
             timeout: 5000,
         });
         return (res.data || []).slice(0, 3).map((n) => ({
             headline: n.headline,
-            source:   n.source,
-            summary:  (n.summary || "").slice(0, 200),
+            source: n.source,
+            summary: (n.summary || "").slice(0, 200),
         }));
     } catch {
         return [];
@@ -48,12 +48,12 @@ const fetchAlphaVantageRSI = async (symbol) => {
     try {
         const res = await axios.get("https://www.alphavantage.co/query", {
             params: {
-                function:    "RSI",
+                function: "RSI",
                 symbol,
-                interval:    "daily",
+                interval: "daily",
                 time_period: 14,
                 series_type: "close",
-                apikey:      process.env.ALPHA_VANTAGE_API_KEY,
+                apikey: process.env.ALPHA_VANTAGE_API_KEY,
             },
             timeout: 8000,
         });
@@ -108,7 +108,7 @@ export const chatWithAI = async (req, res) => {
             const sym = tx.stockSymbol;
             if (!holdingsMap[sym]) holdingsMap[sym] = { symbol: sym, quantity: 0, totalInvested: 0 };
             if (tx.transactionType === "BUY") {
-                holdingsMap[sym].quantity      += tx.quantity;
+                holdingsMap[sym].quantity += tx.quantity;
                 holdingsMap[sym].totalInvested += tx.totalAmount;
             } else {
                 holdingsMap[sym].quantity -= tx.quantity;
@@ -120,8 +120,8 @@ export const chatWithAI = async (req, res) => {
             .filter((h) => h.quantity > 0)
             .sort((a, b) => b.totalInvested - a.totalInvested)
             .map((h) => ({
-                symbol:        h.symbol,
-                quantity:      h.quantity,
+                symbol: h.symbol,
+                quantity: h.quantity,
                 totalInvested: +h.totalInvested.toFixed(2),
             }));
 
@@ -129,39 +129,69 @@ export const chatWithAI = async (req, res) => {
         const top3 = portfolioData.slice(0, 3);
         const top1 = portfolioData[0];
 
-        const [quotesArr, newsArr, topRSI] = await Promise.all([
-            // Quotes for ALL holdings
-            Promise.all(portfolioData.map((p) => fetchFinnhubQuote(p.symbol))),
-            // News for top 3 only (rate-limit friendly)
-            Promise.all(top3.map((p) => fetchFinnhubNews(p.symbol))),
-            // RSI for top holding only (AV free tier: 5 req/min)
-            top1 ? fetchAlphaVantageRSI(top1.symbol) : Promise.resolve(null),
-        ]);
+        // const [quotesArr, newsArr, topRSI] = await Promise.all([
+        //     // Quotes for ALL holdings
+        //     Promise.all(portfolioData.map((p) => fetchFinnhubQuote(p.symbol))),
+        //     // News for top 3 only (rate-limit friendly)
+        //     Promise.all(top3.map((p) => fetchFinnhubNews(p.symbol))),
+        //     // RSI for top holding only (AV free tier: 5 req/min)
+        //     top1 ? fetchAlphaVantageRSI(top1.symbol) : Promise.resolve(null),
+        // ]);
 
+
+        // // Inside chatWithAI controller
+        // const [quotesArr, newsArr, topRSI] = await Promise.all([
+        //     Promise.all(portfolioData.map((p) => fetchFinnhubQuote(p.symbol).catch(() => null))),
+        //     Promise.all(top3.map((p) => fetchFinnhubNews(p.symbol).catch(() => []))),
+        //     top1 ? fetchAlphaVantageRSI(top1.symbol).catch(() => null) : Promise.resolve(null),
+        // ]);
+        /** Finnhub Market News / Trends */
+        const fetchMarketTrends = async () => {
+            try {
+                // You can use 'general' or 'crypto' or 'forex'
+                const res = await axios.get("https://finnhub.io/api/v1/news", {
+                    params: { category: "general", token: process.env.FINNHUB_API_KEY },
+                    timeout: 5000,
+                });
+                // Return top 5 headlines to give AI some "market context"
+                return res.data.slice(0, 5).map(n => `[${n.source}] ${n.headline}`);
+            } catch {
+                return [];
+            }
+        };
+
+        // Inside your chatWithAI function:
+        // 1. Add marketTrends to the Promise.all
+        const [quotesArr, newsArr, topRSI, marketTrends] = await Promise.all([
+            Promise.all(portfolioData.map((p) => fetchFinnhubQuote(p.symbol).catch(() => null))),
+            Promise.all(top3.map((p) => fetchFinnhubNews(p.symbol).catch(() => []))),
+            top1 ? fetchAlphaVantageRSI(top1.symbol).catch(() => null) : Promise.resolve(null),
+            fetchMarketTrends(), // New Call
+        ]);
         // ── ASSEMBLE MARKET INTELLIGENCE ──
         const marketData = portfolioData.map((p, i) => {
             const q = quotesArr[i];
             return {
-                symbol:        p.symbol,
-                currentPrice:  q?.c  ?? null,
-                change:        q?.d  ?? null,
+                symbol: p.symbol,
+                currentPrice: q?.c ?? null,
+                change: q?.d ?? null,
                 changePercent: q?.dp ?? null,
-                dayHigh:       q?.h  ?? null,
-                dayLow:        q?.l  ?? null,
-                prevClose:     q?.pc ?? null,
-                rsi14:         i === 0 ? topRSI : null,   // only top holding (AV limit)
-                recentNews:    i < 3   ? (newsArr[i] || []) : [],
+                dayHigh: q?.h ?? null,
+                dayLow: q?.l ?? null,
+                prevClose: q?.pc ?? null,
+                rsi14: i === 0 ? topRSI : null,   // only top holding (AV limit)
+                recentNews: i < 3 ? (newsArr[i] || []) : [],
             };
         });
 
         // ── USER PROFILE CONTEXT ──
         const userProfile = {
-            username:      user.username     || "Trader",
-            balance:       user.walletBalance ?? null,   // ← correct field from UserModel
+            username: user.username || "Trader",
+            balance: user.walletBalance ?? null,   // ← correct field from UserModel
             riskTolerance: user.riskTolerance || "Medium",
-            timeHorizon:   user.timeHorizon   || "Long Term",
-            goal:          user.goal          || "Growth",
-            role:          user.role          || "trader",
+            timeHorizon: user.timeHorizon || "Long Term",
+            goal: user.goal || "Growth",
+            role: user.role || "trader",
             totalHoldings: portfolioData.length,
         };
 
@@ -172,6 +202,7 @@ export const chatWithAI = async (req, res) => {
             userProfile,
             portfolioData,
             marketData,
+            marketTrends,
         });
 
         return res.status(200).json({ success: true, response });
