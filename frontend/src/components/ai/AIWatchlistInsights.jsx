@@ -1,5 +1,3 @@
-// frontend/src/components/ai/AIWatchlistInsights.jsx
-
 import { useEffect, useState } from "react";
 import api from "../../service/api";
 
@@ -13,25 +11,16 @@ function AIWatchlistInsights() {
 
   const fetchInsights = async () => {
     try {
-      const res = await api.get(
-        "/api/ai/watchlist-insights",
-        {
-          withCredentials: true,
-        }
-      );
-
-      setWatchlist(
-        res?.data?.payload || []
-      );
+      const res = await api.get("/ai/watchlist-insights", { withCredentials: true });
+      setWatchlist(res?.data?.payload || []);
     } catch (err) {
-      console.error(
-        "Watchlist AI error:",
-        err
-      );
+      console.error("Watchlist AI error:", err);
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const getSentimentStyle = (
     sentiment
@@ -62,6 +51,8 @@ function AIWatchlistInsights() {
     };
   };
 
+
+
   if (loading) {
     return (
       <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-full">
@@ -81,7 +72,7 @@ function AIWatchlistInsights() {
 
   return (
     <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-full overflow-hidden relative">
-      
+
       {/* GLOW */}
       <div className="absolute right-0 top-0 w-56 h-56 bg-indigo-500/10 blur-[120px]" />
 
@@ -130,7 +121,7 @@ function AIWatchlistInsights() {
                 key={index}
                 className="rounded-[1.7rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
               >
-                
+
                 {/* TOP */}
                 <div className="flex items-center justify-between mb-5">
                   <div>
@@ -153,7 +144,7 @@ function AIWatchlistInsights() {
 
                 {/* PRICE */}
                 <div className="grid grid-cols-2 gap-4 mb-5">
-                  
+
                   <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
                     <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
                       Current Price
@@ -173,12 +164,11 @@ function AIWatchlistInsights() {
                     </p>
 
                     <h4
-                      className={`text-2xl font-black ${
-                        stock.predictedMove >
-                        0
+                      className={`text-2xl font-black ${stock.predictedMove >
+                          0
                           ? "text-emerald-400"
                           : "text-red-400"
-                      }`}
+                        }`}
                     >
                       {stock.predictedMove > 0
                         ? "+"

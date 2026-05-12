@@ -1,6 +1,7 @@
 import exp from "express";
 import { verifyToken } from "../middleware/verifyToken.js";
-import { getAiSuggestions } from "../controllers/aiController.js";
+import { getAiSuggestions, getWatchlistInsights } from "../controllers/aiController.js";
+
 import { chatWithAI } from "../controllers/aiChatController.js";
 
 const aiRouter = exp.Router();
@@ -12,6 +13,9 @@ aiRouter.get("/sanity", (req, res) =>
 
 // GET /api/ai/suggestions — personalized portfolio AI analysis
 aiRouter.get("/suggestions", verifyToken("trader"), getAiSuggestions);
+
+// GET /api/ai/watchlist-insights — AI generated watchlist recommendations
+aiRouter.get("/watchlist-insights", verifyToken("trader"), getWatchlistInsights);
 
 // POST /api/ai/chat — AI conversational assistant (also in aiChatRoute but kept here for clarity)
 // Note: actual implementation is in aiChatRoute.js, this avoids double-mounting

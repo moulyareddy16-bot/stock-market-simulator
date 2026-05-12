@@ -2,12 +2,12 @@
 
 function AIPortfolioScore({ portfolioScore }) {
   const {
-    overall = 78,
-    diversification = 74,
-    stability = 81,
-    momentum = 69,
-    aiConfidence = 88,
+    diversification = 0,
+    riskAdjusted = 0,
   } = portfolioScore || {};
+
+  const overall = Math.round((diversification + riskAdjusted) / 2) || 0;
+
 
   const getScoreColor = (score) => {
     if (score >= 80) return "text-emerald-400";
@@ -27,16 +27,8 @@ function AIPortfolioScore({ portfolioScore }) {
       value: diversification,
     },
     {
-      title: "Stability",
-      value: stability,
-    },
-    {
-      title: "Momentum",
-      value: momentum,
-    },
-    {
-      title: "AI Confidence",
-      value: aiConfidence,
+      title: "Risk Adjusted",
+      value: riskAdjusted,
     },
   ];
 

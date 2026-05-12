@@ -3,43 +3,8 @@
 function AITradeSignals({
   signals = [],
 }) {
-  const fallbackSignals = [
-    {
-      symbol: "AAPL",
-      signal: "BUY",
-      confidence: 92,
-      entry: 212.4,
-      target: 228.9,
-      stopLoss: 204.2,
-      rsi: 41,
-      trend: "Bullish Reversal",
-    },
-    {
-      symbol: "TSLA",
-      signal: "HOLD",
-      confidence: 71,
-      entry: 187.6,
-      target: 198.5,
-      stopLoss: 179.8,
-      rsi: 58,
-      trend: "High Volatility",
-    },
-    {
-      symbol: "NVDA",
-      signal: "STRONG BUY",
-      confidence: 96,
-      entry: 973.2,
-      target: 1048.7,
-      stopLoss: 930.4,
-      rsi: 63,
-      trend: "Momentum Expansion",
-    },
-  ];
+  const data = signals;
 
-  const data =
-    signals.length > 0
-      ? signals
-      : fallbackSignals;
 
   const getSignalStyle = (signal) => {
     if (signal.includes("BUY")) {
@@ -93,94 +58,100 @@ function AITradeSignals({
 
       {/* SIGNALS */}
       <div className="space-y-6 relative z-10">
-        {data.map((stock, index) => {
-          const style = getSignalStyle(stock.signal);
+        {data.length > 0 ? (
+          data.map((stock, index) => {
+            const style = getSignalStyle(stock.signal);
 
-          return (
-            <div
-              key={index}
-              className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-6 hover:border-emerald-500/20 transition-all duration-300"
-            >
-              {/* TOP */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-3xl font-black text-white">
-                    {stock.symbol}
-                  </h3>
+            return (
+              <div
+                key={index}
+                className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-6 hover:border-emerald-500/20 transition-all duration-300"
+              >
+                {/* TOP */}
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-3xl font-black text-white">
+                      {stock.symbol}
+                    </h3>
 
-                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black mt-1">
-                    Confidence {stock.confidence}%
-                  </p>
-                </div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500 font-black mt-1">
+                      Confidence {stock.confidence}%
+                    </p>
+                  </div>
 
-                <div
-                  className={`px-5 py-2 rounded-xl border text-xs font-black uppercase tracking-widest ${style.bg} ${style.text}`}
-                >
-                  {stock.signal}
-                </div>
-              </div>
-
-              {/* TREND */}
-              <div className="mb-6 rounded-2xl bg-black/20 border border-white/5 p-4">
-                <p className="text-sm text-slate-300 font-medium">
-                  {stock.trend}
-                </p>
-              </div>
-
-              {/* METRICS */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                {/* ENTRY */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    Entry
-                  </p>
-
-                  <h4 className="text-xl font-black text-white">
-                    ${stock.entry}
-                  </h4>
-                </div>
-
-                {/* TARGET */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    Target
-                  </p>
-
-                  <h4 className="text-xl font-black text-emerald-400">
-                    ${stock.target}
-                  </h4>
-                </div>
-
-                {/* STOP LOSS */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    Stop Loss
-                  </p>
-
-                  <h4 className="text-xl font-black text-red-400">
-                    ${stock.stopLoss}
-                  </h4>
-                </div>
-
-                {/* RSI */}
-                <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                    RSI
-                  </p>
-
-                  <h4
-                    className={`text-xl font-black ${getRSIColor(
-                      stock.rsi
-                    )}`}
+                  <div
+                    className={`px-5 py-2 rounded-xl border text-xs font-black uppercase tracking-widest ${style.bg} ${style.text}`}
                   >
-                    {stock.rsi}
-                  </h4>
+                    {stock.signal}
+                  </div>
+                </div>
+
+                {/* TREND */}
+                <div className="mb-6 rounded-2xl bg-black/20 border border-white/5 p-4">
+                  <p className="text-sm text-slate-300 font-medium">
+                    {stock.trend}
+                  </p>
+                </div>
+
+                {/* METRICS */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  
+                  {/* ENTRY */}
+                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
+                      Entry
+                    </p>
+
+                    <h4 className="text-xl font-black text-white">
+                      ${stock.entry}
+                    </h4>
+                  </div>
+
+                  {/* TARGET */}
+                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
+                      Target
+                    </p>
+
+                    <h4 className="text-xl font-black text-emerald-400">
+                      ${stock.target}
+                    </h4>
+                  </div>
+
+                  {/* STOP LOSS */}
+                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
+                      Stop Loss
+                    </p>
+
+                    <h4 className="text-xl font-black text-red-400">
+                      ${stock.stopLoss}
+                    </h4>
+                  </div>
+
+                  {/* RSI */}
+                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
+                      RSI
+                    </p>
+
+                    <h4
+                      className={`text-xl font-black ${getRSIColor(
+                        stock.rsi
+                      )}`}
+                    >
+                      {stock.rsi}
+                    </h4>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-10 text-center text-slate-400 font-medium">
+            No trade signals available. Add stocks to your portfolio or watchlist to see AI signals.
+          </div>
+        )}
       </div>
 
       {/* FOOTER */}

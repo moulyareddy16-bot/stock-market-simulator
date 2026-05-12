@@ -1,35 +1,8 @@
 // frontend/src/components/ai/AIMarketSentiment.jsx
 
 function AIMarketSentiment({ sentimentData }) {
-  const data = sentimentData || {
-    overall: "BULLISH",
-    fearGreedIndex: 72,
-    volatilityIndex: 28,
-    institutionalBias: "BUYING",
-    retailBias: "CAUTIOUS",
-    sectors: [
-      {
-        name: "Technology",
-        sentiment: "STRONG BUY",
-        score: 91,
-      },
-      {
-        name: "Energy",
-        sentiment: "BULLISH",
-        score: 78,
-      },
-      {
-        name: "Healthcare",
-        sentiment: "NEUTRAL",
-        score: 55,
-      },
-      {
-        name: "Finance",
-        sentiment: "WEAK",
-        score: 39,
-      },
-    ],
-  };
+  const data = sentimentData || {};
+
 
   const getColor = (score) => {
     if (score >= 75) return "text-emerald-400";
@@ -89,7 +62,7 @@ function AIMarketSentiment({ sentimentData }) {
           </p>
 
           <h3 className="text-4xl font-black text-yellow-400">
-            {data.volatilityIndex}
+            {data.volatilityIndex || "N/A"}
           </h3>
         </div>
       </div>
@@ -102,7 +75,7 @@ function AIMarketSentiment({ sentimentData }) {
           </p>
 
           <h3 className="text-2xl font-black text-white">
-            {data.institutionalBias}
+            {data.institutionalBias || "N/A"}
           </h3>
         </div>
 
@@ -112,7 +85,7 @@ function AIMarketSentiment({ sentimentData }) {
           </p>
 
           <h3 className="text-2xl font-black text-white">
-            {data.retailBias}
+            {data.retailBias || "N/A"}
           </h3>
         </div>
       </div>

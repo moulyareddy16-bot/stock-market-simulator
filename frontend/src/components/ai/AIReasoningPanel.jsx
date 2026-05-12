@@ -3,28 +3,8 @@
 function AIReasoningPanel({
   reasoning = [],
 }) {
-  const fallbackReasoning = [
-    {
-      step: "Concentration Analysis",
-      finding: "Your portfolio is well-diversified across 12 sectors with no single position exceeding 15%.",
-      impact: "LOW",
-    },
-    {
-      step: "Volatility Stress Test",
-      finding: "Expected drawdown in a 10% market correction is -6.2%, indicating higher stability than the S&P 500.",
-      impact: "MEDIUM",
-    },
-    {
-      step: "Sentiment Correlation",
-      finding: "Institutional buying pressure detected in tech holdings despite retail fear, suggesting a potential bull flag.",
-      impact: "HIGH",
-    },
-  ];
+  const data = reasoning;
 
-  const data =
-    reasoning.length > 0
-      ? reasoning
-      : fallbackReasoning;
 
   const getImpactStyle = (impact = "") => {
     if (impact.includes("HIGH") || impact.includes("CRITICAL")) {
@@ -72,42 +52,48 @@ function AIReasoningPanel({
 
       {/* REASONING LIST */}
       <div className="space-y-6 relative z-10">
-        {data.map((item, index) => {
-          const style = getImpactStyle(item?.impact);
+        {data.length > 0 ? (
+          data.map((item, index) => {
+            const style = getImpactStyle(item?.impact);
 
-          return (
-            <div
-              key={index}
-              className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
-            >
-              {/* TOP */}
-              <div className="flex items-start justify-between mb-5">
-                <div>
-                  <h3 className="text-xl font-black text-white mb-1">
-                    {item?.step}
-                  </h3>
+            return (
+              <div
+                key={index}
+                className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
+              >
+                {/* TOP */}
+                <div className="flex items-start justify-between mb-5">
+                  <div>
+                    <h3 className="text-xl font-black text-white mb-1">
+                      {item?.step}
+                    </h3>
 
-                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black">
-                    Analysis Vector
+                    <p className="text-xs uppercase tracking-widest text-slate-500 font-black">
+                      Analysis Vector
+                    </p>
+                  </div>
+
+                  <div
+                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}
+                  >
+                    {item?.impact} IMPACT
+                  </div>
+                </div>
+
+                {/* FINDING */}
+                <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
+                  <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                    {item?.finding}
                   </p>
                 </div>
-
-                <div
-                  className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}
-                >
-                  {item?.impact} IMPACT
-                </div>
               </div>
-
-              {/* FINDING */}
-              <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                  {item?.finding}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-10 text-center text-slate-400 font-medium">
+            No reasoning steps available. AI analysis will appear here.
+          </div>
+        )}
       </div>
 
       {/* FOOTER */}

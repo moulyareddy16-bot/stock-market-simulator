@@ -1,10 +1,10 @@
 // frontend/src/components/ai/AIConfidenceMeter.jsx
 
 function AIConfidenceMeter({
-  confidence = 82,
-  prediction = "Bullish Momentum Continuation",
-  risk = "Moderate",
-  volatility = 34,
+  confidence = 0,
+  prediction = "N/A",
+  risk = "N/A",
+  volatility = 0,
 }) {
   const getConfidenceColor = () => {
     if (confidence >= 80) {

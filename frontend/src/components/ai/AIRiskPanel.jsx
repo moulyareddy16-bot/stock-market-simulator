@@ -2,11 +2,16 @@
 
 function AIRiskPanel({ riskData }) {
   const {
-    overallRisk = "MEDIUM",
-    volatility = 52,
-    concentrationRisk = "MODERATE",
-    warnings = [],
+    level = "N/A",
+    score = 0,
+    concentrationRisk = "N/A",
+    warning = "",
+    warnings: propWarnings = [],
   } = riskData || {};
+
+  const overallRisk = level;
+  const volatility = score;
+  const warnings = propWarnings.length > 0 ? propWarnings : (warning ? [warning] : []);
 
   const riskColor =
     overallRisk === "LOW"

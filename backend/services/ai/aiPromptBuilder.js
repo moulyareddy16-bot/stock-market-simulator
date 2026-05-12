@@ -31,10 +31,11 @@ ANALYSIS TASKS:
 4. Detect risk concentration (any position > 40% of portfolio)
 5. Detect sentiment conflicts (price rising but negative sentiment)
 6. Flag potential bull traps (RSI > 75 with declining sentiment)
-7. Write an executive summary (2–3 sentences, institutional tone)
-8. Generate a risk warning if needed
-9. Score the trader (0–100) based on diversification, win potential, and risk profile
-10. Score AI confidence (0–100) based on data quality available
+7. Perform historical trend analysis using the 'historicalPrices' provided in market data to identify momentum or reversal patterns.
+8. Write an executive summary (2–3 sentences, institutional tone)
+9. Generate a risk warning if needed
+10. Score the trader (0–100) based on diversification, win potential, and risk profile
+11. Score AI confidence (0–100) based on data quality available
 
 REQUIRED JSON OUTPUT SCHEMA:
 {

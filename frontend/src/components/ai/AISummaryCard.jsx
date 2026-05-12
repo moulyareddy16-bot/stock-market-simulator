@@ -1,6 +1,6 @@
 // frontend/src/components/ai/AISummaryCard.jsx
 
-function AISummaryCard({ summary, traderScore }) {
+function AISummaryCard({ summary, traderScore, marketPhase = "N/A" }) {
 
   return (
     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-gradient-to-br from-indigo-500/10 via-slate-900 to-emerald-500/10 p-8 lg:p-10">
@@ -134,7 +134,7 @@ function AISummaryCard({ summary, traderScore }) {
             </p>
 
             <h3 className="text-xl font-black text-emerald-400">
-              Momentum Expansion
+              {marketPhase}
             </h3>
 
             <p className="mt-3 text-slate-400 text-sm">

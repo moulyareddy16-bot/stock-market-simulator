@@ -60,13 +60,13 @@ function Navbar() {
           <div className="flex items-center gap-3">
             <NavLink
               to="/signin"
-              className="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-colors"
+              className="px-5 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
             >
               Sign In
             </NavLink>
             <NavLink
               to="/register"
-              className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-black rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
+              className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-medium rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
             >
               Start Trading
             </NavLink>

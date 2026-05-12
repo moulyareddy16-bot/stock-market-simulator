@@ -177,6 +177,7 @@ function AICommandCenter() {
         <AISummaryCard
           summary={aiData.executiveSummary}
           traderScore={aiData.traderScore}
+          marketPhase={aiData?.marketSentiment?.label}
         />
       </div>
 
