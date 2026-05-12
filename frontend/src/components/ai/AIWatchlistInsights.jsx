@@ -3,35 +3,10 @@
 import { useEffect, useState } from "react";
 import api from "../../service/api";
 
-function AIWatchlistInsights() {
-  const [watchlist, setWatchlist] = useState([]);
-  const [loading, setLoading] = useState(true);
+function AIWatchlistInsights({ watchlist = [] }) {
+  // Data now comes from props (AICommandCenter), so we remove redundant local fetching.
+  const loading = false; // Parent handles loading state
 
-  useEffect(() => {
-    fetchInsights();
-  }, []);
-
-  const fetchInsights = async () => {
-    try {
-      const res = await api.get(
-        "/api/ai/watchlist-insights",
-        {
-          withCredentials: true,
-        }
-      );
-
-      setWatchlist(
-        res?.data?.payload || []
-      );
-    } catch (err) {
-      console.error(
-        "Watchlist AI error:",
-        err
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getSentimentStyle = (
     sentiment

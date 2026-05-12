@@ -47,28 +47,27 @@
 //     });
 // };
 
-export const calculateOverallSentiment = (
-    marketData
-) => {
+export const calculateOverallSentiment = (marketData) => {
 
-    if (!marketData.length) {
+    if (!marketData || !marketData.length) {
         return "NEUTRAL";
     }
 
-    const avg =
-        marketData.reduce(
-            (acc, item) =>
-                acc + item.sentiment,
-            0
-        ) / marketData.length;
+    // sentiment field may not be present in all marketData shapes
+    const validItems = marketData.filter(
+        (item) => item.sentiment != null && !isNaN(item.sentiment)
+    );
 
-    if (avg >= 0.7) {
-        return "BULLISH";
-    }
-
-    if (avg >= 0.45) {
+    if (!validItems.length) {
         return "NEUTRAL";
     }
 
+    const avg = validItems.reduce(
+        (acc, item) => acc + item.sentiment,
+        0
+    ) / validItems.length;
+
+    if (avg >= 0.7) return "BULLISH";
+    if (avg >= 0.45) return "NEUTRAL";
     return "BEARISH";
 };
