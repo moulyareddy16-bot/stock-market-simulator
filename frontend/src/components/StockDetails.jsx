@@ -8,6 +8,7 @@ import { buyStock, sellStock } from "../service/tradeService";
 
 import { socket } from "../socket/socket";
 import StockChart from "./StockChart";
+import AdvancedChart from "./AdvancedChart";
 import Skeleton from "./Skeleton";
 import { useToast } from "./Toast";
 import CoinIcon from "./CoinIcon";
@@ -19,14 +20,17 @@ function StockDetails() {
   // LIVE GRAPH STATES
   const [livePrice, setLivePrice] = useState(null);
   const [liveChartData, setLiveChartData] = useState([]);
+  const [liveChartView, setLiveChartView] = useState("basic"); // basic | advanced
   
   // HISTORICAL STATES
   const [historicalData, setHistoricalData] = useState([]);
   const [selectedRange, setSelectedRange] = useState("1D");
   const [showHistorical, setShowHistorical] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historicalChartView, setHistoricalChartView] = useState("basic"); // basic | advanced
 
   // TRADING STATES
+  // ... (rest of the states)
   const [quantity, setQuantity] = useState(1);
   const [quantityError, setQuantityError] = useState("");
   const [trading, setTrading] = useState(false);
@@ -37,9 +41,9 @@ function StockDetails() {
   const historicalSectionRef = useRef(null);
 
   // 1. FETCH STOCK DETAILS
+  // ... (existing fetchStock and formatMarketCap)
   const formatMarketCap = (num) => {
     if (!num || num === 0) return "N/A";
-    // Finnhub provides market cap in Millions
     if (num >= 1000000) return (num / 1000000).toFixed(2) + "T";
     if (num >= 1000) return (num / 1000).toFixed(2) + "B";
     return num.toFixed(2) + "M";
@@ -89,10 +93,18 @@ function StockDetails() {
   useEffect(() => {
     if (liveChartData.length === 0 && stock?.currentPrice) {
       const dummy = [];
+      const now = Date.now();
       for (let i = 0; i < 50; i++) {
+        const time = Math.floor((now - (50 - i) * 60000) / 1000);
+        const price = Number(stock.currentPrice) + (Math.random() * 0.4 - 0.2);
         dummy.push({
-          date: new Date(Date.now() - (50 - i) * 60000).toTimeString().split(' ')[0],
-          price: Number(stock.currentPrice) + (Math.random() * 0.4 - 0.2)
+          time,
+          date: new Date(time * 1000).toTimeString().split(' ')[0],
+          open: price,
+          high: price + 0.1,
+          low: price - 0.1,
+          close: price,
+          value: Math.floor(Math.random() * 1000)
         });
       }
       setLiveChartData(dummy);
@@ -113,17 +125,22 @@ function StockDetails() {
         const latestPrice = Number(liveStock.currentPrice);
         setLivePrice(latestPrice.toFixed(2));
         setLiveChartData((prevData) => {
+          const time = Math.floor(Date.now() / 1000);
           const updated = [
             ...prevData,
             {
+              time,
               date: new Date().toTimeString().split(' ')[0],
-              price: Number(latestPrice.toFixed(2))
+              open: latestPrice,
+              high: latestPrice + 0.1,
+              low: latestPrice - 0.1,
+              close: latestPrice,
+              value: Math.floor(Math.random() * 1000)
             }
           ];
           return updated.slice(-50);
         });
         
-        // Update stock current price so stats/terminal reflect it
         setStock(prev => prev ? { ...prev, currentPrice: latestPrice } : prev);
       }
     });
@@ -328,11 +345,25 @@ function StockDetails() {
             {/* LIVE MOMENTUM */}
             <div className="glass-card p-8 bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
               <div className="flex items-center justify-between mb-8">
-                 <h3 className="text-base font-black text-white uppercase tracking-wider">Live Momentum</h3>
+                 <div className="flex items-center gap-4">
+                    <h3 className="text-base font-black text-white uppercase tracking-wider">Live Momentum</h3>
+                    <select 
+                      value={liveChartView} 
+                      onChange={(e) => setLiveChartView(e.target.value)}
+                      className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-400 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                    >
+                      <option value="basic">Standard View</option>
+                      <option value="advanced">Advanced (Candles)</option>
+                    </select>
+                 </div>
                  <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-tighter border border-emerald-500/20">Real-time Stream</span>
               </div>
               <div className="h-[320px]">
-                 <StockChart chartData={liveChartData} range="LIVE" />
+                 {liveChartView === "basic" ? (
+                   <StockChart chartData={liveChartData} range="LIVE" />
+                 ) : (
+                   <AdvancedChart chartData={liveChartData} range="LIVE" mainSymbol={stockSymbol} />
+                 )}
               </div>
             </div>
 
@@ -341,7 +372,17 @@ function StockDetails() {
                <div ref={historicalSectionRef} className="space-y-8 animate-slide-up">
                   <div className="glass-card bg-slate-900/40 p-8 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                      <h2 className="text-xl font-black text-white uppercase tracking-widest">Historical Performance</h2>
+                      <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-black text-white uppercase tracking-widest">Historical Performance</h2>
+                        <select 
+                          value={historicalChartView} 
+                          onChange={(e) => setHistoricalChartView(e.target.value)}
+                          className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-400 outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                        >
+                          <option value="basic">Standard View</option>
+                          <option value="advanced">Advanced (Candles)</option>
+                        </select>
+                      </div>
                       <div className="flex bg-slate-950/40 p-1 rounded-xl border border-slate-800">
                          {["1D", "5D", "1M", "3M", "1Y", "MAX"].map((item) => (
                             <button
@@ -363,7 +404,11 @@ function StockDetails() {
                              </div>
                           </div>
                        ) : (
-                          <StockChart chartData={historicalData} range={selectedRange} />
+                          historicalChartView === "basic" ? (
+                            <StockChart chartData={historicalData} range={selectedRange} />
+                          ) : (
+                            <AdvancedChart chartData={historicalData} range={selectedRange} mainSymbol={stockSymbol} />
+                          )
                        )}
                     </div>
                   </div>
@@ -487,3 +532,4 @@ function StockDetails() {
 }
 
 export default StockDetails;
+

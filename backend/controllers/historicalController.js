@@ -9,12 +9,12 @@ export const getStockHistory = async (req, res) => {
    try {
       const { symbol } = req.params;
       const range = req.query.range || "1D";
-      const cacheKey = `history_${symbol}_${range}`;
+      const cacheKey = `history_v2_${symbol}_${range}`; // Version 2 for OHLC
 
-      // 1. CHECK CACHE (survive API limits)
+      // 1. CHECK CACHE
       const cachedData = stockCache.get(cacheKey);
       if (cachedData) {
-         console.log(`History Cache Hit: ${symbol} (${range})`);
+         console.log(`History Cache Hit (v2): ${symbol} (${range})`);
          return res.status(200).json({
             success: true,
             data: cachedData,
@@ -55,22 +55,20 @@ export const getStockHistory = async (req, res) => {
 
          if (timeSeries) {
             formattedData = Object.entries(timeSeries).map(([date, values]) => {
-               let formattedDate = date;
-               if (range === "1D") {
-                  formattedDate = new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-               } else if (range === "5D") {
-                  formattedDate = new Date(date).toLocaleDateString([], { weekday: "short" });
-               } else {
-                  formattedDate = new Date(date).toLocaleDateString([], { day: "numeric", month: "short" });
-               }
+               // lightweight-charts needs time in seconds or YYYY-MM-DD
+               const timestamp = Math.floor(new Date(date).getTime() / 1000);
                return {
-                  date: formattedDate,
-                  price: Number(values["4. close"])
+                  time: timestamp,
+                  open: Number(values["1. open"]),
+                  high: Number(values["2. high"]),
+                  low: Number(values["3. low"]),
+                  close: Number(values["4. close"]),
+                  value: Number(values["5. volume"] || 0)
                };
-            }).reverse();
+            }).sort((a, b) => a.time - b.time);
 
-            // Apply Slicing
-            const sliceMap = { "1D": 78, "5D": 5, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 };
+            // Slicing
+            const sliceMap = { "1D": 78, "5D": 390, "1M": 30, "3M": 90, "1Y": 250, "MAX": 1000 };
             formattedData = formattedData.slice(-(sliceMap[range] || 30));
          }
       } catch (avError) {
@@ -99,21 +97,14 @@ export const getStockHistory = async (req, res) => {
             });
 
             if (fhResponse.data.s === "ok") {
-               formattedData = fhResponse.data.t.map((t, i) => {
-                  const date = new Date(t * 1000);
-                  let formattedDate;
-                  if (range === "1D") {
-                     formattedDate = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-                  } else if (range === "5D") {
-                     formattedDate = date.toLocaleDateString([], { weekday: "short" });
-                  } else {
-                     formattedDate = date.toLocaleDateString([], { day: "numeric", month: "short" });
-                  }
-                  return {
-                     date: formattedDate,
-                     price: Number(fhResponse.data.c[i])
-                  };
-               });
+               formattedData = fhResponse.data.t.map((t, i) => ({
+                  time: t,
+                  open: Number(fhResponse.data.o[i]),
+                  high: Number(fhResponse.data.h[i]),
+                  low: Number(fhResponse.data.l[i]),
+                  close: Number(fhResponse.data.c[i]),
+                  value: Number(fhResponse.data.v[i])
+               }));
             }
          } catch (fhError) {
             console.log(`Finnhub Failed for ${symbol}:`, fhError.message);
@@ -121,66 +112,60 @@ export const getStockHistory = async (req, res) => {
       }
 
       // ==========================================
-      // 4. CACHE & RETURN REAL DATA
+      // 4. SMART UNIQUE DUMMY DATA (Last Resort)
+      // ==========================================
+      if (!formattedData || formattedData.length === 0) {
+         console.log(`Generating unique dummy OHLC data for ${symbol}`);
+         const dummyData = [];
+         const now = new Date();
+         const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+         let currentPrice = 100 + (seed % 400);
+
+         const stockCacheData = stockCache.get(`stock_${symbol}`);
+         if (stockCacheData) {
+            currentPrice = stockCacheData.currentPrice;
+         }
+
+         const totalPoints = { "1D": 78, "5D": 390, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 }[range] || 30;
+         const intervalSec = range === "1D" ? 5 * 60 : 86400;
+
+         for (let i = totalPoints; i >= 0; i--) {
+            const time = Math.floor((now.getTime() - i * intervalSec * 1000) / 1000);
+            
+            const wave = Math.sin((i + seed) / (range === "1D" ? 10 : 20)) * (currentPrice * 0.05);
+            const noise = (Math.random() - 0.5) * (currentPrice * 0.02);
+            
+            const close = Number(Math.max(5, currentPrice + wave + noise).toFixed(2));
+            const open = Number(Math.max(5, close + (Math.random() - 0.5) * (close * 0.01)).toFixed(2));
+            const high = Number(Math.max(open, close) + Math.random() * (close * 0.005)).toFixed(2);
+            const low = Number(Math.min(open, close) - Math.random() * (close * 0.005)).toFixed(2);
+            const volume = Math.floor(Math.random() * 1000000);
+
+            dummyData.push({
+               time,
+               open: Number(open),
+               high: Number(high),
+               low: Number(low),
+               close: Number(close),
+               value: volume
+            });
+         }
+         formattedData = dummyData;
+      }
+
+      // ==========================================
+      // 5. CACHE & RETURN
       // ==========================================
       if (formattedData && formattedData.length > 0) {
-         stockCache.set(cacheKey, formattedData, 3600); // Cache for 1 hour
+         stockCache.set(cacheKey, formattedData, 3600); 
          return res.status(200).json({
             success: true,
             data: formattedData,
-            source: "api"
+            source: formattedData === dummyData ? "dummy" : "api"
          });
       }
 
-      // ==========================================
-      // 5. SMART UNIQUE DUMMY DATA (Last Resort)
-      // ==========================================
-      console.log(`Generating unique dummy data for ${symbol}`);
-      const dummyData = [];
-      const now = new Date();
-      
-      // Symbol-based seeding
-      const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      let currentPrice = 100 + (seed % 400); // Start price between 100 and 500
-      
-      // Try to get a more realistic start price from current cache
-      const stockCacheData = stockCache.get(`stock_${symbol}`);
-      if (stockCacheData) {
-         currentPrice = stockCacheData.currentPrice;
-      }
-
-      const totalPoints = { "1D": 78, "5D": 5, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 }[range] || 30;
-      const intervalMs = range === "1D" ? 5 * 60000 : 86400000;
-
-      for (let i = totalPoints; i >= 0; i--) {
-         const time = new Date(now.getTime() - i * intervalMs);
-         
-         // Unique movement per stock based on seed
-         const wave = Math.sin((i + seed) / (range === "1D" ? 10 : 20)) * (currentPrice * 0.05);
-         const noise = (Math.random() - 0.5) * (currentPrice * 0.02);
-         
-         const pricePoint = currentPrice + wave + noise;
-         
-         let formattedDate;
-         if (range === "1D") {
-            formattedDate = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-         } else if (range === "5D") {
-            formattedDate = time.toLocaleDateString([], { weekday: "short" });
-         } else {
-            formattedDate = time.toLocaleDateString([], { day: "numeric", month: "short" });
-         }
-
-         dummyData.push({
-            date: formattedDate,
-            price: Number(Math.max(5, pricePoint).toFixed(2))
-         });
-      }
-
-      return res.status(200).json({
-         success: true,
-         data: dummyData,
-         source: "dummy"
-      });
+      res.status(404).json({ success: false, message: "No data available" });
 
    } catch (error) {
       console.error("Historical Controller Error:", error.message);
