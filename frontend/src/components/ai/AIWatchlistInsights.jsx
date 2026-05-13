@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../../service/api";
 
-function AIWatchlistInsights({ watchlist = [] }) {
-  // Data now comes from props (AICommandCenter), so we remove redundant local fetching.
-  const loading = false; // Parent handles loading state
+function AIWatchlistInsights() {
+  const [watchlist, setWatchlist] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
   useEffect(() => {
     fetchInsights();
   }, []);
@@ -20,8 +19,6 @@ function AIWatchlistInsights({ watchlist = [] }) {
       setLoading(false);
     }
   };
-=======
->>>>>>> 96136e73c53cbb82a5eac0080a6b7a9fc478fb23
 
 
 
@@ -168,9 +165,9 @@ function AIWatchlistInsights({ watchlist = [] }) {
 
                     <h4
                       className={`text-2xl font-black ${stock.predictedMove >
-                          0
-                          ? "text-emerald-400"
-                          : "text-red-400"
+                        0
+                        ? "text-emerald-400"
+                        : "text-red-400"
                         }`}
                     >
                       {stock.predictedMove > 0
