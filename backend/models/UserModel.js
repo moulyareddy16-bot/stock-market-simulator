@@ -65,8 +65,6 @@ const userSchema = new Schema(
 );
 
 // ── INDEXES ──
-// email: used in login (findOne by email)
-userSchema.index({ email: 1 });
 // role: used in leaderboard (find all traders)
 userSchema.index({ role: 1 });
 // Combined for active trader queries

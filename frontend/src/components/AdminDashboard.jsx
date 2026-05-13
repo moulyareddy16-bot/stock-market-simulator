@@ -195,98 +195,94 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#081c15]">
-        <div className="h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[#020617]">
+        <div className="space-y-4 text-center">
+          <div className="h-16 w-16 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent mx-auto" />
+          <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest">Loading Admin Panel...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#081c15]">
-        <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-6 text-red-400">
-          <h2 className="text-xl font-bold">Error</h2>
-          <p>{error}</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#020617]">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-red-400 max-w-md">
+          <h2 className="text-xl font-black mb-2">Error</h2>
+          <p className="text-sm text-red-300">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] text-white">
+    <div className="flex min-h-screen bg-[#020617] text-white">
 
       {/* Sidebar */}
-      <div className={`transition-all duration-300 ${isAdminCollapsed ? "w-20" : "w-64"} bg-[#0f172a]/50 backdrop-blur-md p-6 flex flex-col sticky top-16 h-[calc(100vh-64px)] border-r border-slate-700/50 z-20`}>
+      <div className={`transition-all duration-300 ${isAdminCollapsed ? "w-20" : "w-64"} bg-[#020617] border-r border-slate-800 flex flex-col sticky top-16 h-[calc(100vh-64px)] z-20 overflow-y-auto`}>
         
         {/* Toggle Button */}
-        <div className={`mb-10 flex ${isAdminCollapsed ? "justify-center" : "justify-between items-center"}`}>
-          {!isAdminCollapsed && <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin</h2>}
-          <button 
+        <div className={`px-4 py-4 flex ${isAdminCollapsed ? "justify-center" : "justify-end"}`}>
+          <button
             onClick={() => setIsAdminCollapsed(!isAdminCollapsed)}
-            className="p-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all group"
-            title={isAdminCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            className="p-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all"
+            title={isAdminCollapsed ? "Expand" : "Collapse"}
           >
-            <svg 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className={`transition-transform duration-500 ${isAdminCollapsed ? "rotate-180" : ""}`}
-            >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className={`transition-transform duration-500 ${isAdminCollapsed ? "rotate-180" : ""}`}>
               <polyline points="11 17 6 12 11 7" />
               <polyline points="18 17 13 12 18 7" />
             </svg>
           </button>
         </div>
 
-        <nav className="flex flex-col gap-2">
-          <button
-            onClick={() => setActiveMenu('users')}
-            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'users' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
-            title={isAdminCollapsed ? "Users" : ""}
-          >
-            <span className="text-xl">👥</span> {!isAdminCollapsed && "Users"}
-          </button>
-          <button
-            onClick={() => setActiveMenu('stocks')}
-            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'stocks' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
-            title={isAdminCollapsed ? "Stocks" : ""}
-          >
-            <span className="text-xl">📈</span> {!isAdminCollapsed && "Stocks"}
-          </button>
-          <button
-            onClick={() => setActiveMenu('history')}
-            className={`flex items-center ${isAdminCollapsed ? "justify-center" : "gap-3 p-3"} rounded-xl transition ${activeMenu === 'history' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
-            title={isAdminCollapsed ? "Activity History" : ""}
-          >
-            <span className="text-xl">📜</span> {!isAdminCollapsed && "Activity History"}
-          </button>
+        <nav className="flex-1 px-4 space-y-2">
+          {[
+            { key: 'users', label: 'Traders', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+            { key: 'stocks', label: 'Stocks', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg> },
+            { key: 'history', label: 'Activity', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> },
+          ].map(item => (
+            <button
+              key={item.key}
+              onClick={() => setActiveMenu(item.key)}
+              title={isAdminCollapsed ? item.label : ''}
+              className={`w-full flex items-center ${isAdminCollapsed ? 'justify-center' : 'gap-4'} px-4 py-3 rounded-xl transition-all border ${
+                activeMenu === item.key
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200 border-transparent'
+              }`}
+            >
+              <div className="shrink-0 w-5 h-5">{item.icon}</div>
+              {!isAdminCollapsed && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
+            </button>
+          ))}
         </nav>
+        {!isAdminCollapsed && (
+          <div className="px-4 mb-4">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/10">
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Admin Panel</p>
+              <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase">Manage traders, stocks and activity logs.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 sm:p-10 relative">
+      <div className="flex-1 p-6 sm:p-10 relative overflow-y-auto">
 
         {activeMenu === 'users' && (
           <>
             {/* Header */}
             <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-                  Traders Information
+                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                  Traders <span className="text-emerald-400">Information</span>
                 </h1>
-                <p className="mt-2 text-slate-400">
-                  System overview and traders management
-                </p>
+                <p className="mt-2 text-slate-400">System overview and trader management</p>
               </div>
 
               <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
                 <div className="relative flex-1 max-w-md">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
                   <input
                     type="text"
                     placeholder="Search traders..."
@@ -295,7 +291,7 @@ function AdminDashboard() {
                       setUserSearch(e.target.value);
                       setUserPage(1);
                     }}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-4 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
                   />
                 </div>
 
@@ -315,13 +311,15 @@ function AdminDashboard() {
                 .map((user) => (
                   <div
                     key={user._id}
-                    className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!user.isUserActive ? 'border-red-500/20' : ''}`}
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-slate-900/60 backdrop-blur-sm p-6 shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-emerald-500/10 ${
+                      !user.isUserActive ? 'border-red-500/20 bg-red-500/5' : 'border-slate-800 hover:border-emerald-500/30'
+                    }`}
                   >
                     {/* User Info Header with Status Badge */}
                     <div className={`mb-6 flex items-center justify-between gap-4 transition-opacity ${!user.isUserActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
                       <div className="flex items-center gap-4 min-w-0">
-                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-xl font-bold text-white shadow-inner`}>
-                          {user.username.charAt(0).toUpperCase()}
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-lg font-black text-emerald-400">
+                          {user.username.charAt(0).toLowerCase()}
                         </div>
                         <div className="min-w-0">
                           <h3 className="text-lg font-bold text-slate-100 break-words" title={user.username}>
@@ -432,17 +430,14 @@ function AdminDashboard() {
             {/* Header */}
             <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-                  Stocks Dashboard
+                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                  Stocks <span className="text-emerald-400">Dashboard</span>
                 </h1>
-                <p className="mt-2 text-slate-400">
-                  Market overview and stock management
-                </p>
+                <p className="mt-2 text-slate-400">Market overview and stock management</p>
               </div>
 
               <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
                 <div className="relative flex-1 max-w-md">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
                   <input
                     type="text"
                     placeholder="Search stocks..."
@@ -451,7 +446,7 @@ function AdminDashboard() {
                       setStockSearch(e.target.value);
                       setStockPage(1);
                     }}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-10 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-800/50 pl-4 pr-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
                   />
                 </div>
 
@@ -476,7 +471,9 @@ function AdminDashboard() {
                   .map((stock) => (
                     <div
                       key={stock._id}
-                      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-6 shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-800/60 hover:shadow-emerald-500/10 ${!stock.isActive ? 'border-red-500/20' : ''}`}
+                      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-slate-900/60 backdrop-blur-sm p-6 shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-emerald-500/10 ${
+                        !stock.isActive ? 'border-red-500/20 bg-red-500/5' : 'border-slate-800 hover:border-emerald-500/30'
+                      }`}
                     >
                       {/* Status Badge */}
                       <div className="absolute right-4 top-4">
@@ -577,12 +574,10 @@ function AdminDashboard() {
             {/* Header */}
             <div className="mb-10 flex items-center justify-between">
               <div>
-                <h1 className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
-                  Activity History
+                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                  Activity <span className="text-emerald-400">History</span>
                 </h1>
-                <p className="mt-2 text-slate-400">
-                  Audit log of all administrative actions
-                </p>
+                <p className="mt-2 text-slate-400">Audit log of all administrative actions</p>
               </div>
               <button
                 onClick={handleClearHistory}
@@ -599,7 +594,7 @@ function AdminDashboard() {
                 <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/40 shadow-xl backdrop-blur-sm overflow-hidden">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 shadow-xl backdrop-blur-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-300">
                     <thead className="bg-slate-900/50 text-xs uppercase text-slate-400 border-b border-slate-700">
@@ -647,11 +642,11 @@ function AdminDashboard() {
 
         {/* --- USER DETAILS MODAL --- */}
         {selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="w-full max-w-4xl bg-[#0f172a] rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div className="w-full max-w-4xl bg-[#020617] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
               {/* Modal Header */}
-              <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+              <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/80">
                 <div>
                   <h2 className="text-2xl font-bold text-white">
                     {selectedUser.username}'s Details
@@ -677,7 +672,7 @@ function AdminDashboard() {
                 <div className="flex-1 overflow-auto flex flex-col">
 
                   {/* Tabs */}
-                  <div className="flex border-b border-slate-700 px-6 pt-4 bg-slate-800/20">
+                  <div className="flex border-b border-slate-800 px-6 pt-4 bg-slate-900/40">
                     <button
                       onClick={() => setModalTab("transactions")}
                       className={`pb-3 px-4 font-semibold text-sm transition-colors border-b-2 ${modalTab === "transactions" ? "border-emerald-500 text-emerald-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
