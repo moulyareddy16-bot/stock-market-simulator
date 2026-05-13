@@ -5,7 +5,6 @@ function AIWatchlistInsights({ watchlist = [] }) {
   // Data now comes from props (AICommandCenter), so we remove redundant local fetching.
   const loading = false; // Parent handles loading state
 
-<<<<<<< HEAD
   useEffect(() => {
     fetchInsights();
   }, []);
@@ -20,8 +19,6 @@ function AIWatchlistInsights({ watchlist = [] }) {
       setLoading(false);
     }
   };
-=======
->>>>>>> 96136e73c53cbb82a5eac0080a6b7a9fc478fb23
 
 
 

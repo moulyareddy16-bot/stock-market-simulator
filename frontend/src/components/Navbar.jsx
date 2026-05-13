@@ -50,7 +50,7 @@ function Navbar() {
           <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </div>
         <span className="text-2xl font-black text-white tracking-tighter">
-          Fin<span className="text-emerald-500">nova</span>
+          $Stock<span className="text-emerald-500">king</span>
         </span>
       </NavLink>
 
