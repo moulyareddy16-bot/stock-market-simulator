@@ -135,10 +135,32 @@ export const getAiSuggestions = async (req, res) => {
             marketData,
         });
 
-        // ── CACHE RESULT ──
-        setCachedAIResponse(userId, aiResult);
+        // Detect if AI returned real data vs fallback (fallback has confidenceScore=0 and empty tradeSignals)
+        const isRealAIResponse = aiResult.confidenceScore > 0 || (aiResult.tradeSignals && aiResult.tradeSignals.length > 0);
 
-        return res.status(200).json({ success: true, payload: aiResult });
+        // ── CACHE RESULT (only if AI gave a real response, not a fallback) ──
+        setCachedAIResponse(userId, aiResult, isRealAIResponse);
+
+        // ── BUILD COMPATIBILITY SHIM (supports both AiSuggestions.jsx + AICommandCenter.jsx) ──
+        // AiSuggestions.jsx reads: summary, riskWarning, marketSentiment (string), portfolioHealth.diversificationScore
+        // AICommandCenter.jsx reads: executiveSummary, riskAnalysis.warning, marketSentiment.label (object)
+        const payload = {
+            ...aiResult,
+            // Legacy fields for AiSuggestions.jsx
+            summary: aiResult.executiveSummary,
+            riskWarning: aiResult.riskAnalysis?.warning || "",
+            traderScore: aiResult.traderScore || 0,
+            marketSentiment: aiResult.marketSentiment?.label || "NEUTRAL",  // string for old page
+            portfolioHealth: {
+                diversificationScore: aiResult.portfolioScore?.diversification || 0,
+                concentrationRisk: aiResult.portfolioScore?.concentration || "LOW",
+            },
+            suggestions: aiResult.suggestions || [],
+            // Keep the nested object too for AICommandCenter.jsx
+            marketSentimentData: aiResult.marketSentiment,
+        };
+
+        return res.status(200).json({ success: true, payload });
 
     } catch (err) {
         console.error("AI Controller ERROR:", err.message);
@@ -148,6 +170,7 @@ export const getAiSuggestions = async (req, res) => {
         });
     }
 };
+
 
 export const getWatchlistInsights = async (req, res) => {
     try {

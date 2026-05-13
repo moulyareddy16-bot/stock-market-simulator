@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import api from "../../service/api";
 
-function AIWatchlistInsights({ watchlist = [] }) {
-  // Data now comes from props (AICommandCenter), so we remove redundant local fetching.
-  const loading = false; // Parent handles loading state
+function AIWatchlistInsights({ watchlist: propWatchlist }) {
+  const [watchlist, setWatchlist] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // If parent passed watchlist data (from portfolio AI analysis), use it directly
+    if (propWatchlist && propWatchlist.length > 0) {
+      setWatchlist(propWatchlist);
+      setLoading(false);
+      return;
+    }
+    // Otherwise fetch from dedicated endpoint
     fetchInsights();
-  }, []);
+  }, [propWatchlist]);
 
   const fetchInsights = async () => {
+    setLoading(true);
     try {
       const res = await api.get("/ai/watchlist-insights", { withCredentials: true });
       setWatchlist(res?.data?.payload || []);
@@ -128,10 +136,8 @@ function AIWatchlistInsights({ watchlist = [] }) {
                     <h3 className="text-3xl font-black text-white">
                       {stock.symbol}
                     </h3>
-
                     <p className="text-xs uppercase tracking-widest text-slate-500 font-black mt-1">
-                      AI Confidence{" "}
-                      {stock.confidence}%
+                      Signal: {stock.signal || "WATCH"}
                     </p>
                   </div>
 
@@ -142,49 +148,10 @@ function AIWatchlistInsights({ watchlist = [] }) {
                   </div>
                 </div>
 
-                {/* PRICE */}
-                <div className="grid grid-cols-2 gap-4 mb-5">
-
-                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                      Current Price
-                    </p>
-
-                    <h4 className="text-2xl font-black text-white">
-                      $
-                      {stock.currentPrice?.toFixed(
-                        2
-                      )}
-                    </h4>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-950/60 border border-white/5 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">
-                      Predicted Move
-                    </p>
-
-                    <h4
-                      className={`text-2xl font-black ${stock.predictedMove >
-                          0
-                          ? "text-emerald-400"
-                          : "text-red-400"
-                        }`}
-                    >
-                      {stock.predictedMove > 0
-                        ? "+"
-                        : ""}
-                      {
-                        stock.predictedMove
-                      }
-                      %
-                    </h4>
-                  </div>
-                </div>
-
                 {/* INSIGHT */}
                 <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
                   <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                    {stock.reasoning}
+                    {stock.reason || stock.reasoning || "No reasoning available."}
                   </p>
                 </div>
               </div>

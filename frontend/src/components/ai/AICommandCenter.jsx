@@ -157,13 +157,13 @@ function AICommandCenter() {
 
         <AIConfidenceMeter
           confidence={aiData?.confidenceScore}
-          prediction={aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
+          prediction={aiData?.marketSentimentData?.reasoning || aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
           risk={aiData?.riskAnalysis?.level}
           volatility={aiData?.riskAnalysis?.score || 45}
         />
 
         <AIMarketSentiment
-          sentimentData={aiData?.marketSentiment}
+          sentimentData={aiData?.marketSentimentData || aiData?.marketSentiment}
         />
 
         <AIRiskPanel
@@ -197,7 +197,7 @@ function AICommandCenter() {
       {/* WATCHLIST */}
       <div className="mb-10">
         <AIWatchlistInsights
-          watchlist={aiData.watchlist}
+          watchlist={aiData.watchlist || []}
         />
       </div>
 
