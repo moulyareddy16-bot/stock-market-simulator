@@ -138,9 +138,6 @@ export const getAiSuggestions = async (req, res) => {
         // Detect if AI returned real data vs fallback (fallback has confidenceScore=0 and empty tradeSignals)
         const isRealAIResponse = aiResult.confidenceScore > 0 || (aiResult.tradeSignals && aiResult.tradeSignals.length > 0);
 
-        // ── CACHE RESULT (only if AI gave a real response, not a fallback) ──
-        setCachedAIResponse(userId, aiResult, isRealAIResponse);
-
         // ── BUILD COMPATIBILITY SHIM (supports both AiSuggestions.jsx + AICommandCenter.jsx) ──
         // AiSuggestions.jsx reads: summary, riskWarning, marketSentiment (string), portfolioHealth.diversificationScore
         // AICommandCenter.jsx reads: executiveSummary, riskAnalysis.warning, marketSentiment.label (object)
@@ -160,6 +157,9 @@ export const getAiSuggestions = async (req, res) => {
             marketSentimentData: aiResult.marketSentiment,
         };
 
+        // ── CACHE RESULT (only if AI gave a real response, not a fallback) ──
+        setCachedAIResponse(userId, payload, isRealAIResponse);
+
         return res.status(200).json({ success: true, payload });
 
     } catch (err) {
@@ -174,7 +174,7 @@ export const getAiSuggestions = async (req, res) => {
 
 export const getWatchlistInsights = async (req, res) => {
     try {
-        const userId = req.userId;
+        const userId = req.user.id;
         
         const user = await userModel.findById(userId).lean();
         if (!user) {
@@ -205,7 +205,7 @@ Return ONLY valid JSON.
 
         const parsed = await generateStructuredJSON(prompt);
         
-        return res.status(200).json({ success: true, payload: parsed.payload || [] });
+        return res.status(200).json({ success: true, payload: parsed?.payload || [] });
 
     } catch (err) {
         console.error("Watchlist AI Controller ERROR:", err.message);
