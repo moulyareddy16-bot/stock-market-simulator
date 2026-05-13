@@ -22,11 +22,18 @@ export const getCachedAIResponse = (key) => {
 
 export const setCachedAIResponse = (
     key,
-    value
+    value,
+    isSuccess = true  // Only cache successful AI responses
 ) => {
+    if (!isSuccess) return; // Never cache fallback/error responses
 
     aiCache.set(key, {
         value,
         timestamp: Date.now()
     });
+};
+
+export const clearCachedAIResponse = (key) => {
+    if (key) aiCache.delete(key);
+    else aiCache.clear();
 };
