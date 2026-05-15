@@ -3,19 +3,24 @@ dotenv.config();
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
+import { InferenceClient } from "@huggingface/inference";
 
 // ──────────────────────────────────────────────────────────────────────
 // CLIENT INITIALIZATION
 // ──────────────────────────────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const groq   = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const hf     = new InferenceClient(process.env.HUGGINGFACE_API_KEY);
 
 // Gemini models to try (first hit wins)
-const GEMINI_MODELS = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+// Gemini models to try (first hit wins)
+// Gemini models to try (first hit wins)
+const GEMINI_MODELS = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
 
 // GROQ fallback models (Llama 3.3 70B is the best free option)
 const GROQ_TEXT_MODELS  = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
 const GROQ_JSON_MODELS  = ["llama-3.3-70b-versatile"];
+const HF_FINANCE_MODEL  = "ProsusAI/finbert";
 
 /**
  * Returns true if the error is a quota/rate-limit error (all Gemini models share one quota).
@@ -97,6 +102,63 @@ const generateJSONViaGroq = async (prompt) => {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+// HUGGING FACE FALLBACK — free-text
+// ──────────────────────────────────────────────────────────────────────
+const generateTextViaHF = async (prompt) => {
+    try {
+        const result = await hf.chatCompletion({
+            model: "Qwen/Qwen2.5-72B-Instruct",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 1024,
+            temperature: 0.7,
+        });
+        if (result?.choices[0]?.message?.content) {
+            console.log("[HF] Success with Qwen-72B");
+            return result.choices[0].message.content;
+        }
+    } catch (err) {
+        console.warn("[HF] Qwen failed:", err.message);
+    }
+    return null;
+};
+
+/**
+ * Specialized Financial Sentiment Analysis using ProsusAI/finbert
+ */
+export const analyzeFinancialSentiment = async (text) => {
+    try {
+        const result = await hf.textClassification({
+            model: HF_FINANCE_MODEL,
+            inputs: text
+        });
+        return result[0]; 
+    } catch (error) {
+        console.error("HF Sentiment Analysis failed:", error.message);
+        return { label: 'neutral', score: 0.0 };
+    }
+};
+
+/**
+ * Specialized News Sentiment Analysis
+ */
+export const analyzeNewsSentiment = async (headline) => {
+    try {
+        const result = await hf.textClassification({
+            model: HF_FINANCE_MODEL,
+            inputs: headline,
+        });
+        const topSentiment = result[0];
+        return {
+            sentiment: topSentiment.label.toUpperCase(),
+            confidence: (topSentiment.score * 100).toFixed(2),
+        };
+    } catch (error) {
+        console.error("Hugging Face News Analysis Error:", error.message);
+        return { sentiment: "NEUTRAL", confidence: "0.00" };
+    }
+};
+
+// ──────────────────────────────────────────────────────────────────────
 // PUBLIC: Generate structured JSON  (Gemini → GROQ fallback)
 // ──────────────────────────────────────────────────────────────────────
 export const generateStructuredJSON = async (prompt) => {
@@ -110,7 +172,7 @@ export const generateStructuredJSON = async (prompt) => {
                     temperature: 0.2,
                     maxOutputTokens: 2048,
                 },
-            });
+            }, { apiVersion: 'v1' });
             const result = await model.generateContent(prompt);
             const parsed = JSON.parse(cleanJSON(result.response.text()));
             console.log(`[Gemini] JSON success with model: ${modelName}`);
@@ -121,8 +183,7 @@ export const generateStructuredJSON = async (prompt) => {
                 console.warn("[Gemini] Quota exhausted → falling back to GROQ for JSON...");
                 break; // stop trying Gemini models
             }
-            if (!isGeminiModelNotFound(err)) break; // unknown error — stop
-            // 404 → continue to next Gemini model
+            continue;
         }
     }
 
@@ -150,7 +211,7 @@ export const generateText = async (prompt) => {
                     { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",  threshold: "BLOCK_NONE" },
                     { category: "HARM_CATEGORY_DANGEROUS_CONTENT",  threshold: "BLOCK_NONE" },
                 ],
-            });
+            }, { apiVersion: 'v1' });
             const result = await model.generateContent(prompt);
             const text   = result.response.text();
             console.log(`[Gemini] Text success with model: ${modelName}`);
@@ -161,8 +222,7 @@ export const generateText = async (prompt) => {
                 console.warn("[Gemini] Quota exhausted → falling back to GROQ for text...");
                 break; // stop trying Gemini models
             }
-            if (!isGeminiModelNotFound(err)) break; // unknown error — stop
-            // 404 → continue to next Gemini model
+            continue;
         }
     }
 
@@ -170,6 +230,10 @@ export const generateText = async (prompt) => {
     const groqText = await generateTextViaGroq(prompt);
     if (groqText) return groqText;
 
+    // ── Fall back to Hugging Face ──
+    const hfText = await generateTextViaHF(prompt);
+    if (hfText) return hfText;
+
     console.error("[AI] All providers failed for text generation.");
-    return "Alpha-Insight AI is currently re-calibrating. Please try again in 30 seconds.";
+    return "Alpha-Insight AI is currently experiencing extremely high demand. Please try again in 30 seconds.";
 };

@@ -18,8 +18,8 @@ export const saveUserMemory = (
         timestamp: Date.now(),
     });
 
-    // LIMIT MEMORY
-    if (existing.length > 20) {
+    // LIMIT MEMORY (Reduce to 10 to save tokens/rate limits)
+    if (existing.length > 10) {
         existing.shift();
     }
 
@@ -44,7 +44,7 @@ export const saveAIResponse = (
         timestamp: Date.now(),
     });
 
-    if (existing.length > 20) {
+    if (existing.length > 10) {
         existing.shift();
     }
 

@@ -4,6 +4,7 @@ import api from "../../service/api";
 function AIWatchlistInsights({ watchlist: propWatchlist }) {
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     // If parent passed watchlist data (from portfolio AI analysis), use it directly
@@ -28,55 +29,30 @@ function AIWatchlistInsights({ watchlist: propWatchlist }) {
     }
   };
 
-
-
-  const getSentimentStyle = (
-    sentiment
-  ) => {
-    if (
-      sentiment?.includes("BUY") ||
-      sentiment === "BULLISH"
-    ) {
-      return {
-        text: "text-emerald-400",
-        bg: "bg-emerald-500/10 border-emerald-500/20",
-      };
+  const getSentimentStyle = (sentiment) => {
+    if (sentiment?.includes("BUY") || sentiment === "BULLISH") {
+      return { text: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" };
     }
-
-    if (
-      sentiment?.includes("SELL") ||
-      sentiment?.includes("VOLATILE")
-    ) {
-      return {
-        text: "text-red-400",
-        bg: "bg-red-500/10 border-red-500/20",
-      };
+    if (sentiment?.includes("SELL") || sentiment?.includes("VOLATILE")) {
+      return { text: "text-red-400", bg: "bg-red-500/10 border-red-500/20" };
     }
-
-    return {
-      text: "text-yellow-400",
-      bg: "bg-yellow-500/10 border-yellow-500/20",
-    };
+    return { text: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" };
   };
-
-
 
   if (loading) {
     return (
       <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-full">
         <div className="animate-pulse space-y-5">
           <div className="h-8 w-56 bg-slate-800 rounded-xl" />
-
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-40 rounded-[1.5rem] bg-slate-900/50"
-            />
+            <div key={i} className="h-40 rounded-[1.5rem] bg-slate-900/50" />
           ))}
         </div>
       </div>
     );
   }
+
+  const displayedWatchlist = showAll ? watchlist : watchlist.slice(0, 2);
 
   return (
     <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-full overflow-hidden relative">
@@ -90,12 +66,10 @@ function AIWatchlistInsights({ watchlist: propWatchlist }) {
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black mb-2">
             AI Watchlist Scanner
           </p>
-
           <h2 className="text-2xl font-black text-white">
             Watchlist Insights
           </h2>
         </div>
-
         <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl">
           👁️
         </div>
@@ -107,56 +81,59 @@ function AIWatchlistInsights({ watchlist: propWatchlist }) {
           <h3 className="text-xl font-black text-white mb-3">
             No Watchlist Data
           </h3>
-
           <p className="text-slate-400 font-medium">
-            Add stocks to your watchlist
-            to activate AI monitoring.
+            Add stocks to your watchlist to activate AI monitoring.
           </p>
         </div>
       )}
 
       {/* LIST */}
       <div className="space-y-5 relative z-10">
-        {watchlist.map(
-          (stock, index) => {
-            const style =
-              getSentimentStyle(
-                stock.sentiment
-              );
+        {watchlist.length > 0 && (
+          <>
+            {displayedWatchlist.map((stock, index) => {
+              const style = getSentimentStyle(stock.sentiment);
+              return (
+                <div
+                  key={index}
+                  className="rounded-[1.7rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
+                >
+                  {/* TOP */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div>
+                      <h3 className="text-3xl font-black text-white">
+                        {stock.symbol}
+                      </h3>
+                      <p className="text-xs uppercase tracking-widest text-slate-500 font-black mt-1">
+                        Signal: {stock.signal || "WATCH"}
+                      </p>
+                    </div>
+                    <div className={`px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-widest ${style.bg} ${style.text}`}>
+                      {stock.sentiment}
+                    </div>
+                  </div>
 
-            return (
-              <div
-                key={index}
-                className="rounded-[1.7rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
-              >
-
-                {/* TOP */}
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="text-3xl font-black text-white">
-                      {stock.symbol}
-                    </h3>
-                    <p className="text-xs uppercase tracking-widest text-slate-500 font-black mt-1">
-                      Signal: {stock.signal || "WATCH"}
+                  {/* INSIGHT */}
+                  <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                      {stock.reason || stock.reasoning || "No reasoning available."}
                     </p>
                   </div>
-
-                  <div
-                    className={`px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-widest ${style.bg} ${style.text}`}
-                  >
-                    {stock.sentiment}
-                  </div>
                 </div>
+              );
+            })}
 
-                {/* INSIGHT */}
-                <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
-                  <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                    {stock.reason || stock.reasoning || "No reasoning available."}
-                  </p>
-                </div>
+            {watchlist.length > 2 && (
+              <div className="flex justify-center mt-2">
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="px-6 py-3 rounded-xl bg-slate-900/80 border border-indigo-500/30 text-indigo-400 font-bold text-xs uppercase tracking-widest hover:bg-indigo-500/10 hover:border-indigo-500/60 transition-all"
+                >
+                  {showAll ? "Show Less" : `View All ${watchlist.length} Insights`}
+                </button>
               </div>
-            );
-          }
+            )}
+          </>
         )}
       </div>
 
@@ -166,10 +143,7 @@ function AIWatchlistInsights({ watchlist: propWatchlist }) {
           Watchlist intelligence is powered by:
           <span className="text-white font-bold">
             {" "}
-            real-time RSI, moving averages,
-            volatility clustering, news
-            sentiment, earnings reactions,
-            and institutional flow analysis.
+            real-time RSI, moving averages, volatility clustering, news sentiment, earnings reactions, and institutional flow analysis.
           </span>
         </p>
       </div>
