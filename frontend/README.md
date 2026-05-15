@@ -32,3 +32,7 @@ npm install recharts socket.io-client
 # . Install new packages
 cd stock-market-simulator/backend
 - npm install helmet express-rate-limit
+
+
+# Dependencies
+Run npm install lightweight-charts in the frontend directory to enable advanced, high-performance financial charting.
