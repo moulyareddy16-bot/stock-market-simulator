@@ -50,3 +50,4 @@ Install Google SDK:
 # 1. Install new packages
 cd stock-market-simulator/backend
 npm install helmet express-rate-limit
+npm install groq-sdk @huggingface/inference
