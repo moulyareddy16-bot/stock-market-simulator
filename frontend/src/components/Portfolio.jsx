@@ -64,9 +64,19 @@ function Portfolio() {
 
   return (
     <div className="space-y-10 animate-fade-in pb-20">
-      <header className="mb-4">
-        <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent tracking-tight pb-1">Your Portfolio</h1>
-        <p className="text-slate-400 mt-2 font-medium">Detailed breakdown of your virtual investments</p>
+      <header className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent tracking-tight pb-1">Your Portfolio</h1>
+          <p className="text-slate-400 mt-2 font-medium">Detailed breakdown of your virtual investments</p>
+        </div>
+        <Link 
+          to="/ai" 
+          className="group relative inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 rounded-2xl transition-all duration-300"
+        >
+          <span className="text-xl group-hover:scale-110 transition-transform duration-300">🤖</span>
+          <span className="font-black text-emerald-400 uppercase tracking-widest text-sm">Alpha AI Insights</span>
+          <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 transition-all"></div>
+        </Link>
       </header>
 
       {/* SUMMARY CARDS */}

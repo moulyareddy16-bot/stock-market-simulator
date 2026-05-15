@@ -14,83 +14,59 @@ import AIWatchlistInsights from "./AIWatchlistInsights";
 import AIChatPanel from "./AIChatPanel";
 
 function AICommandCenter() {
-
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   const [aiData, setAiData] = useState({
     executiveSummary:
       "AI engine is analyzing your portfolio and market conditions...",
-
     traderScore: 0,
-
     confidenceScore: 0,
-
     marketSentiment: {
       label: "NEUTRAL",
       score: 50,
     },
-
     portfolioScore: {
       diversification: 0,
       riskAdjusted: 0,
       concentration: "LOW",
     },
-
     riskAnalysis: {
       level: "Moderate",
-      warning:
-        "Risk engine initializing...",
+      warning: "Risk engine initializing...",
     },
-
     tradeSignals: [],
-
     watchlist: [],
-
     reasoning: [],
   });
 
   const [error, setError] = useState("");
 
   useEffect(() => {
-
     const fetchAI = async () => {
-
       try {
-
         setLoading(true);
-
         const res = await api.get("/ai/suggestions");
-
         if (res?.data?.payload) {
           setAiData(res.data.payload);
         }
-
       } catch (err) {
-
         console.error(err);
-
-        setError(
-          "Institutional AI engine temporarily unavailable."
-        );
-
+        setError("Institutional AI engine temporarily unavailable.");
       } finally {
-
         setLoading(false);
-
       }
     };
 
     fetchAI();
-
   }, []);
 
   if (loading || !aiData) {
     return (
       <div className="min-h-screen bg-[#050816] p-6 lg:p-10">
         <div className="animate-pulse space-y-6">
-
           <div className="h-40 rounded-[2rem] bg-slate-900/60" />
-
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
               <div
@@ -99,7 +75,6 @@ function AICommandCenter() {
               />
             ))}
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[...Array(4)].map((_, i) => (
               <div
@@ -108,37 +83,33 @@ function AICommandCenter() {
               />
             ))}
           </div>
-
         </div>
       </div>
     );
   }
 
+  const tabs = [
+    { id: "dashboard", label: "Overview Metrics", icon: "📊" },
+    { id: "signals", label: "Trade Signals & Reasoning", icon: "⚡" },
+    { id: "watchlist", label: "Watchlist Insights", icon: "👁️" },
+  ];
+
   return (
     <div className="min-h-screen bg-[#050816] text-white p-6 lg:p-10 pb-32">
-
       {/* PAGE HEADER */}
-      <div className="mb-10">
-
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-
           <div className="px-4 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-[0.25em] uppercase">
             Institutional AI
           </div>
-
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-
         </div>
-
         <h1 className="text-5xl lg:text-6xl font-black tracking-tight mb-4">
           Alpha Insight Engine
         </h1>
-
         <p className="text-slate-400 max-w-3xl text-lg leading-relaxed">
-          Real-time portfolio intelligence, AI trade signals,
-          risk analysis, and institutional-grade market reasoning.
+          Real-time portfolio intelligence, AI trade signals, risk analysis, and institutional-grade market reasoning.
         </p>
-
       </div>
 
       {/* ERROR */}
@@ -148,32 +119,8 @@ function AICommandCenter() {
         </div>
       )}
 
-      {/* TOP GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-
-        <AIPortfolioScore
-          portfolioScore={aiData.portfolioScore}
-        />
-
-        <AIConfidenceMeter
-          confidence={aiData?.confidenceScore}
-          prediction={aiData?.marketSentimentData?.reasoning || aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
-          risk={aiData?.riskAnalysis?.level}
-          volatility={aiData?.riskAnalysis?.score || 45}
-        />
-
-        <AIMarketSentiment
-          sentimentData={aiData?.marketSentimentData || aiData?.marketSentiment}
-        />
-
-        <AIRiskPanel
-          riskData={aiData?.riskAnalysis}
-        />
-
-      </div>
-
-      {/* EXECUTIVE SUMMARY */}
-      <div className="mb-6">
+      {/* ALWAYS VISIBLE AT TOP: EXECUTIVE SUMMARY */}
+      <div className="mb-8">
         <AISummaryCard
           summary={aiData.executiveSummary}
           traderScore={aiData.traderScore}
@@ -181,29 +128,75 @@ function AICommandCenter() {
         />
       </div>
 
-      {/* SIGNALS + REASONING */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-
-        <AITradeSignals
-          signals={aiData.tradeSignals}
-        />
-
-        <AIReasoningPanel
-          reasoning={aiData.reasoning}
-        />
-
+      {/* TAB NAVIGATION */}
+      <div className="flex flex-wrap gap-4 mb-8">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 ${
+              activeTab === tab.id
+                ? "bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                : "bg-slate-900/50 text-slate-400 hover:bg-slate-800 border border-slate-800"
+            }`}
+          >
+            <span className="text-lg">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* WATCHLIST */}
-      <div className="mb-10">
-        <AIWatchlistInsights
-          watchlist={aiData.watchlist || []}
-        />
+      {/* TAB CONTENT */}
+      <div className="animate-fade-in">
+        {/* DASHBOARD TAB */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AIPortfolioScore portfolioScore={aiData.portfolioScore} />
+              <AIConfidenceMeter
+                confidence={aiData?.confidenceScore}
+                prediction={aiData?.marketSentimentData?.reasoning || aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
+                risk={aiData?.riskAnalysis?.level}
+                volatility={aiData?.riskAnalysis?.score || 45}
+              />
+              
+              {showAllMetrics && (
+                <>
+                  <AIMarketSentiment sentimentData={aiData?.marketSentimentData || aiData?.marketSentiment} />
+                  <AIRiskPanel riskData={aiData?.riskAnalysis} />
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={() => setShowAllMetrics(!showAllMetrics)}
+                className="px-6 py-3 rounded-xl bg-slate-900/80 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-widest hover:bg-emerald-500/10 hover:border-emerald-500/60 transition-all"
+              >
+                {showAllMetrics ? "Hide Additional Metrics" : "View More Metrics"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SIGNALS TAB */}
+        {activeTab === "signals" && (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <AITradeSignals signals={aiData.tradeSignals} />
+            <AIReasoningPanel reasoning={aiData.reasoning} />
+          </div>
+        )}
+
+        {/* WATCHLIST TAB */}
+        {activeTab === "watchlist" && (
+          <div>
+            <AIWatchlistInsights watchlist={aiData.watchlist || []} />
+          </div>
+        )}
       </div>
 
-      {/* FLOATING CHAT */}
+      {/* FLOATING CHAT PANEL */}
       <AIChatPanel />
-
     </div>
   );
 }
