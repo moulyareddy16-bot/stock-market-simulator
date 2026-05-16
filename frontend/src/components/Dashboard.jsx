@@ -82,9 +82,10 @@ function Dashboard() {
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{index.name}</p>
               <h3 className="text-xl font-black text-white">{index.value}</h3>
             </div>
-            <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+            <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
               index.up ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
             }`}>
+              <span>{index.up ? "▲" : "▼"}</span>
               {index.change}
             </div>
           </div>
@@ -120,8 +121,10 @@ function Dashboard() {
                     <p className="text-xl font-black text-white">$154.20</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Change</p>
-                    <p className="text-emerald-400 font-black">+2.4%</p>
+                    <p className="text-emerald-400 font-black flex items-center justify-end gap-1">
+                      <span>▲</span>
+                      +2.4%
+                    </p>
                   </div>
                 </div>
                 {/* Subtle Background Glow */}

@@ -217,10 +217,11 @@ function Portfolio() {
                       ${stock.currentPrice?.toFixed(2)}
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className={`font-black ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      <div className={`font-black flex items-center justify-end gap-1 ${stock.profitLoss >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        <span>{stock.profitLoss >= 0 ? "▲" : "▼"}</span>
                         {stock.profitLoss >= 0 ? "+" : "-"}${Math.abs(stock.profitLoss || 0).toFixed(2)}
                       </div>
-                      <div className={`text-[10px] font-bold ${stock.profitLoss >= 0 ? "text-emerald-500/50" : "text-red-500/50"}`}>
+                      <div className={`text-[10px] font-bold flex items-center justify-end gap-1 ${stock.profitLoss >= 0 ? "text-emerald-500/50" : "text-red-500/50"}`}>
                         {stock.profitPercent?.toFixed(2)}%
                       </div>
                     </td>

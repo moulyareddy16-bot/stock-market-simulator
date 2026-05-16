@@ -335,6 +335,28 @@ function StockDetails() {
           {/* MAIN CONTENT - STANDARD PADDING */}
           <div className="px-6 lg:px-12 space-y-8">
 
+<<<<<<< HEAD
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* SIDEBAR: SYMBOL, BUTTON, PROFILE */}
+          <div className="flex flex-col gap-6 w-full lg:col-span-1">
+             {/* SYMBOL BOX */}
+             <div className="glass-card flex flex-col justify-center items-center p-8 bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl relative overflow-hidden text-center">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full"></div>
+                
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">{stock.stockSymbol}</h1>
+                  {stock.change && (
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black flex items-center gap-1 ${
+                      stock.change.includes('-') 
+                        ? 'bg-red-500/10 text-red-400' 
+                        : 'bg-emerald-500/10 text-emerald-400'
+                    }`}>
+                      <span>{stock.change.includes('-') ? '▼' : '▲'}</span>
+                      {stock.change}
+                    </span>
+                  )}
+=======
           {/* UNIFIED COMPACT HERO SECTION */}
           <section className="glass-card bg-[#0a1120]/40 rounded-[2.5rem] border border-slate-800/50 shadow-2xl overflow-hidden animate-fade-in">
             <div className="p-6 lg:p-8 border-b border-slate-800/40 bg-slate-900/10">
@@ -365,6 +387,7 @@ function StockDetails() {
                       <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)] ml-1"></div>
                     </div>
                   </div>
+>>>>>>> 904b0105f03dca3e64b33639a57f51d7190d01f0
                 </div>
 
                 <div className="flex items-center gap-3">

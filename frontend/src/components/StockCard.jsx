@@ -32,7 +32,8 @@ function StockCard({ stock }) {
         </div>
         <div className="text-right space-y-1">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">24h Change</p>
-          <p className={`font-black ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+          <p className={`font-black flex items-center justify-end gap-1 ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+            <span>{isUp ? "▲" : "▼"}</span>
             {change}
           </p>
         </div>

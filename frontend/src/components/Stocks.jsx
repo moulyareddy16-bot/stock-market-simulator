@@ -38,8 +38,8 @@ function Stocks() {
   const [addingStock, setAddingStock] = useState(false);
   const [fetchingStocks, setFetchingStocks] = useState(false);
   // FILTER STATES
-// MAIN LOADING
-const [loading, setLoading] = useState(false);
+  // MAIN LOADING
+  const [loading, setLoading] = useState(false);
 
   // FORM DATA
   const [stockData, setStockData] = useState({
@@ -131,12 +131,12 @@ const [loading, setLoading] = useState(false);
     setStockData({
       ...stockData,
 
-    [name]:
-      name === "stockSymbol"
-        ? value.toUpperCase()
-        : value,
-  });
-};
+      [name]:
+        name === "stockSymbol"
+          ? value.toUpperCase()
+          : value,
+    });
+  };
 
   // =====================================
   // ADD STOCK
@@ -179,7 +179,7 @@ const [loading, setLoading] = useState(false);
       alert(
 
         error.response?.data?.message ||
-          "Unable to add stock"
+        "Unable to add stock"
       );
     } finally {
       setAddingStock(false);
@@ -202,7 +202,7 @@ const [loading, setLoading] = useState(false);
 
       alert(
         error.response?.data?.message ||
-          "Failed to delete stock"
+        "Failed to delete stock"
       );
     }
   };
@@ -223,7 +223,7 @@ const [loading, setLoading] = useState(false);
 
       alert(
         error.response?.data?.message ||
-          "Failed to update stock"
+        "Failed to update stock"
       );
     } finally {
       setLoadingStock("");
@@ -233,7 +233,7 @@ const [loading, setLoading] = useState(false);
   // FORMAT MARKET CAP
   const formatMarketCap = (num) => {
     if (!num || num === 0) return "N/A";
-    
+
     // Finnhub provides market cap in Millions.
     // 1,000,000 Millions = 1 Trillion
     // 1,000 Millions = 1 Billion
@@ -305,11 +305,10 @@ const [loading, setLoading] = useState(false);
             <button
               onClick={() => setStatusFilter("all")}
               className={`rounded-xl px-5 py-2 font-semibold transition
-              ${
-                statusFilter === "all"
+              ${statusFilter === "all"
                   ? "bg-emerald-500 text-black"
                   : "bg-slate-800 text-white"
-              }`}
+                }`}
             >
               All
             </button>
@@ -319,11 +318,10 @@ const [loading, setLoading] = useState(false);
                 setStatusFilter("active")
               }
               className={`rounded-xl px-5 py-2 font-semibold transition
-              ${
-                statusFilter === "active"
+              ${statusFilter === "active"
                   ? "bg-emerald-500 text-black"
                   : "bg-slate-800 text-white"
-              }`}
+                }`}
             >
               Active
             </button>
@@ -333,11 +331,10 @@ const [loading, setLoading] = useState(false);
                 setStatusFilter("inactive")
               }
               className={`rounded-xl px-5 py-2 font-semibold transition
-              ${
-                statusFilter === "inactive"
+              ${statusFilter === "inactive"
                   ? "bg-red-500 text-white"
                   : "bg-slate-800 text-white"
-              }`}
+                }`}
             >
               Inactive
             </button>
@@ -347,8 +344,8 @@ const [loading, setLoading] = useState(false);
 
       {/* STATS */}
       {/* <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"> */}
-       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
-        
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">
             Total Stocks
@@ -417,7 +414,7 @@ const [loading, setLoading] = useState(false);
               className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-500"
             />
 
-           
+
             <button
               type="submit"
               disabled={addingStock}
@@ -442,173 +439,177 @@ const [loading, setLoading] = useState(false);
           [...filteredStocks]
             .sort((a, b) => (b.isActive === a.isActive ? 0 : b.isActive ? 1 : -1))
             .map((stock) => (
-            <div
-              key={stock._id}
-              className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 transition hover:-translate-y-1 hover:border-emerald-500/40`}
-            >
+              <div
+                key={stock._id}
+                className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4 transition hover:-translate-y-1 hover:border-emerald-500/40`}
+              >
 
-              {/* TOP */}
-              <div className="flex items-start justify-between">
+                {/* TOP */}
+                <div className="flex items-start justify-between">
 
-                <div className={`flex gap-4 transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                  <div className={`flex gap-4 transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
 
-                  {/* LOGO */}
-                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white">
-                    {stock.logo ? (
-                      <img
-                        src={stock.logo}
-                        alt={stock.companyName}
-                        className="h-full w-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-2xl font-black text-black">
-                        {stock.stockSymbol[0]}
-                      </span>
-                    )}
+                    {/* LOGO */}
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white">
+                      {stock.logo ? (
+                        <img
+                          src={stock.logo}
+                          alt={stock.companyName}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl font-black text-black">
+                          {stock.stockSymbol[0]}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* INFO */}
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-black">
+                        {stock.stockSymbol}
+                      </h2>
+
+                      <p className="mt-1 text-sm text-slate-400 truncate" title={stock.companyName}>
+                        {stock.companyName}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* INFO */}
-                  <div className="min-w-0">
-                    <h2 className="text-2xl font-black">
-                      {stock.stockSymbol}
-                    </h2>
+                  {/* STATUS (FOR MANAGERS) */}
+                  {role !== "trader" && (
+                    <button
+                      disabled={
+                        loadingStock ===
+                        stock.stockSymbol
+                      }
+                      onClick={() =>
+                        handleToggleStatus(stock)
+                      }
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-all ${stock.isActive
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                          : "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                        }`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${stock.isActive ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                      {stock.isActive
+                        ? "Active"
+                        : "Inactive"}
+                    </button>
+                  )}
+                </div>
 
-                    <p className="mt-1 text-sm text-slate-400 truncate" title={stock.companyName}>
-                      {stock.companyName}
+                {/* CHART (FOR TRADERS ONLY) */}
+                {role === "trader" && (
+                  <div className={`mt-4 w-full transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                    <Sparkline symbol={stock.stockSymbol} color="#10b981" />
+                  </div>
+                )}
+
+                {/* DETAILS */}
+                <div className={`mt-5 grid grid-cols-2 gap-4 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">Price</p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">Change</p>
+                    <p className={`mt-1 text-sm font-semibold flex items-center gap-1 ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {stock.d ? (
+                        <>
+                          <span>{stock.d >= 0 ? '▲' : '▼'}</span>
+                          {stock.d >= 0 ? '+' : ''}{stock.d.toFixed(2)} ({stock.dp.toFixed(2)}%)
+                        </>
+                      ) : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">
+                      Sector
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold">
+                      {stock.sector || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">
+                      Country
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold">
+                      {stock.country || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">
+                      Market Cap
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold text-emerald-400">
+                      {formatMarketCap(
+                        stock.marketCapitalization
+                      )}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">
+                      IPO
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold">
+                      {stock.ipo || "N/A"}
                     </p>
                   </div>
                 </div>
 
-                {/* STATUS (FOR MANAGERS) */}
-                {role !== "trader" && (
-                  <button
-                    disabled={
-                      loadingStock ===
-                      stock.stockSymbol
-                    }
-                    onClick={() =>
-                      handleToggleStatus(stock)
-                    }
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-all ${
-                      stock.isActive
-                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                        : "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                    }`}
-                  >
-                    <span className={`h-1.5 w-1.5 rounded-full ${stock.isActive ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-                    {stock.isActive
-                      ? "Active"
-                      : "Inactive"}
-                  </button>
-                )}
-              </div>
+                {/* FOOTER (Dimmed when inactive) */}
+                <div className={`mt-6 flex items-center justify-between border-t border-slate-800 pt-4 transition-opacity ${!stock.isActive ? 'opacity-40' : 'opacity-100'}`}>
 
-              {/* CHART (FOR TRADERS ONLY) */}
-              {role === "trader" && (
-                <div className={`mt-4 w-full transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-                  <Sparkline symbol={stock.stockSymbol} color={stock.d >= 0 ? "#10b981" : "#ef4444"} />
-                </div>
-              )}
-
-              {/* DETAILS */}
-              <div className={`mt-5 grid grid-cols-2 gap-4 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
-
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">Price</p>
-                  <p className="mt-1 text-sm font-semibold text-white">
-                    {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">Change</p>
-                  <p className={`mt-1 text-sm font-semibold ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {stock.d ? `${stock.d >= 0 ? '+' : ''}${stock.d.toFixed(2)} (${stock.dp.toFixed(2)}%)` : 'N/A'}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">
-                    Sector
+                  <p className="text-xs text-slate-500">
+                    Added{" "}
+                    {new Date(
+                      stock.createdAt
+                    ).toLocaleDateString()}
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold">
-                    {stock.sector || "N/A"}
-                  </p>
-                </div>
+                  <div className="flex gap-2">
 
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">
-                    Country
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    {stock.country || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">
-                    Market Cap
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-emerald-400">
-                    {formatMarketCap(
-                      stock.marketCapitalization
-                    )}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">
-                    IPO
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    {stock.ipo || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* FOOTER (Dimmed when inactive) */}
-              <div className={`mt-6 flex items-center justify-between border-t border-slate-800 pt-4 transition-opacity ${!stock.isActive ? 'opacity-40' : 'opacity-100'}`}>
-
-                <p className="text-xs text-slate-500">
-                  Added{" "}
-                  {new Date(
-                    stock.createdAt
-                  ).toLocaleDateString()}
-                </p>
-
-                <div className="flex gap-2">
-
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/stocks/${stock.stockSymbol}`
-                      )
-                    }
-                    className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-emerald-400"
-                  >
-                    View
-                  </button>
-
-                  {role === "stockmanager" && (
                     <button
                       onClick={() =>
-                        handleDelete(
-                          stock.stockSymbol
+                        navigate(
+                          `/stocks/${stock.stockSymbol}`
                         )
                       }
-                      className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400"
+                      className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-emerald-400"
                     >
-                      Delete
+                      View
                     </button>
-                  )}
+
+                    {role === "stockmanager" && (
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            stock.stockSymbol
+                          )
+                        }
+                        className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))
         ) : (
           <div className="col-span-full rounded-3xl border border-slate-800 bg-slate-900 py-20 text-center">
             <div className="text-5xl">
