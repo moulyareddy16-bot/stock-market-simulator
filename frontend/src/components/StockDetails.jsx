@@ -284,11 +284,12 @@ function StockDetails() {
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">{stock.stockSymbol}</h1>
                   {stock.change && (
-                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black flex items-center gap-1 ${
                       stock.change.includes('-') 
                         ? 'bg-red-500/10 text-red-400' 
                         : 'bg-emerald-500/10 text-emerald-400'
                     }`}>
+                      <span>{stock.change.includes('-') ? '▼' : '▲'}</span>
                       {stock.change}
                     </span>
                   )}
