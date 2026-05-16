@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllStocks, getStockDetails } from '../service/stockService';
-import AdvancedChart from './AdvancedChart';
+// import AdvancedChart from './AdvancedChart';
 import axios from 'axios';
 
 // Utility for formatting market cap
