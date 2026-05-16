@@ -397,6 +397,7 @@ function StockDetails() {
                       type="number"
                       min="1"
                       value={quantity}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => {
                         setQuantity(e.target.value);
                         setQuantityError("");
@@ -521,10 +522,6 @@ function StockDetails() {
                   <div className="flex items-center gap-3">
                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Market Momentum</h3>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/5 rounded-full border border-emerald-500/10">
-                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-tighter">Live</span>
                   </div>
                 </div>
                 <div className="h-[380px] lg:h-[420px] w-full p-2 bg-slate-950/40 rounded-b-2xl border border-slate-800/30">
