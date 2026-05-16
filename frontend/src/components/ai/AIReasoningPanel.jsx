@@ -28,13 +28,13 @@ function AIReasoningPanel({
   };
 
   return (
-    <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-full overflow-hidden relative">
+    <div className="glass-card rounded-[2rem] border border-white/5 p-7 h-[450px] overflow-hidden relative flex flex-col">
       
       {/* BACKGROUND GLOW */}
       <div className="absolute bottom-0 left-0 w-52 h-52 bg-indigo-500/10 blur-[100px]" />
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8 relative z-10">
+      <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
         <div>
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black mb-2">
             Neural Decision Layer
@@ -45,13 +45,13 @@ function AIReasoningPanel({
           </h2>
         </div>
 
-        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl">
+        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-lg">
           🧠
         </div>
       </div>
 
-      {/* REASONING LIST */}
-      <div className="space-y-6 relative z-10">
+      {/* SCROLLABLE CONTENT */}
+      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative z-10 space-y-5">
         {data.length > 0 ? (
           data.map((item, index) => {
             const style = getImpactStyle(item?.impact);
@@ -59,30 +59,30 @@ function AIReasoningPanel({
             return (
               <div
                 key={index}
-                className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-6 hover:border-indigo-500/20 transition-all duration-300"
+                className="rounded-[1.5rem] border border-white/5 bg-slate-900/40 p-5 hover:border-indigo-500/20 transition-all duration-300"
               >
                 {/* TOP */}
-                <div className="flex items-start justify-between mb-5">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-black text-white mb-1">
+                    <h3 className="text-lg font-black text-white mb-0.5">
                       {item?.step}
                     </h3>
 
-                    <p className="text-xs uppercase tracking-widest text-slate-500 font-black">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black">
                       Analysis Vector
                     </p>
                   </div>
 
                   <div
-                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}
+                    className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}
                   >
                     {item?.impact} IMPACT
                   </div>
                 </div>
 
                 {/* FINDING */}
-                <div className="rounded-2xl bg-black/20 border border-white/5 p-5">
-                  <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                <div className="rounded-xl bg-black/20 border border-white/5 p-4">
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
                     {item?.finding}
                   </p>
                 </div>
@@ -90,21 +90,19 @@ function AIReasoningPanel({
             );
           })
         ) : (
-          <div className="rounded-[1.8rem] border border-white/5 bg-slate-900/40 p-10 text-center text-slate-400 font-medium">
-            No reasoning steps available. AI analysis will appear here.
+          <div className="rounded-[1.5rem] border border-white/5 bg-slate-900/40 p-8 text-center text-slate-400 font-medium text-sm">
+            No reasoning data available.
           </div>
         )}
       </div>
 
       {/* FOOTER */}
-      <div className="mt-8 rounded-[1.5rem] border border-white/5 bg-black/20 p-5 relative z-10">
-        <p className="text-sm text-slate-300 leading-relaxed font-medium">
-          The AI reasoning engine cross-validates:
+      <div className="mt-4 rounded-xl border border-white/5 bg-black/20 p-4 relative z-10 shrink-0">
+        <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+          The AI engine cross-validates:
           <span className="text-white font-bold">
             {" "}
-            RSI patterns, moving averages, volatility,
-            insider sentiment, news momentum, sector rotation,
-            and portfolio exposure alignment.
+            RSI, moving averages, news momentum, and sector rotation.
           </span>
         </p>
       </div>

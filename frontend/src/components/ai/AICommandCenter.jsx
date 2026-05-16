@@ -5,9 +5,7 @@ import api from "../../service/api";
 
 import AISummaryCard from "./AISummaryCard";
 import AITradeSignals from "./AITradeSignals";
-import AIRiskPanel from "./AIRiskPanel";
 import AIPortfolioScore from "./AIPortfolioScore";
-import AIMarketSentiment from "./AIMarketSentiment";
 import AIReasoningPanel from "./AIReasoningPanel";
 import AIConfidenceMeter from "./AIConfidenceMeter";
 import AIWatchlistInsights from "./AIWatchlistInsights";
@@ -16,7 +14,6 @@ import AIChatPanel from "./AIChatPanel";
 function AICommandCenter() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   const [aiData, setAiData] = useState({
     executiveSummary:
@@ -119,8 +116,8 @@ function AICommandCenter() {
         </div>
       )}
 
-      {/* ALWAYS VISIBLE AT TOP: EXECUTIVE SUMMARY */}
-      <div className="mb-8">
+      {/* EXECUTIVE SUMMARY */}
+      <div className="mb-10">
         <AISummaryCard
           summary={aiData.executiveSummary}
           traderScore={aiData.traderScore}
@@ -146,50 +143,37 @@ function AICommandCenter() {
         ))}
       </div>
 
-      {/* TAB CONTENT */}
-      <div className="animate-fade-in">
-        {/* DASHBOARD TAB */}
+      {/* SECTIONS / TAB CONTENT */}
+      <div className="animate-fade-in mb-24 min-h-[500px]">
+        
+        {/* SECTION 1: OVERVIEW METRICS */}
         {activeTab === "dashboard" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AIPortfolioScore portfolioScore={aiData.portfolioScore} />
-              <AIConfidenceMeter
-                confidence={aiData?.confidenceScore}
-                prediction={aiData?.marketSentimentData?.reasoning || aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
-                risk={aiData?.riskAnalysis?.level}
-                volatility={aiData?.riskAnalysis?.score || 45}
-              />
-              
-              {showAllMetrics && (
-                <>
-                  <AIMarketSentiment sentimentData={aiData?.marketSentimentData || aiData?.marketSentiment} />
-                  <AIRiskPanel riskData={aiData?.riskAnalysis} />
-                </>
-              )}
-            </div>
-
-            <div className="flex justify-center mt-2">
-              <button
-                onClick={() => setShowAllMetrics(!showAllMetrics)}
-                className="px-6 py-3 rounded-xl bg-slate-900/80 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-widest hover:bg-emerald-500/10 hover:border-emerald-500/60 transition-all"
-              >
-                {showAllMetrics ? "Hide Additional Metrics" : "View More Metrics"}
-              </button>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <AIPortfolioScore 
+              portfolioScore={aiData.portfolioScore} 
+              sentimentLabel={aiData?.marketSentimentData?.label || aiData?.marketSentiment?.label}
+            />
+            <AIConfidenceMeter
+              confidence={aiData?.confidenceScore}
+              prediction={aiData?.marketSentimentData?.reasoning || aiData?.marketSentiment?.reasoning || "Analyzing market velocity..."}
+              risk={aiData?.riskAnalysis?.level}
+              volatility={aiData?.riskAnalysis?.score || 45}
+              fearGreedIndex={aiData?.marketSentimentData?.score || aiData?.marketSentiment?.score || 50}
+            />
           </div>
         )}
 
-        {/* SIGNALS TAB */}
+        {/* SECTION 2: TRADE SIGNALS & REASONING */}
         {activeTab === "signals" && (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <AITradeSignals signals={aiData.tradeSignals} />
             <AIReasoningPanel reasoning={aiData.reasoning} />
           </div>
         )}
 
-        {/* WATCHLIST TAB */}
+        {/* SECTION 3: WATCHLIST INSIGHTS */}
         {activeTab === "watchlist" && (
-          <div>
+          <div className="max-w-4xl">
             <AIWatchlistInsights watchlist={aiData.watchlist || []} />
           </div>
         )}

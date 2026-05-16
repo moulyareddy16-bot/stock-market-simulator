@@ -26,7 +26,7 @@ function AISummaryCard({ summary, traderScore, marketPhase = "N/A" }) {
 
             </div>
 
-            <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-white mb-4">
+            <h2 className="text-2xl lg:text-3xl font-black tracking-tight text-white mb-4">
               Institutional Grade Portfolio Intelligence
             </h2>
 

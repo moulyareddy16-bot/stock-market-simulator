@@ -168,11 +168,10 @@ export const generateStructuredJSON = async (prompt) => {
             const model = genAI.getGenerativeModel({
                 model: modelName,
                 generationConfig: {
-                    responseMimeType: "application/json",
                     temperature: 0.2,
                     maxOutputTokens: 2048,
                 },
-            }, { apiVersion: 'v1' });
+            }, { apiVersion: 'v1beta' });
             const result = await model.generateContent(prompt);
             const parsed = JSON.parse(cleanJSON(result.response.text()));
             console.log(`[Gemini] JSON success with model: ${modelName}`);
@@ -211,7 +210,7 @@ export const generateText = async (prompt) => {
                     { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",  threshold: "BLOCK_NONE" },
                     { category: "HARM_CATEGORY_DANGEROUS_CONTENT",  threshold: "BLOCK_NONE" },
                 ],
-            }, { apiVersion: 'v1' });
+            }, { apiVersion: 'v1beta' });
             const result = await model.generateContent(prompt);
             const text   = result.response.text();
             console.log(`[Gemini] Text success with model: ${modelName}`);
