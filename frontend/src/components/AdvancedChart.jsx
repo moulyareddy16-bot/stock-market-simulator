@@ -1,22 +1,34 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { createChart, ColorType, AreaSeries, LineSeries } from 'lightweight-charts';
-import axios from 'axios';
 
 /**
  * AdvancedChart Component
  * Uses lightweight-charts for high-performance financial visualization.
  * Supports Zoom, Pan, and Compare modes.
  */
-export default function AdvancedChart({ chartData, range, mainSymbol }) {
+export default function AdvancedChart({ chartData, range, mainSymbol, compareData, compareSymbol }) {
   const chartContainerRef = useRef();
   const chartRef = useRef(null);
   const areaSeriesRef = useRef(null);
   const compareSeriesRef = useRef(null);
-  
-  const [compareSymbol, setCompareSymbol] = useState('');
-  const [compareData, setCompareData] = useState(null);
-  const [isComparing, setIsComparing] = useState(false);
-  const [loadingCompare, setLoadingCompare] = useState(false);
+ 
+   const handleResize = useCallback(() => {
+    if (chartRef.current && chartContainerRef.current) {
+      // Use the parent's width as a safer boundary
+      const parentWidth = chartContainerRef.current.parentElement?.clientWidth || chartContainerRef.current.clientWidth;
+      const height = chartContainerRef.current.clientHeight || 450;
+      
+      if (parentWidth > 0) {
+        chartRef.current.applyOptions({ 
+          width: parentWidth - 2, // Small buffer to prevent scrollbars
+          height: height 
+        });
+        requestAnimationFrame(() => {
+          chartRef.current?.timeScale().fitContent();
+        });
+      }
+    }
+  }, []);
 
   // 1. Initialize Chart (Only once)
   useEffect(() => {
@@ -40,22 +52,15 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
         timeVisible: true,
         secondsVisible: range === 'LIVE',
       },
-      // Enable both scales to handle different price ranges
       leftPriceScale: {
-        visible: true,
+        visible: !!compareData,
         borderColor: 'rgba(30, 41, 59, 0.8)',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.2,
-        },
+        scaleMargins: { top: 0.1, bottom: 0.2 },
       },
       rightPriceScale: {
         visible: true,
         borderColor: 'rgba(30, 41, 59, 0.8)',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.2,
-        },
+        scaleMargins: { top: 0.1, bottom: 0.2 },
       },
       crosshair: {
         mode: 0,
@@ -64,35 +69,25 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
       },
     });
 
-    // Main series on the RIGHT
     const areaSeries = chart.addSeries(AreaSeries, {
       lineColor: '#10b981',
       topColor: 'rgba(16, 185, 129, 0.4)',
       bottomColor: 'rgba(16, 185, 129, 0.0)',
       lineWidth: 3,
-      priceFormat: {
-        type: 'price',
-        precision: 2,
-        minMove: 0.01,
-      },
+      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
       priceScaleId: 'right',
     });
 
     chartRef.current = chart;
     areaSeriesRef.current = areaSeries;
 
-    const handleResize = () => {
-      if (chartRef.current && chartContainerRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight,
-        });
-      }
-    };
 
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(chartContainerRef.current);
     window.addEventListener('resize', handleResize);
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
       if (chartRef.current) {
         chartRef.current.remove();
@@ -101,20 +96,23 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
         compareSeriesRef.current = null;
       }
     };
-  }, []); // Only run once
+  }, []);
 
   // 2. Update Range Options
   useEffect(() => {
     if (chartRef.current) {
       chartRef.current.applyOptions({
-        timeScale: {
-          secondsVisible: range === 'LIVE',
-        },
+        timeScale: { secondsVisible: range === 'LIVE' },
       });
     }
   }, [range]);
 
-  // 3. Update Main Data
+  useEffect(() => {
+    const timer = setTimeout(handleResize, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 4. DATA SYNC - MAIN SERIES
   useEffect(() => {
     if (!areaSeriesRef.current || !chartData) return;
 
@@ -125,7 +123,6 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
       }))
       .sort((a, b) => a.time - b.time);
 
-    // Filter out duplicates
     const uniqueData = [];
     const seenTimes = new Set();
     for (const item of formattedData) {
@@ -137,7 +134,12 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
 
     if (uniqueData.length > 0) {
       areaSeriesRef.current.setData(uniqueData);
-      chartRef.current.timeScale().fitContent();
+      requestAnimationFrame(() => {
+        handleResize();
+        if (chartRef.current) {
+          chartRef.current.timeScale().fitContent();
+        }
+      });
     }
   }, [chartData]);
 
@@ -149,6 +151,9 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
       if (compareSeriesRef.current) {
         chartRef.current.removeSeries(compareSeriesRef.current);
         compareSeriesRef.current = null;
+        chartRef.current.applyOptions({
+          leftPriceScale: { visible: false }
+        });
       }
       return;
     }
@@ -157,12 +162,15 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
       chartRef.current.removeSeries(compareSeriesRef.current);
     }
 
-    // Put comparison on the LEFT scale so it's always visible regardless of price level
+    chartRef.current.applyOptions({
+      leftPriceScale: { visible: true }
+    });
+
     const compareSeries = chartRef.current.addSeries(LineSeries, {
       color: '#6366f1',
       lineWidth: 2,
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
-      title: compareSymbol.toUpperCase(),
+      title: compareSymbol?.toUpperCase(),
       priceScaleId: 'left',
     });
 
@@ -187,85 +195,14 @@ export default function AdvancedChart({ chartData, range, mainSymbol }) {
 
   }, [compareData, compareSymbol]);
 
-
-  const handleCompareSubmit = async (e) => {
-    e.preventDefault();
-    if (!compareSymbol) return;
-
-    setLoadingCompare(true);
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/historical/history/${compareSymbol.toUpperCase()}?range=${range}`
-      );
-      if (response.data && response.data.success) {
-        setCompareData(response.data.data);
-        setIsComparing(true);
-      } else {
-        alert("No data found for " + compareSymbol);
-      }
-    } catch (err) {
-      console.error("Comparison fetch error:", err);
-      alert("Error fetching comparison stock");
-    } finally {
-      setLoadingCompare(false);
-    }
-  };
-
-  const clearCompare = () => {
-    setCompareData(null);
-    setCompareSymbol('');
-    setIsComparing(false);
-  };
-
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[400px]">
-      {/* Overlay UI */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-3">
-        <form onSubmit={handleCompareSubmit} className="flex items-center">
-          <input 
-            type="text"
-            placeholder="Compare symbol..."
-            value={compareSymbol}
-            onChange={(e) => setCompareSymbol(e.target.value)}
-            className="bg-slate-900/90 border border-slate-800 rounded-l-xl px-4 py-2 text-[10px] font-black tracking-widest text-white outline-none focus:border-emerald-500/50 w-36 transition-all placeholder:text-slate-600 uppercase"
-          />
-          <button 
-            type="submit"
-            disabled={loadingCompare}
-            className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black px-4 py-2 rounded-r-xl text-[10px] font-black tracking-widest uppercase transition-all"
-          >
-            {loadingCompare ? '...' : 'Add'}
-          </button>
-        </form>
-
-        {isComparing && (
-          <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3 py-2 rounded-xl">
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{compareSymbol.toUpperCase()}</span>
-            <button onClick={clearCompare} className="text-indigo-400 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="absolute top-4 right-4 z-20 pointer-events-none text-right">
-        <div className="text-[10px] font-black text-emerald-500 tracking-[0.2em] uppercase">{mainSymbol} DATA</div>
-        <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Live Financial Engine</div>
-      </div>
-
-      {/* Container */}
-      <div ref={chartContainerRef} className="flex-1 w-full h-full" />
-      
-      {/* Legend / Info */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
-        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-800/50">
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+    <div className="relative w-full h-full flex flex-col min-w-0 overflow-hidden">
+      <div ref={chartContainerRef} className="flex-1 w-full h-full min-w-0" />
+      <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
+        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/5">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
           <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{mainSymbol}</span>
         </div>
-      </div>
-
-      <div className="absolute bottom-4 right-4 z-20 pointer-events-none bg-slate-900/40 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-800/50">
-        <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Zoom: Scroll • Pan: Drag</span>
       </div>
     </div>
   );
