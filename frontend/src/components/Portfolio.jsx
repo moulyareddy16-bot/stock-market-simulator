@@ -83,7 +83,7 @@ function Portfolio() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           { 
-            label: "Finnova Credits", 
+            label: "Stockking virtual wallet", 
             value: summary?.walletBalance, 
             isCredits: true, 
             bgStyle: "from-amber-500/10 via-transparent to-transparent border-amber-500/20 hover:border-amber-500/40 shadow-amber-500/5",
