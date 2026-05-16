@@ -1,234 +1,211 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, CrosshairMode, CandlestickSeries, LineSeries } from 'lightweight-charts';
-import axios from 'axios';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { createChart, ColorType, AreaSeries, LineSeries } from 'lightweight-charts';
 
-const AdvancedChart = ({ chartData, range, mainSymbol }) => {
-    const chartContainerRef = useRef();
-    const chartRef = useRef();
-    const candlestickSeriesRef = useRef();
-    const lineSeriesRef = useRef();
-    const comparisonSeriesRef = useRef();
-
-    const [seriesType, setSeriesType] = useState('candlestick');
-    const [comparisonSymbol, setComparisonSymbol] = useState('');
-    const [showComparisonInput, setShowComparisonInput] = useState(false);
-    const [comparisonData, setComparisonData] = useState(null);
-    const [loadingComparison, setLoadingComparison] = useState(false);
-
-    useEffect(() => {
-        if (!chartContainerRef.current) return;
-
-        const chart = createChart(chartContainerRef.current, {
-            // ... options
-            layout: {
-                background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: '#94a3b8',
-            },
-            grid: {
-                vertLines: { color: 'rgba(51, 65, 85, 0.5)' },
-                horzLines: { color: 'rgba(51, 65, 85, 0.5)' },
-            },
-            crosshair: {
-                mode: CrosshairMode.Normal,
-                vertLine: {
-                    width: 1,
-                    color: '#64748b',
-                    style: 2, 
-                    labelBackgroundColor: '#0f172a',
-                },
-                horzLine: {
-                    width: 1,
-                    color: '#64748b',
-                    style: 2, 
-                    labelBackgroundColor: '#0f172a',
-                },
-            },
-            rightPriceScale: {
-                borderColor: 'rgba(51, 65, 85, 0.5)',
-                autoScale: true,
-            },
-            timeScale: {
-                borderColor: 'rgba(51, 65, 85, 0.5)',
-                timeVisible: true,
-                secondsVisible: false,
-            },
-            handleScroll: true,
-            handleScale: true,
+/**
+ * AdvancedChart Component
+ * Uses lightweight-charts for high-performance financial visualization.
+ * Supports Zoom, Pan, and Compare modes.
+ */
+export default function AdvancedChart({ chartData, range, mainSymbol, compareData, compareSymbol }) {
+  const chartContainerRef = useRef();
+  const chartRef = useRef(null);
+  const areaSeriesRef = useRef(null);
+  const compareSeriesRef = useRef(null);
+ 
+   const handleResize = useCallback(() => {
+    if (chartRef.current && chartContainerRef.current) {
+      // Use the parent's width as a safer boundary
+      const parentWidth = chartContainerRef.current.parentElement?.clientWidth || chartContainerRef.current.clientWidth;
+      const height = chartContainerRef.current.clientHeight || 450;
+      
+      if (parentWidth > 0) {
+        chartRef.current.applyOptions({ 
+          width: parentWidth - 2, // Small buffer to prevent scrollbars
+          height: height 
         });
+        requestAnimationFrame(() => {
+          chartRef.current?.timeScale().fitContent();
+        });
+      }
+    }
+  }, []);
 
-        chartRef.current = chart;
+  // 1. Initialize Chart (Only once)
+  useEffect(() => {
+    if (!chartContainerRef.current) return;
 
-        const handleResize = () => {
-            chart.applyOptions({ width: chartContainerRef.current.clientWidth });
-        };
-        window.addEventListener('resize', handleResize);
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#94a3b8',
+        fontSize: 10,
+        fontFamily: 'Inter, sans-serif',
+      },
+      grid: {
+        vertLines: { color: 'rgba(30, 41, 59, 0.5)' },
+        horzLines: { color: 'rgba(30, 41, 59, 0.5)' },
+      },
+      width: chartContainerRef.current.clientWidth,
+      height: chartContainerRef.current.clientHeight || 500,
+      timeScale: {
+        borderColor: 'rgba(30, 41, 59, 0.8)',
+        timeVisible: true,
+        secondsVisible: range === 'LIVE',
+      },
+      leftPriceScale: {
+        visible: !!compareData,
+        borderColor: 'rgba(30, 41, 59, 0.8)',
+        scaleMargins: { top: 0.1, bottom: 0.2 },
+      },
+      rightPriceScale: {
+        visible: true,
+        borderColor: 'rgba(30, 41, 59, 0.8)',
+        scaleMargins: { top: 0.1, bottom: 0.2 },
+      },
+      crosshair: {
+        mode: 0,
+        vertLine: { color: '#10b981', width: 1, style: 3, labelBackgroundColor: '#10b981' },
+        horzLine: { color: '#10b981', width: 1, style: 3, labelBackgroundColor: '#10b981' },
+      },
+    });
 
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            chart.remove();
-            chartRef.current = null;
-            candlestickSeriesRef.current = null;
-            lineSeriesRef.current = null;
-            comparisonSeriesRef.current = null;
-        };
-    }, []);
+    const areaSeries = chart.addSeries(AreaSeries, {
+      lineColor: '#10b981',
+      topColor: 'rgba(16, 185, 129, 0.4)',
+      bottomColor: 'rgba(16, 185, 129, 0.0)',
+      lineWidth: 3,
+      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+      priceScaleId: 'right',
+    });
 
-    useEffect(() => {
-        if (!chartRef.current || !chartData || chartData.length === 0) return;
+    chartRef.current = chart;
+    areaSeriesRef.current = areaSeries;
 
-        try {
-            if (candlestickSeriesRef.current) {
-                chartRef.current.removeSeries(candlestickSeriesRef.current);
-                candlestickSeriesRef.current = null;
-            }
-            if (lineSeriesRef.current) {
-                chartRef.current.removeSeries(lineSeriesRef.current);
-                lineSeriesRef.current = null;
-            }
 
-            if (seriesType === 'candlestick') {
-                candlestickSeriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
-                    upColor: '#10b981',
-                    downColor: '#ef4444',
-                    borderVisible: false,
-                    wickUpColor: '#10b981',
-                    wickDownColor: '#ef4444',
-                });
-                candlestickSeriesRef.current.setData(chartData);
-            } else {
-                lineSeriesRef.current = chartRef.current.addSeries(LineSeries, {
-                    color: '#10b981',
-                    lineWidth: 2,
-                });
-                const lineData = chartData.map(d => ({ time: d.time, value: d.close }));
-                lineSeriesRef.current.setData(lineData);
-            }
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(chartContainerRef.current);
+    window.addEventListener('resize', handleResize);
 
-            chartRef.current.timeScale().fitContent();
-        } catch (err) {
-            console.warn("Chart series update failed (likely chart was recreated):", err);
-        }
-    }, [chartData, seriesType]);
-
-    const handleAddComparison = async () => {
-        if (!comparisonSymbol) return;
-        setLoadingComparison(true);
-        try {
-            const response = await axios.get(`http://localhost:5000/api/historical/history/${comparisonSymbol.toUpperCase()}?range=${range}`);
-            if (response.data.success) {
-                const data = response.data.data;
-                setComparisonData(data);
-                setShowComparisonInput(false);
-                
-                if (comparisonSeriesRef.current) {
-                    chartRef.current.removeSeries(comparisonSeriesRef.current);
-                }
-
-                comparisonSeriesRef.current = chartRef.current.addSeries(LineSeries, {
-                    color: '#6366f1', 
-                    lineWidth: 2,
-                    title: comparisonSymbol.toUpperCase(),
-                });
-                
-                const compLineData = data.map(d => ({ time: d.time, value: d.close }));
-                comparisonSeriesRef.current.setData(compLineData);
-            }
-        } catch (error) {
-            console.error("Failed to fetch comparison data:", error);
-        } finally {
-            setLoadingComparison(false);
-        }
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+        areaSeriesRef.current = null;
+        compareSeriesRef.current = null;
+      }
     };
+  }, []);
 
-    const removeComparison = () => {
-        if (comparisonSeriesRef.current) {
-            chartRef.current.removeSeries(comparisonSeriesRef.current);
-            comparisonSeriesRef.current = null;
-        }
-        setComparisonData(null);
-        setComparisonSymbol('');
-    };
+  // 2. Update Range Options
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.applyOptions({
+        timeScale: { secondsVisible: range === 'LIVE' },
+      });
+    }
+  }, [range]);
 
-    if (!chartData || chartData.length === 0) {
-        return (
-            <div className="flex h-full items-center justify-center text-slate-500 font-bold uppercase tracking-widest text-[10px]">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="w-6 h-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-                    Initializing Terminal...
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    const timer = setTimeout(handleResize, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 4. DATA SYNC - MAIN SERIES
+  useEffect(() => {
+    if (!areaSeriesRef.current || !chartData) return;
+
+    const formattedData = chartData
+      .map(item => ({
+        time: item.time,
+        value: item.price || item.close,
+      }))
+      .filter(item => typeof item.value === 'number' && !isNaN(item.value))
+      .sort((a, b) => a.time - b.time);
+
+    const uniqueData = [];
+    const seenTimes = new Set();
+    for (const item of formattedData) {
+      if (!seenTimes.has(item.time)) {
+        uniqueData.push(item);
+        seenTimes.add(item.time);
+      }
     }
 
-    return (
-        <div className="relative w-full h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4 bg-slate-950/50 p-2 rounded-2xl border border-slate-800/50">
-                <div className="flex items-center gap-2">
-                    <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-800">
-                        <button
-                            onClick={() => setSeriesType('candlestick')}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${seriesType === 'candlestick' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            CANDLES
-                        </button>
-                        <button
-                            onClick={() => setSeriesType('line')}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${seriesType === 'line' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            LINE
-                        </button>
-                    </div>
+    if (uniqueData.length > 0) {
+      areaSeriesRef.current.setData(uniqueData);
+      requestAnimationFrame(() => {
+        handleResize();
+        if (chartRef.current) {
+          chartRef.current.timeScale().fitContent();
+        }
+      });
+    }
+  }, [chartData]);
 
-                    {comparisonData && (
-                        <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-1.5 animate-fade-in">
-                            <span className="text-[10px] font-black text-indigo-400">VS {comparisonSymbol.toUpperCase()}</span>
-                            <button onClick={removeComparison} className="text-indigo-400 hover:text-white transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                            </button>
-                        </div>
-                    )}
-                </div>
+  // 4. Handle Comparison
+  useEffect(() => {
+    if (!chartRef.current) return;
 
-                <div className="flex items-center gap-2">
-                    {showComparisonInput ? (
-                        <div className="flex items-center gap-2 animate-slide-left">
-                            <input
-                                type="text"
-                                placeholder="Ticker..."
-                                value={comparisonSymbol}
-                                onChange={(e) => setComparisonSymbol(e.target.value)}
-                                className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-[10px] font-black text-white outline-none focus:border-emerald-500 w-24"
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddComparison()}
-                            />
-                            <button
-                                onClick={handleAddComparison}
-                                disabled={loadingComparison}
-                                className="bg-emerald-500 text-black rounded-xl px-3 py-1.5 text-[10px] font-black hover:bg-emerald-400 disabled:opacity-50"
-                            >
-                                {loadingComparison ? '...' : 'ADD'}
-                            </button>
-                            <button
-                                onClick={() => setShowComparisonInput(false)}
-                                className="text-slate-500 hover:text-white px-1"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={() => setShowComparisonInput(true)}
-                            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-400 hover:text-white transition group"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 group-hover:rotate-90 transition-transform"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                            COMPARE
-                        </button>
-                    )}
-                </div>
-            </div>
+    if (!compareData) {
+      if (compareSeriesRef.current) {
+        chartRef.current.removeSeries(compareSeriesRef.current);
+        compareSeriesRef.current = null;
+        chartRef.current.applyOptions({
+          leftPriceScale: { visible: false }
+        });
+      }
+      return;
+    }
 
-            <div ref={chartContainerRef} className="flex-1 w-full min-h-0" />
+    if (compareSeriesRef.current) {
+      chartRef.current.removeSeries(compareSeriesRef.current);
+    }
+
+    chartRef.current.applyOptions({
+      leftPriceScale: { visible: true }
+    });
+
+    const compareSeries = chartRef.current.addSeries(LineSeries, {
+      color: '#6366f1',
+      lineWidth: 2,
+      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+      title: compareSymbol?.toUpperCase(),
+      priceScaleId: 'left',
+    });
+
+    const formattedCompare = compareData
+      .map(item => ({
+        time: item.time,
+        value: item.price || item.close,
+      }))
+      .filter(item => typeof item.value === 'number' && !isNaN(item.value))
+      .sort((a, b) => a.time - b.time);
+
+    const uniqueCompare = [];
+    const seenTimes = new Set();
+    for (const item of formattedCompare) {
+      if (!seenTimes.has(item.time)) {
+        uniqueCompare.push(item);
+        seenTimes.add(item.time);
+      }
+    }
+
+    compareSeries.setData(uniqueCompare);
+    compareSeriesRef.current = compareSeries;
+
+  }, [compareData, compareSymbol]);
+
+  return (
+    <div className="relative w-full h-full flex flex-col min-w-0 overflow-hidden">
+      <div ref={chartContainerRef} className="flex-1 w-full h-full min-w-0" />
+      <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
+        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/5">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{mainSymbol}</span>
         </div>
-    );
-};
-
-export default AdvancedChart;
+      </div>
+    </div>
+  );
+}

@@ -1,4 +1,5 @@
 import {
+   ReferenceLine,
    ResponsiveContainer,
    AreaChart,
    Area,
@@ -12,11 +13,16 @@ function StockChart({
    chartData,
    range
 }) {
-   // EMPTY STATE
    if (!chartData || chartData.length === 0) {
+      const isLive = range === "LIVE";
       return (
-         <div className="flex h-full items-center justify-center text-slate-400">
-            Waiting for realtime live price data.
+         <div className="flex h-full items-center justify-center text-slate-500 font-bold uppercase tracking-widest text-[10px]">
+            <div className="flex flex-col items-center gap-3">
+               {!isLive && <div className="w-4 h-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>}
+               <p className="animate-pulse">
+                  {isLive ? "Connecting to live market stream..." : `Fetching ${range || 'historical'} performance data...`}
+               </p>
+            </div>
          </div>
       );
    }
@@ -28,6 +34,8 @@ function StockChart({
       price: item.price || item.close
    }));
 
+   const firstPrice = processedData[0]?.price || 0;
+
    return (
       <div className="h-full w-full pb-6">
          <ResponsiveContainer
@@ -38,8 +46,8 @@ function StockChart({
                data={processedData}
                margin={{
                   top: 20,
-                  right: 20,
-                  left: 0,
+                  right: 30,
+                  left: 20,
                   bottom: 30
                }}
             >
@@ -53,12 +61,12 @@ function StockChart({
                   >
                      <stop
                         offset="5%"
-                        stopColor="#4ade80"
-                        stopOpacity={0.4}
+                        stopColor="#10b981"
+                        stopOpacity={0.5}
                      />
                      <stop
                         offset="95%"
-                        stopColor="#4ade80"
+                        stopColor="#10b981"
                         stopOpacity={0}
                      />
                   </linearGradient>
@@ -66,20 +74,24 @@ function StockChart({
 
                <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#334155"
+                  stroke="#1e293b"
                   vertical={false}
+                  opacity={0.5}
                />
 
                <XAxis
                   dataKey="date"
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 12 }}
+                  stroke="#475569"
+                  tick={{ fontSize: 10, fontWeight: 'bold' }}
                   interval="preserveStartEnd"
-                  minTickGap={50}
+                  minTickGap={40}
                   tickFormatter={(value) => {
-                     if (range === "LIVE") return value;
                      const date = new Date(value);
                      if (isNaN(date.getTime())) return value;
+                     
+                     if (range === "LIVE") {
+                        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                     }
                      if (range === "1D") {
                         return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
                      }
@@ -91,11 +103,13 @@ function StockChart({
                />
 
                <YAxis
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 12 }}
+                  stroke="#475569"
+                  width={80}
+                  tick={{ fontSize: 10, fontWeight: 'bold' }}
+                  tickFormatter={(value) => `$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   domain={[
-                     (dataMin) => dataMin - (dataMin * 0.05),
-                     (dataMax) => dataMax + (dataMax * 0.05)
+                     (dataMin) => dataMin - (Math.abs(dataMin) * 0.01),
+                     (dataMax) => dataMax + (Math.abs(dataMax) * 0.01)
                   ]}
                />
 
@@ -118,21 +132,30 @@ function StockChart({
                      "Price"
                   ]}
                   contentStyle={{
-                     backgroundColor: "#0f172a",
-                     border: "1px solid #334155",
-                     borderRadius: "10px",
-                     color: "#fff"
+                     backgroundColor: "#020617",
+                     border: "1px solid #1e293b",
+                     borderRadius: "12px",
+                     color: "#fff",
+                     fontWeight: "bold"
                   }}
                />
 
+               <ReferenceLine 
+                  y={firstPrice} 
+                  stroke="#10b981" 
+                  strokeDasharray="3 3" 
+                  opacity={0.4} 
+               />
+
                <Area
-                  type="linear"
+                  type="monotone"
                   dataKey="price"
-                  stroke="#86efac"
+                  stroke="#10b981"
                   fill="url(#colorPrice)"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 5, fill: "#10b981", strokeWidth: 0 }}
+                  animationDuration={1500}
                />
             </AreaChart>
          </ResponsiveContainer>

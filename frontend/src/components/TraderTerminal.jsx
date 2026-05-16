@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllStocks, getStockDetails } from '../service/stockService';
-import AdvancedChart from './AdvancedChart';
+// import AdvancedChart from './AdvancedChart';
 import axios from 'axios';
 
 // Utility for formatting market cap
@@ -23,9 +23,14 @@ export const Sparkline = ({ symbol, color = "#10b981" }) => {
       try {
         const response = await axios.get(`http://localhost:5000/api/historical/history/${symbol}?range=1W`);
         let data = response.data.data || response.data || [];
-        if (data.length > 0 && isMounted) {
-          const minPrice = Math.min(...data.map(d => d.close));
-          const maxPrice = Math.max(...data.map(d => d.close));
+        // Filter out invalid data and normalize price/close
+        data = data.map(d => ({ ...d, close: d.price || d.close }))
+                   .filter(d => d && typeof d.close === 'number' && !isNaN(d.close));
+
+        if (data.length > 1 && isMounted) {
+          const prices = data.map(d => d.close);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
           const range = maxPrice - minPrice || 1;
 
           const svgPoints = data.map((d, i) => {
@@ -34,6 +39,8 @@ export const Sparkline = ({ symbol, color = "#10b981" }) => {
             return `${x.toFixed(1)},${y.toFixed(1)}`;
           });
           setPoints(svgPoints.join(" "));
+        } else if (data.length === 1 && isMounted) {
+          setPoints("0,15 100,15"); // Flat line for single point
         }
       } catch (err) {
         console.error("Sparkline fetch error:", err);

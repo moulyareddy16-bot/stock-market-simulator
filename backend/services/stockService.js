@@ -14,7 +14,7 @@ async (symbol, days = 30) => {
    to - (days * 24 * 60 * 60);
 
 
-   // Finnhub candle API
+   // Finnhub API
    const response = await axios.get(
 
       `https://finnhub.io/api/v1/stock/candle`,

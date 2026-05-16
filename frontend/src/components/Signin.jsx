@@ -76,7 +76,7 @@ function Signin() {
             </h2>
 
             <p className="mb-8 mt-3 text-center text-sm text-slate-300">
-              Welcome back to StockSim
+              Welcome back to Stockking
             </p>
 
             <input

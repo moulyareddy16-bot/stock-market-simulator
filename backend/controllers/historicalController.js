@@ -9,7 +9,8 @@ export const getStockHistory = async (req, res) => {
    try {
       const { symbol } = req.params;
       const range = req.query.range || "1D";
-      const cacheKey = `history_v2_${symbol}_${range}`; // Version 2 for OHLC
+      console.log(`[Historical] Fetching ${symbol} for range: ${range}`);
+      const cacheKey = `history_v3_${symbol}_${range}`; // Bumped to v3 to clear any old OHLC cache
 
       // 1. CHECK CACHE
       const cachedData = stockCache.get(cacheKey);
@@ -59,10 +60,7 @@ export const getStockHistory = async (req, res) => {
                const timestamp = Math.floor(new Date(date).getTime() / 1000);
                return {
                   time: timestamp,
-                  open: Number(values["1. open"]),
-                  high: Number(values["2. high"]),
-                  low: Number(values["3. low"]),
-                  close: Number(values["4. close"]),
+                  price: Number(values["4. close"]),
                   value: Number(values["5. volume"] || 0)
                };
             }).sort((a, b) => a.time - b.time);
@@ -99,10 +97,7 @@ export const getStockHistory = async (req, res) => {
             if (fhResponse.data.s === "ok") {
                formattedData = fhResponse.data.t.map((t, i) => ({
                   time: t,
-                  open: Number(fhResponse.data.o[i]),
-                  high: Number(fhResponse.data.h[i]),
-                  low: Number(fhResponse.data.l[i]),
-                  close: Number(fhResponse.data.c[i]),
+                  price: Number(fhResponse.data.c[i]),
                   value: Number(fhResponse.data.v[i])
                }));
             }
@@ -115,60 +110,62 @@ export const getStockHistory = async (req, res) => {
       // 4. SMART UNIQUE DUMMY DATA (Last Resort)
       // ==========================================
       if (!formattedData || formattedData.length === 0) {
-         console.log(`Generating unique dummy OHLC data for ${symbol}`);
+         console.log(`[Historical] Generating dummy data for ${symbol} (${range})`);
          const dummyData = [];
          const now = new Date();
          const seed = symbol.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-         let currentPrice = 100 + (seed % 400);
+         let basePrice = 100 + (seed % 400);
 
+         // Use last known price if available
          const stockCacheData = stockCache.get(`stock_${symbol}`);
-         if (stockCacheData) {
-            currentPrice = stockCacheData.currentPrice;
+         if (stockCacheData && stockCacheData.currentPrice) {
+            basePrice = stockCacheData.currentPrice;
          }
 
-         const totalPoints = { "1D": 78, "5D": 390, "1M": 30, "3M": 90, "1Y": 250, "MAX": 500 }[range] || 30;
-         const intervalSec = range === "1D" ? 5 * 60 : 86400;
+         const config = {
+            "1D": { points: 78, interval: 300 },      // 6.5 hours, 5 min intervals
+            "5D": { points: 120, interval: 3600 },    // 5 days, 1 hour intervals
+            "1M": { points: 30, interval: 86400 },    // 30 days, 1 day intervals
+            "3M": { points: 90, interval: 86400 },    // 90 days, 1 day intervals
+            "1Y": { points: 250, interval: 86400 },   // 250 trading days, 1 day intervals
+            "MAX": { points: 500, interval: 86400 }   // 500 days, 1 day intervals
+         };
 
-         for (let i = totalPoints; i >= 0; i--) {
-            const time = Math.floor((now.getTime() - i * intervalSec * 1000) / 1000);
-            
-            const wave = Math.sin((i + seed) / (range === "1D" ? 10 : 20)) * (currentPrice * 0.05);
-            const noise = (Math.random() - 0.5) * (currentPrice * 0.02);
-            
-            const close = Number(Math.max(5, currentPrice + wave + noise).toFixed(2));
-            const open = Number(Math.max(5, close + (Math.random() - 0.5) * (close * 0.01)).toFixed(2));
-            const high = Number(Math.max(open, close) + Math.random() * (close * 0.005)).toFixed(2);
-            const low = Number(Math.min(open, close) - Math.random() * (close * 0.005)).toFixed(2);
-            const volume = Math.floor(Math.random() * 1000000);
+         const { points: totalPoints, interval: intervalSec } = config[range] || config["1M"];
 
+         let currentPrice = basePrice;
+         for (let i = 0; i <= totalPoints; i++) {
+            const time = Math.floor((now.getTime() - (totalPoints - i) * intervalSec * 1000) / 1000);
+            
+            // Random walk: previous price + small random change
+            const volatility = 0.003; // 0.3% max move per point (reduced for smoothness)
+            const change = currentPrice * volatility * (Math.random() - 0.5);
+            currentPrice = Math.max(1, currentPrice + change);
+            
             dummyData.push({
                time,
-               open: Number(open),
-               high: Number(high),
-               low: Number(low),
-               close: Number(close),
-               value: volume
+               price: Number(currentPrice.toFixed(2)),
+               value: Math.floor(Math.random() * 1000000)
             });
          }
          formattedData = dummyData;
+         console.log(`[Historical] Generated ${formattedData.length} random-walk points`);
       }
 
       // ==========================================
       // 5. CACHE & RETURN
       // ==========================================
-      if (formattedData && formattedData.length > 0) {
-         stockCache.set(cacheKey, formattedData, 3600); 
-         return res.status(200).json({
-            success: true,
-            data: formattedData,
-            source: formattedData === dummyData ? "dummy" : "api"
-         });
-      }
-
-      res.status(404).json({ success: false, message: "No data available" });
+      stockCache.set(cacheKey, formattedData, 3600); 
+      console.log(`[Historical] Sending ${formattedData.length} points for ${symbol}`);
+      
+      return res.status(200).json({
+         success: true,
+         data: formattedData,
+         source: "final_fallback"
+      });
 
    } catch (error) {
-      console.error("Historical Controller Error:", error.message);
+      console.error("Historical Controller Error:", error.stack);
       res.status(500).json({ success: false, message: "Server error fetching history" });
    }
 };

@@ -378,9 +378,6 @@ export const getStockDetails = async (req, res, next) => {
          return res.status(200).json({
             payload: {
                c: cachedData.currentPrice,
-               h: cachedData.high || cachedData.currentPrice,
-               l: cachedData.low || cachedData.currentPrice,
-               o: cachedData.open || cachedData.currentPrice,
                pc: cachedData.previousClose || cachedData.currentPrice,
                d: cachedData.previousClose ? cachedData.currentPrice - cachedData.previousClose : 0,
                dp: cachedData.previousClose ? ((cachedData.currentPrice - cachedData.previousClose) / cachedData.previousClose) * 100 : 0,
@@ -406,9 +403,6 @@ export const getStockDetails = async (req, res, next) => {
          
          const dummyData = {
             c: dummyPrice,
-            h: dummyPrice,
-            l: dummyPrice,
-            o: dummyPrice,
             pc: dummyPrice,
             d: 0,
             dp: 0,
@@ -490,15 +484,7 @@ export const getStockHistory =
                         .toISOString()
                         .split("T")[0],
 
-                  price: data.c[index], // ADDED FOR CHART COMPATIBILITY
-                  open: data.o[index],
-
-                  high: data.h[index],
-
-                  low: data.l[index],
-
-                  close: data.c[index],
-
+                  price: data.c[index],
                   volume: data.v[index]
 
                };
@@ -652,10 +638,7 @@ export const getSingleStock = async (req, res, next) => {
          change,
          peRatio,
          divYield,
-         ...profile,
-         high: quoteData.h || currentPrice || 155.00,
-         low: quoteData.l || currentPrice || 145.00,
-         open: quoteData.o || currentPrice || 150.00
+         ...profile
       };
 
       return res.status(200).json({
