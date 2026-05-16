@@ -210,7 +210,7 @@ function Profile() {
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Available Credits</p>
                 <h4 className="text-4xl font-black text-white flex items-center gap-2">
-                  <CoinIcon className="w-8 h-8 text-amber-400" />
+                  <CoinIcon className="w-8 h-8" />
                   {user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </h4>
               </div>
@@ -321,7 +321,7 @@ function Profile() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Finnova Credits</label>
                   <div className="w-full bg-slate-950/30 border border-slate-800/50 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 flex items-center gap-2">
-                    <CoinIcon className="w-4 h-4 text-amber-600" />
+                    <CoinIcon className="w-4 h-4" />
                     {user?.walletBalance?.toLocaleString()}
                   </div>
                 </div>

@@ -355,7 +355,7 @@ function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Wallet Balance</span>
                         <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
-                          <CoinIcon className="w-4 h-4 text-amber-400" />
+                          <CoinIcon className="w-4 h-4" />
                           {formatCurrency(user.walletBalance)}
                         </span>
                       </div>
@@ -719,7 +719,7 @@ function AdminDashboard() {
                                   </td>
                                   <td className="px-6 py-4">{tx.quantity}</td>
                                   <td className="px-6 py-4">{formatCurrency(tx.pricePerShare)}</td>
-                                  <td className="px-6 py-4 flex items-center gap-1">{tx.transactionType === 'BUY' ? '-' : '+'}<CoinIcon className="w-3 h-3 text-amber-500" /> {formatCurrency(tx.totalAmount)}</td>
+                                  <td className="px-6 py-4 flex items-center gap-1">{tx.transactionType === 'BUY' ? '-' : '+'}<CoinIcon className="w-3 h-3" /> {formatCurrency(tx.totalAmount)}</td>
                                 </tr>
                               ))
                             )}
@@ -736,14 +736,14 @@ function AdminDashboard() {
                           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
                             <p className="text-xs text-slate-400 mb-1">Total Investment</p>
                             <p className="text-lg font-bold flex items-center gap-1.5">
-                              <CoinIcon className="w-5 h-5 text-amber-400" />
+                              <CoinIcon className="w-5 h-5" />
                               {formatCurrency(modalData.summary.totalInvestment)}
                             </p>
                           </div>
                           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
                             <p className="text-xs text-slate-400 mb-1">Current Value</p>
                             <p className="text-lg font-bold flex items-center gap-1.5">
-                              <CoinIcon className="w-5 h-5 text-amber-400" />
+                              <CoinIcon className="w-5 h-5" />
                               {formatCurrency(modalData.summary.totalCurrentValue)}
                             </p>
                           </div>
@@ -751,7 +751,7 @@ function AdminDashboard() {
                             <p className="text-xs text-slate-400 mb-1">Total P/L</p>
                             <p className={`text-lg font-bold flex items-center gap-1.5 ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {modalData.summary.totalProfit >= 0 ? '+' : ''}
-                              <CoinIcon className={`w-5 h-5 ${modalData.summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`} />
+                              <CoinIcon className="w-5 h-5" />
                               {formatCurrency(modalData.summary.totalProfit)}
                             </p>
                           </div>
