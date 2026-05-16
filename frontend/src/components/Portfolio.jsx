@@ -85,7 +85,6 @@ function Portfolio() {
           { 
             label: "Stockking virtual wallet", 
             value: summary?.walletBalance, 
-            isCredits: true, 
             bgStyle: "from-amber-500/10 via-transparent to-transparent border-amber-500/20 hover:border-amber-500/40 shadow-amber-500/5",
             glowColor: "bg-amber-500/10"
           },
@@ -106,11 +105,7 @@ function Portfolio() {
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">{item.label}</p>
             <div className="flex items-end justify-between">
               <h3 className={`text-3xl font-black flex items-center ${item.highlight ? (item.value >= 0 ? "text-emerald-400" : "text-red-400") : "text-white"}`}>
-                {item.isCredits ? (
-                  <CoinIcon className="w-6 h-6 mr-2 text-amber-400 drop-shadow-md" />
-                ) : (
-                  <span className="mr-1 opacity-70">$</span>
-                )}
+                <span className="mr-1 opacity-70">$</span>
                 {(item.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </h3>
             </div>
