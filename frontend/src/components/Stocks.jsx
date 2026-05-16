@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   getAllStocks,
+  getStockDetails,
   addStock,
   deleteStock,
   toggleStockStatus,
@@ -10,6 +11,7 @@ import {
 
 import StockCard from "./StockCard";
 import { CardSkeleton } from "./Skeleton";
+import { Sparkline } from "./TraderTerminal";
 
 function Stocks() {
   const navigate = useNavigate();
@@ -54,7 +56,20 @@ const [loading, setLoading] = useState(false);
 
       const allStocks = data.payload || [];
 
-      setStocks(allStocks);
+      // Fetch live details for each stock
+      const detailedStocks = await Promise.all(
+        allStocks.map(async (stock) => {
+          try {
+            const details = await getStockDetails(stock.stockSymbol);
+            return { ...stock, ...details.payload }; // Merge DB data and live data
+          } catch (err) {
+            console.error(`Failed to fetch details for ${stock.stockSymbol}`);
+            return stock; // Return DB data if live fetch fails
+          }
+        })
+      );
+
+      setStocks(detailedStocks);
       setTotalPages(data.totalPages || 1);
       setTotalStocks(data.totalStocks || 0);
       setTotalActive(data.totalActive || 0);
@@ -488,23 +503,29 @@ const [loading, setLoading] = useState(false);
                 )}
               </div>
 
-              {/* CHART */}
-              <div className={`mt-5 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
-                <svg
-                  viewBox="0 0 100 30"
-                  className="h-10 w-full"
-                >
-                  <polyline
-                    fill="none"
-                    stroke={stock.isActive ? "rgb(34 197 94)" : "rgb(239 68 68)"}
-                    strokeWidth="2"
-                    points="0,25 20,20 40,22 60,10 80,14 100,5"
-                  />
-                </svg>
-              </div>
+              {/* CHART (FOR TRADERS ONLY) */}
+              {role === "trader" && (
+                <div className={`mt-4 w-full transition-opacity ${!stock.isActive ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+                  <Sparkline symbol={stock.stockSymbol} color={stock.d >= 0 ? "#10b981" : "#ef4444"} />
+                </div>
+              )}
 
               {/* DETAILS */}
               <div className={`mt-5 grid grid-cols-2 gap-4 transition-opacity ${!stock.isActive ? 'opacity-30' : 'opacity-100'}`}>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">Price</p>
+                  <p className="mt-1 text-sm font-semibold text-white">
+                    {stock.c ? `$${stock.c.toFixed(2)}` : 'N/A'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">Change</p>
+                  <p className={`mt-1 text-sm font-semibold ${stock.d >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {stock.d ? `${stock.d >= 0 ? '+' : ''}${stock.d.toFixed(2)} (${stock.dp.toFixed(2)}%)` : 'N/A'}
+                  </p>
+                </div>
 
                 <div>
                   <p className="text-xs uppercase tracking-widest text-slate-500">

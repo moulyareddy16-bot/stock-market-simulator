@@ -14,6 +14,7 @@ import AdminDashboard from "./components/AdminDashboard";
 
 import Leaderboard from "./components/Leaderboard";
 import AICommandCenter from "./components/ai/AICommandCenter";
+import TraderTerminal from "./components/TraderTerminal";
 
 function App() {
   const routerObj = createBrowserRouter([
@@ -58,6 +59,14 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["trader", "stockmanager"]}>
               <StockDetails />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/terminal",
+          element: (
+            <ProtectedRoute allowedRoles={["trader", "stockmanager"]}>
+              <TraderTerminal />
             </ProtectedRoute>
           ),
         },
